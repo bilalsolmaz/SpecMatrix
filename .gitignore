@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# ChromaDB & Persistent Storage
+data/vector_store/
+data/uploads/
+*.sqlite3
+
+# Environment
+.env
+
+# Reports
+*.xlsx
+exports/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+

@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="tr" class="h-full bg-slate-900 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpecMatrix AI | Evrensel Şartname, Sözleşme ve Teklif Uyumluluk Zekâsı</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            850: '#151e2e',
+                            900: '#0f172a',
+                            950: '#090d16',
+                        },
+                        brand: {
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="min-h-full flex flex-col font-sans bg-slate-950 text-slate-200 antialiased selection:bg-sky-500 selection:text-white">
+
+    <!-- Top Mission Control Navigation Header -->
+    <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 shadow-xl">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            
+            <!-- Logo & Brand Title -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-sky-500/20 ring-1 ring-sky-400/40">
+                    <i data-lucide="shield-check" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-lg font-black tracking-tight text-white">SpecMatrix <span class="text-sky-400">AI</span></span>
+                        <span class="text-[10px] font-bold bg-sky-500/20 text-sky-300 px-2 py-0.5 rounded-full border border-sky-400/30">Enterprise v2.0</span>
+                    </div>
+                    <p class="text-xs text-slate-400 hidden sm:block">Evrensel Şartname, Sözleşme ve Teklif Uyumluluk Zekâsı</p>
+                </div>
+            </div>
+
+            <!-- Header Controls: Sector Selector & Engine Status -->
+            <div class="flex items-center space-x-3">
+                
+                <!-- Sector Preset Selector -->
+                <div class="relative inline-block text-left">
+                    <div class="flex items-center space-x-1.5 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700 text-xs text-slate-300">
+                        <i data-lucide="layers" class="w-3.5 h-3.5 text-sky-400"></i>
+                        <span class="text-slate-400">Sektör:</span>
+                        <select id="header-sector-select" class="bg-transparent text-white font-medium focus:outline-none cursor-pointer">
+                            <option value="UNIVERSAL" class="bg-slate-900 text-white">🌐 Tüm Sektörler (Evrensel)</option>
+                            <option value="DEFENSE_IT" class="bg-slate-900 text-white">🛡️ Savunma & Siber Güvenlik</option>
+                            <option value="HEALTHCARE_MEDTECH" class="bg-slate-900 text-white">🏥 Sağlık & Tıbbi Cihaz</option>
+                            <option value="CONSTRUCTION_HVAC" class="bg-slate-900 text-white">🏗️ İnşaat & Tesisat</option>
+                            <option value="CONTRACTS_LEGAL" class="bg-slate-900 text-white">⚖️ Hukuk & Sözleşmeler</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- LLM Provider & Health Badge -->
+                <div id="engine-status-badge" class="flex items-center space-x-2 text-xs bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700 text-slate-300">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span id="engine-mode-text" class="font-medium text-slate-200">Ollama: llama3.2:3b</span>
+                </div>
+
+                <!-- KB Stats Pill -->
+                <div id="kb-stats-badge" class="hidden md:flex items-center space-x-1.5 text-xs bg-slate-800/60 px-2.5 py-1.5 rounded-lg border border-slate-700/60 text-slate-400">
+                    <i data-lucide="database" class="w-3.5 h-3.5 text-indigo-400"></i>
+                    <span id="header-kb-count">0 Doküman</span>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- 4 Primary Navigation Tabs -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-slate-800/80 flex space-x-1 sm:space-x-4 overflow-x-auto">
+            <button id="nav-btn-matrix" class="nav-tab active py-3 px-3 text-xs sm:text-sm font-semibold flex items-center space-x-2 border-b-2 border-sky-400 text-sky-400 transition-colors shrink-0">
+                <i data-lucide="table-2" class="w-4 h-4"></i>
+                <span>Uyumluluk Matrisi & Gap</span>
+            </button>
+            <button id="nav-btn-chat" class="nav-tab py-3 px-3 text-xs sm:text-sm font-semibold flex items-center space-x-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700 transition-colors shrink-0">
+                <i data-lucide="message-square-text" class="w-4 h-4"></i>
+                <span>Doküman AI Copilot (Chat)</span>
+                <span class="text-[9px] bg-sky-500/20 text-sky-300 px-1.5 py-0.2 rounded font-bold">Yeni</span>
+            </button>
+            <button id="nav-btn-rebuttal" class="nav-tab py-3 px-3 text-xs sm:text-sm font-semibold flex items-center space-x-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700 transition-colors shrink-0">
+                <i data-lucide="file-signature" class="w-4 h-4"></i>
+                <span>Zeyilname & İtiraz Robotu</span>
+            </button>
+            <button id="nav-btn-kb" class="nav-tab py-3 px-3 text-xs sm:text-sm font-semibold flex items-center space-x-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700 transition-colors shrink-0">
+                <i data-lucide="archive" class="w-4 h-4"></i>
+                <span>Bilgi Deposu & Chunks</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- ================================================================= -->
+        <!-- TAB 1: UYUMLULUK MATRİSİ VE GAP ANALİZİ (Matrix View) -->
+        <!-- ================================================================= -->
+        <section id="tab-pane-matrix" class="space-y-6">
+            
+            <!-- Step 1 & 2 Cards -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Quick Spec Load & Analysis Card (8 cols) -->
+                <div class="lg:col-span-8 bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl relative overflow-hidden">
+                    <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 font-black text-sm flex items-center justify-center border border-sky-400/30">1</span>
+                            <div>
+                                <h2 class="font-bold text-white text-base">Şartname Analiz & Doğrulama Paneli</h2>
+                                <p class="text-xs text-slate-400">İhale şartnamesini seçin veya yükleyin; yapay zekâ denetçisini çalıştırın</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 space-y-4">
+                        <!-- Fast Preset Selector Row -->
+                        <div class="bg-slate-850 p-3.5 rounded-xl border border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                            <div class="flex items-center space-x-2 text-xs">
+                                <i data-lucide="zap" class="w-4 h-4 text-amber-400"></i>
+                                <span class="font-semibold text-slate-300">Hazır Demo Şartnamesi:</span>
+                                <select id="sample-spec-select" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-sky-500">
+                                    <option value="DEFENSE_IT">🛡️ Savunma: Kamu Siber Güvenlik Şartnamesi (DMO)</option>
+                                    <option value="HEALTHCARE_MEDTECH">🏥 Sağlık: Şehir Hastanesi Yoğun Bakım Monitörü</option>
+                                    <option value="CONSTRUCTION_HVAC">🏗️ İnşaat: Havalimanı Mekanik Havalandırma</option>
+                                </select>
+                            </div>
+                            <button id="btn-load-sample-spec" class="inline-flex items-center justify-center space-x-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow-lg shadow-sky-600/20 transition-all shrink-0">
+                                <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+                                <span>Örnek Şartnameyi Analiz Et</span>
+                            </button>
+                        </div>
+
+                        <!-- Upload File vs Paste Text Tabs -->
+                        <div class="space-y-3">
+                            <div class="flex border-b border-slate-800 text-xs font-medium">
+                                <button id="tab-btn-file" class="py-2 px-3 border-b-2 border-sky-400 text-sky-400 font-bold focus:outline-none">Dosya Yükle (.pdf, .txt, .docx)</button>
+                                <button id="tab-btn-text" class="py-2 px-3 text-slate-400 hover:text-white border-b-2 border-transparent focus:outline-none">Metin Yapıştır</button>
+                            </div>
+
+                            <div id="tab-pane-file" class="space-y-3">
+                                <div id="spec-dropzone" class="border-2 border-dashed border-slate-800 rounded-xl p-5 text-center hover:border-sky-500 hover:bg-slate-850/60 transition-all cursor-pointer group">
+                                    <i data-lucide="file-up" class="w-8 h-8 mx-auto text-slate-500 group-hover:text-sky-400 transition-colors mb-2"></i>
+                                    <p id="spec-file-label" class="text-sm font-semibold text-slate-200">Şartname Dosyası Seçin veya Sürükleyin</p>
+                                    <p class="text-xs text-slate-500 mt-1">PDF, TXT veya DOCX formatında teknik şartname metni</p>
+                                    <input type="file" id="spec-file-input" class="hidden" accept=".txt,.pdf,.docx">
+                                </div>
+                            </div>
+
+                            <div id="tab-pane-text" class="space-y-3 hidden">
+                                <textarea id="spec-raw-textarea" rows="3" placeholder="Madde 4.1.1: Teklif edilecek cihaz...&#10;Madde 4.1.2: ..." class="w-full text-xs font-mono p-3 rounded-xl border border-slate-800 bg-slate-950 focus:outline-none focus:ring-1 focus:ring-sky-500 text-slate-200"></textarea>
+                            </div>
+
+                            <div class="flex justify-end pt-1">
+                                <button id="btn-start-analysis" class="inline-flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-600/30 transition-all">
+                                    <i data-lucide="sparkles" class="w-4 h-4"></i>
+                                    <span>Yüklenen Şartnameyi Analiz Et</span>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Executive Risk Score & Win Probability Card (4 cols) -->
+                <div class="lg:col-span-4 bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-1.5">
+                                <i data-lucide="gauge" class="w-4 h-4 text-sky-400"></i>
+                                <span>İhale Risk & Uyum İndeksi</span>
+                            </span>
+                            <span id="risk-level-badge" class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">Analiz Bekleniyor</span>
+                        </div>
+                        
+                        <div class="mt-4 flex items-center justify-center py-2">
+                            <div class="relative flex items-center justify-center">
+                                <div class="w-32 h-32 rounded-full border-8 border-slate-800 flex flex-col items-center justify-center" id="risk-dial-border">
+                                    <span id="risk-pct-value" class="text-3xl font-black text-white">—</span>
+                                    <span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Uyum Puanı</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p id="risk-exec-summary" class="text-xs text-slate-300 mt-2 text-center leading-relaxed font-medium">
+                            Şartname analizi başlatıldığında risk endeksi ve kazanma olasılığı hesaplanacaktır.
+                        </p>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
+                        <span>Kritik Elenme Riski (Gap):</span>
+                        <span id="risk-gaps-count" class="font-bold text-white">—</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Analysis Progress Panel -->
+            <div id="analysis-progress-panel" class="bg-slate-900 rounded-2xl border border-sky-500/40 p-5 shadow-2xl hidden">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-5 h-5 border-2 border-sky-400 border-t-transparent rounded-full animate-spin"></div>
+                        <span id="progress-step-text" class="text-sm font-semibold text-white">Şartname maddeleri ayrıştırılıyor ve hibrit arama yapılıyor...</span>
+                    </div>
+                    <span id="progress-pct" class="text-xs font-bold text-sky-400">45%</span>
+                </div>
+                <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                    <div id="progress-bar-fill" class="bg-gradient-to-r from-sky-500 to-indigo-500 h-2 rounded-full transition-all duration-300" style="width: 45%"></div>
+                </div>
+            </div>
+
+            <!-- Results Section (Visible after analysis) -->
+            <section id="results-section" class="space-y-6 hidden">
+                
+                <!-- 5 Executive KPI Cards -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow-md">
+                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Toplam Madde</span>
+                        <div class="mt-2 flex items-baseline justify-between">
+                            <span id="kpi-total" class="text-2xl font-black text-white">0</span>
+                            <span class="text-xs text-slate-500 font-semibold">100%</span>
+                        </div>
+                    </div>
+                    <div class="bg-emerald-950/40 p-4 rounded-xl border border-emerald-500/30 shadow-md">
+                        <div class="flex items-center space-x-1.5 text-emerald-400">
+                            <i data-lucide="check-circle" class="w-4 h-4"></i>
+                            <span class="text-[11px] font-bold uppercase tracking-wider">Tam Uyumlu</span>
+                        </div>
+                        <div class="mt-2 flex items-baseline justify-between">
+                            <span id="kpi-tam" class="text-2xl font-black text-emerald-300">0</span>
+                            <span id="kpi-tam-pct" class="text-xs font-bold text-emerald-400">0%</span>
+                        </div>
+                    </div>
+                    <div class="bg-amber-950/40 p-4 rounded-xl border border-amber-500/30 shadow-md">
+                        <div class="flex items-center space-x-1.5 text-amber-400">
+                            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                            <span class="text-[11px] font-bold uppercase tracking-wider">Kısmen Uyumlu</span>
+                        </div>
+                        <div class="mt-2 flex items-baseline justify-between">
+                            <span id="kpi-kismen" class="text-2xl font-black text-amber-300">0</span>
+                            <span id="kpi-kismen-pct" class="text-xs font-bold text-amber-400">0%</span>
+                        </div>
+                    </div>
+                    <div class="bg-rose-950/40 p-4 rounded-xl border border-rose-500/40 shadow-md ring-1 ring-rose-500/20">
+                        <div class="flex items-center space-x-1.5 text-rose-400">
+                            <i data-lucide="x-circle" class="w-4 h-4"></i>
+                            <span class="text-[11px] font-bold uppercase tracking-wider">Uyumsuz (Gap)</span>
+                        </div>
+                        <div class="mt-2 flex items-baseline justify-between">
+                            <span id="kpi-uyumsuz" class="text-2xl font-black text-rose-300">0</span>
+                            <span id="kpi-uyumsuz-pct" class="text-xs font-bold text-rose-400">0%</span>
+                        </div>
+                    </div>
+                    <div class="bg-slate-850 p-4 rounded-xl border border-slate-700/60 shadow-md">
+                        <div class="flex items-center space-x-1.5 text-slate-300">
+                            <i data-lucide="help-circle" class="w-4 h-4"></i>
+                            <span class="text-[11px] font-bold uppercase tracking-wider">Belirtilmemiş</span>
+                        </div>
+                        <div class="mt-2 flex items-baseline justify-between">
+                            <span id="kpi-belirtilmemis" class="text-2xl font-black text-slate-200">0</span>
+                            <span id="kpi-belirtilmemis-pct" class="text-xs font-bold text-slate-400">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table Header & Filter Toolbar -->
+                <div class="bg-slate-900 rounded-2xl border border-slate-800 shadow-xl overflow-hidden">
+                    <div class="p-4 bg-slate-850/80 border-b border-slate-800 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <!-- Filter Buttons -->
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button data-filter="ALL" class="filter-btn active text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800 text-white hover:bg-slate-700 transition-colors">
+                                Tüm Maddeler
+                            </button>
+                            <button data-filter="UYUMSUZ" class="filter-btn text-xs font-semibold px-3 py-1.5 rounded-lg border border-rose-500/40 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20 transition-colors flex items-center space-x-1">
+                                <i data-lucide="alert-octagon" class="w-3.5 h-3.5"></i>
+                                <span>Sadece Uyumsuzları Göster (Gap Analizi)</span>
+                            </button>
+                            <button data-filter="TAM_UYUMLU" class="filter-btn text-xs font-semibold px-3 py-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 transition-colors">
+                                Tam Uyumlu
+                            </button>
+                            <button data-filter="KISMEN_UYUMLU" class="filter-btn text-xs font-semibold px-3 py-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 transition-colors">
+                                Kısmen Uyumlu
+                            </button>
+                            <button data-filter="BELIRTILMEMIS" class="filter-btn text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/60 text-slate-400 hover:bg-slate-700 transition-colors">
+                                Belirtilmemiş
+                            </button>
+                        </div>
+
+                        <!-- Search Input & Excel Export -->
+                        <div class="flex items-center space-x-3">
+                            <div class="relative w-64">
+                                <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-500"></i>
+                                <input id="matrix-search" type="text" placeholder="Madde veya kelime ara..." class="w-full text-xs pl-9 pr-3 py-2 rounded-lg border border-slate-700 bg-slate-950 focus:outline-none focus:ring-1 focus:ring-sky-500 text-white">
+                            </div>
+
+                            <button id="btn-export-excel" class="inline-flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow-lg shadow-emerald-600/20 transition-all shrink-0">
+                                <i data-lucide="download" class="w-4 h-4"></i>
+                                <span>Excel Olarak İndir (.xlsx)</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Matrix Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-slate-950 text-slate-300 border-b border-slate-800">
+                                    <th class="py-3 px-4 font-semibold w-28">Madde No</th>
+                                    <th class="py-3 px-4 font-semibold w-36">Kategori</th>
+                                    <th class="py-3 px-4 font-semibold">Şartname Gereksinimi</th>
+                                    <th class="py-3 px-4 font-semibold text-center w-36">Uyumluluk</th>
+                                    <th class="py-3 px-4 font-semibold w-48">Eşleşen Ürün & Doküman</th>
+                                    <th class="py-3 px-4 font-semibold text-center w-28">Kanıt & İtiraz</th>
+                                </tr>
+                            </thead>
+                            <tbody id="matrix-tbody" class="divide-y divide-slate-800/80 bg-slate-900/60">
+                                <!-- Injected dynamically by app.js -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="table-empty-state" class="py-12 text-center text-slate-500 hidden">
+                        <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 text-slate-600"></i>
+                        <p class="text-sm font-medium">Seçili filtreye uygun madde bulunamadı.</p>
+                    </div>
+                </div>
+
+            </section>
+        </section>
+
+
+        <!-- ================================================================= -->
+        <!-- TAB 2: DOKÜMAN AI COPILOT (Interactive Conversational RAG Chat) -->
+        <!-- ================================================================= -->
+        <section id="tab-pane-chat" class="space-y-6 hidden">
+            
+            <div class="bg-slate-900 rounded-2xl border border-slate-800 shadow-2xl flex flex-col h-[750px] overflow-hidden">
+                
+                <!-- Chat Header -->
+                <div class="p-4 bg-slate-850 border-b border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white shadow-md">
+                            <i data-lucide="bot" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-white text-sm">Doküman AI Copilot & Şartname Danışmanı</h3>
+                            <p class="text-xs text-slate-400">Yüklenen tüm ürün dokümanları ve incelenen şartname hakkında kanıt alıntılı soru-cevap</p>
+                        </div>
+                    </div>
+                    <button id="btn-clear-chat" class="text-xs text-slate-400 hover:text-rose-400 flex items-center space-x-1 transition-colors px-2.5 py-1 rounded-lg hover:bg-slate-800">
+                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                        <span>Sohbeti Sıfırla</span>
+                    </button>
+                </div>
+
+                <!-- Suggested Prompt Chips -->
+                <div class="p-3 bg-slate-950/60 border-b border-slate-800/80 flex items-center space-x-2 overflow-x-auto text-xs">
+                    <span class="text-slate-500 shrink-0 font-medium">Örnek Sorular:</span>
+                    <div id="chat-prompt-chips" class="flex items-center space-x-2 shrink-0">
+                        <button class="chat-chip bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1 rounded-full border border-slate-700 transition-colors shrink-0">
+                            Bu şartnamede elenmemize yol açacak en riskli 2 madde nedir?
+                        </button>
+                        <button class="chat-chip bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1 rounded-full border border-slate-700 transition-colors shrink-0">
+                            Cihazın çalışma sıcaklığı ve iklim dayanımı nedir?
+                        </button>
+                        <button class="chat-chip bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1 rounded-full border border-slate-700 transition-colors shrink-0">
+                            40 Gbps verim açığımızı zeyilname ile nasıl savunabiliriz?
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Messages Stream Area -->
+                <div id="chat-messages-container" class="flex-1 p-6 overflow-y-auto space-y-5 bg-slate-950/40">
+                    
+                    <!-- Welcome Assistant Message -->
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 rounded-lg bg-sky-600/30 border border-sky-400/40 flex items-center justify-center text-sky-400 shrink-0 mt-0.5">
+                            <i data-lucide="bot" class="w-4 h-4"></i>
+                        </div>
+                        <div class="bg-slate-900 border border-slate-800 rounded-2xl rounded-tl-sm p-4 max-w-2xl text-xs sm:text-sm text-slate-200 leading-relaxed space-y-2 shadow-md">
+                            <p class="font-bold text-white">Merhaba! Ben SpecMatrix AI Doküman ve İhale Danışmanınızım.</p>
+                            <p>Yüklediğiniz ürün katalogları, teknik veri sayfaları (datasheet) veya aktif şartnamedeki herhangi bir teknik kriter hakkında bana dilediğiniz soruyu sorabilirsiniz.</p>
+                            <p class="text-xs text-slate-400">Tüm yanıtlarım, dokümanlarınızdaki <strong>sayfa ve harfiyen paragraf alıntıları</strong> ile kanıtlandırılır.</p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Chat Input Bar -->
+                <div class="p-4 bg-slate-900 border-t border-slate-800">
+                    <form id="chat-form" class="flex items-center space-x-2">
+                        <input id="chat-input-text" type="text" placeholder="Doküman veya şartname hakkında bir soru sorun (örn: 'AegisGuard pasif soğutmalı mı?')..." class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-sky-500">
+                        <button type="submit" id="btn-chat-send" class="bg-sky-600 hover:bg-sky-500 text-white px-5 py-3 rounded-xl font-bold text-xs sm:text-sm flex items-center space-x-1.5 shadow-lg shadow-sky-600/20 transition-all shrink-0">
+                            <i data-lucide="send" class="w-4 h-4"></i>
+                            <span class="hidden sm:inline">Gönder</span>
+                        </button>
+                    </form>
+                    <p class="text-[10px] text-slate-500 mt-2 text-center">Grounded RAG: Cevaplar doğrulanabilir kanıt parçaları ile sınırlandırılmıştır.</p>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================================================================= -->
+        <!-- TAB 3: ZEYİLNAME & İTİRAZ ROBOTU (Tender Rebuttal & Exception Form) -->
+        <!-- ================================================================= -->
+        <section id="tab-pane-rebuttal" class="space-y-6 hidden">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Left Form: Rebuttal Configuration (5 cols) -->
+                <div class="lg:col-span-5 bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl space-y-4">
+                    <div class="pb-3 border-b border-slate-800">
+                        <h3 class="font-bold text-white text-base flex items-center space-x-2">
+                            <i data-lucide="file-signature" class="w-5 h-5 text-indigo-400"></i>
+                            <span>Resmi Zeyilname / Şerh Parametreleri</span>
+                        </h3>
+                        <p class="text-xs text-slate-400 mt-1">Uyumsuz (Gap) maddeyi seçin; KİK ve mevzuata uygun resmi itiraz yazısı hazırlayın</p>
+                    </div>
+
+                    <div class="space-y-3 text-xs">
+                        <!-- Select Gap Clause from Active Spec -->
+                        <div>
+                            <label class="block font-semibold text-slate-300 mb-1">İtiraz Edilecek Madde:</label>
+                            <select id="rebuttal-clause-select" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white focus:ring-1 focus:ring-indigo-500">
+                                <option value="">Aktif analizden bir madde seçin...</option>
+                            </select>
+                        </div>
+
+                        <!-- Clause Text Input/Preview -->
+                        <div>
+                            <label class="block font-semibold text-slate-300 mb-1">Şartname Maddesi Metni:</label>
+                            <textarea id="rebuttal-clause-text" rows="3" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 focus:ring-1 focus:ring-indigo-500 font-mono text-[11px]"></textarea>
+                        </div>
+
+                        <!-- Strategy -->
+                        <div>
+                            <label class="block font-semibold text-slate-300 mb-1">İtiraz / Zeyilname Stratejisi:</label>
+                            <select id="rebuttal-strategy-select" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white focus:ring-1 focus:ring-indigo-500">
+                                <option value="rekabeti_artirma">⚖️ Rekabeti Artırma & KİK Madde 5 (Önerilen)</option>
+                                <option value="teknik_esdegerlik">🔬 Teknik Eşdeğerlik & Fonksiyonel Yeterlilik</option>
+                                <option value="maliyet_ve_kamu_yarari">💰 Kaynak Verimliliği & Kamu Yararı</option>
+                                <option value="standart_uyumu">📜 Uluslararası Standart Uyumu (CE / ISO / EN)</option>
+                            </select>
+                        </div>
+
+                        <!-- Company & Authority Names -->
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block font-semibold text-slate-300 mb-1">Firma Adı:</label>
+                                <input type="text" id="rebuttal-company-name" value="ABC Bilişim ve Savunma Teknolojileri A.Ş." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-300 mb-1">İhale Makamı:</label>
+                                <input type="text" id="rebuttal-authority-name" value="Devlet Malzeme Ofisi Genel Müdürlüğü" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white">
+                            </div>
+                        </div>
+
+                        <button id="btn-generate-rebuttal" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-xl font-bold text-xs flex items-center justify-center space-x-2 shadow-lg shadow-indigo-600/30 transition-all mt-2">
+                            <i data-lucide="sparkles" class="w-4 h-4"></i>
+                            <span>Resmi Zeyilname / İtiraz Mektubu Üret</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Document Preview: Official Letter View (7 cols) -->
+                <div class="lg:col-span-7 bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-1.5">
+                                <i data-lucide="file-text" class="w-4 h-4 text-emerald-400"></i>
+                                <span>Resmi Dilekçe Önizlemesi</span>
+                            </span>
+                            <div class="flex items-center space-x-2">
+                                <button id="btn-copy-rebuttal" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1 rounded-lg border border-slate-700 flex items-center space-x-1 transition-colors">
+                                    <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                                    <span>Metni Kopyala</span>
+                                </button>
+                                <button id="btn-download-rebuttal" class="text-xs bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 px-3 py-1 rounded-lg border border-emerald-500/40 flex items-center space-x-1 transition-colors">
+                                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                                    <span>İndir (.txt)</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Formal Letter Body -->
+                        <div class="mt-4 bg-slate-950 border border-slate-800 rounded-xl p-5 text-xs font-mono text-slate-300 leading-relaxed whitespace-pre-wrap max-h-[500px] overflow-y-auto" id="rebuttal-letter-preview">
+Lütfen sol taraftan bir şartname maddesi seçin ve 'Resmi Zeyilname / İtiraz Mektubu Üret' butonuna tıklayın.
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] text-slate-500 flex items-center space-x-1">
+                        <i data-lucide="info" class="w-3.5 h-3.5 text-sky-400"></i>
+                        <span>Bu metin 4734 Sayılı Kanun Madde 5 ve Madde 12 uyarınca idareye sunulacak resmi dilekçe formatındadır.</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================================================================= -->
+        <!-- TAB 4: KURUMSAL BİLGİ DEPOSU & CHUNK EXPLORER -->
+        <!-- ================================================================= -->
+        <section id="tab-pane-kb" class="space-y-6 hidden">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Upload & Manage Card (5 cols) -->
+                <div class="lg:col-span-5 bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl space-y-4">
+                    <div class="pb-3 border-b border-slate-800">
+                        <h3 class="font-bold text-white text-base flex items-center space-x-2">
+                            <i data-lucide="upload-cloud" class="w-5 h-5 text-sky-400"></i>
+                            <span>Ürün Dokümanı ve Katalog Yükleme</span>
+                        </h3>
+                        <p class="text-xs text-slate-400 mt-1">Firma ürün veri sayfalarını (PDF/TXT/DOCX) sisteme yükleyin</p>
+                    </div>
+
+                    <div id="kb-dropzone" class="border-2 border-dashed border-slate-800 rounded-xl p-6 text-center hover:border-sky-500 hover:bg-slate-850/60 transition-all cursor-pointer group">
+                        <i data-lucide="file-plus" class="w-8 h-8 mx-auto text-slate-500 group-hover:text-sky-400 transition-colors mb-2"></i>
+                        <p class="text-sm font-semibold text-slate-200">Katalog veya Datasheet Yükleyin</p>
+                        <p class="text-xs text-slate-500 mt-1">Sürükleyip bırakın veya tıklayın</p>
+                        <input type="file" id="kb-file-input" class="hidden" accept=".txt,.pdf,.docx,.md">
+                    </div>
+
+                    <div class="flex items-center justify-between pt-2">
+                        <button id="btn-load-demo-kb" class="text-xs text-sky-400 hover:text-sky-300 font-semibold inline-flex items-center space-x-1.5 transition-colors">
+                            <i data-lucide="database" class="w-4 h-4"></i>
+                            <span>Tüm Demo Veri Setlerini Yükle (Savunma, Sağlık, İnşaat)</span>
+                        </button>
+                        <button id="btn-clear-kb" class="text-xs text-slate-500 hover:text-rose-400 transition-colors">
+                            Temizle
+                        </button>
+                    </div>
+
+                    <!-- Active Document Tags -->
+                    <div class="pt-2">
+                        <span class="text-xs font-semibold text-slate-400 block mb-2">İndekslenmiş Dokümanlar:</span>
+                        <div id="kb-docs-tags" class="flex flex-wrap gap-1.5 text-xs">
+                            <span class="text-slate-500 text-xs">Yükleniyor...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chunks Browser (7 cols) -->
+                <div class="lg:col-span-7 bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                            <div>
+                                <h3 class="font-bold text-white text-base flex items-center space-x-2">
+                                    <i data-lucide="split" class="w-5 h-5 text-indigo-400"></i>
+                                    <span>Vektör & Chunk Parça Gezgini</span>
+                                </h3>
+                                <p class="text-xs text-slate-400 mt-0.5">Parçalanmış ve indekslenmiş metin bloklarını inceleyin</p>
+                            </div>
+                            <div class="relative w-48">
+                                <input type="text" id="chunk-search-input" placeholder="Parçalarda ara..." class="w-full text-xs bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
+                            </div>
+                        </div>
+
+                        <!-- Chunks List -->
+                        <div id="chunks-list-container" class="mt-4 space-y-3 max-h-[500px] overflow-y-auto pr-1">
+                            <div class="text-center py-8 text-slate-500 text-xs">Parçalar yükleniyor...</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Slide-Over Evidence Drawer Modal -->
+    <div id="evidence-drawer" class="fixed inset-0 z-50 overflow-hidden hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
+        <div id="drawer-backdrop" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm transition-opacity"></div>
+        <div class="fixed inset-y-0 right-0 pl-10 max-w-full flex">
+            <div class="w-screen max-w-xl bg-slate-900 border-l border-slate-800 shadow-2xl flex flex-col">
+                
+                <!-- Drawer Header -->
+                <div class="p-6 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span id="drawer-clause-id" class="text-sm font-bold bg-sky-500/20 text-sky-300 px-2.5 py-1 rounded-lg border border-sky-400/30">Madde 4.1.1</span>
+                            <span id="drawer-category" class="text-xs text-slate-400">Kategori</span>
+                        </div>
+                        <h3 class="text-base font-bold text-white mt-2">Denetim ve Kanıt İncelemesi</h3>
+                    </div>
+                    <button id="drawer-close-btn" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+
+                <!-- Drawer Content -->
+                <div class="flex-1 overflow-y-auto p-6 space-y-5">
+                    
+                    <!-- Status Card -->
+                    <div id="drawer-status-card" class="p-4 rounded-xl border flex items-center justify-between bg-slate-850 border-slate-700">
+                        <div>
+                            <span class="text-xs uppercase font-bold tracking-wider text-slate-400">Uyumluluk Kararı</span>
+                            <p id="drawer-status-text" class="text-base font-black mt-0.5 text-white">TAM UYUMLU</p>
+                        </div>
+                        <div id="drawer-status-icon" class="w-10 h-10 rounded-full flex items-center justify-center">
+                            <i data-lucide="check-circle" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+
+                    <!-- Clause Text -->
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Şartname Maddesi Metni</h4>
+                        <div id="drawer-clause-text" class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-xs text-slate-200 leading-relaxed">
+                            —
+                        </div>
+                    </div>
+
+                    <!-- Source Info -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+                            <span class="text-[10px] font-semibold text-slate-400 uppercase">Eşleşen Ürün</span>
+                            <p id="drawer-matched-product" class="text-xs font-bold text-white mt-1">—</p>
+                        </div>
+                        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+                            <span class="text-[10px] font-semibold text-slate-400 uppercase">Doküman / Sayfa</span>
+                            <p id="drawer-doc-page" class="text-xs font-bold text-white mt-1">—</p>
+                        </div>
+                    </div>
+
+                    <!-- Exact Citation / Quote -->
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center space-x-1.5">
+                            <i data-lucide="quote" class="w-3.5 h-3.5 text-sky-400"></i>
+                            <span>Harfi Harfine Doküman Alıntısı (Citation Evidence)</span>
+                        </h4>
+                        <div class="bg-sky-950/40 border-l-4 border-sky-400 p-4 rounded-r-xl text-xs text-sky-100 font-serif italic leading-relaxed">
+                            <p id="drawer-exact-quote">—</p>
+                        </div>
+                    </div>
+
+                    <!-- Auditor Notes -->
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Teknik Denetçi Gerekçesi / Analiz Notu</h4>
+                        <div id="drawer-explanation" class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-xs text-slate-300 leading-relaxed font-sans">
+                            —
+                        </div>
+                    </div>
+
+                    <!-- Action: Jump to Rebuttal Generator -->
+                    <div id="drawer-rebuttal-jump-box" class="p-4 rounded-xl bg-indigo-950/30 border border-indigo-500/30 space-y-2">
+                        <div class="flex items-center space-x-2 text-indigo-400 text-xs font-bold">
+                            <i data-lucide="file-signature" class="w-4 h-4"></i>
+                            <span>Bu Madde İçin Resmi İtiraz / Zeyilname Talebi Oluşturun</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400">Tespit edilen bu teknik açığı (Gap) gidermek için tek tıkla resmi ihale itiraz dilekçesi taslağı oluşturabilirsiniz.</p>
+                        <button id="btn-drawer-create-rebuttal" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors flex items-center space-x-1.5">
+                            <span>Zeyilname Robotuna Aktar</span>
+                            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- Drawer Footer -->
+                <div class="p-4 border-t border-slate-800 bg-slate-950 flex justify-end">
+                    <button id="drawer-bottom-close" class="text-xs font-semibold px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors">
+                        Kapat
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+    <!-- JavaScript Application Modules -->
+    <script type="module" src="/static/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+================================================================================
+CLOUDSECURE PLATFORM - KURUMSAL MERKEZİ GÜVENLİK YÖNETİM YAZILIMI
+ÜRÜN KATALOĞU VE TEKNİK ÖZELLİKLER DOKÜMANI - SÜRÜM 4.0
+================================================================================
+
+[Sayfa: 1]
+1. YAZILIM MİMARİSİ VE DAĞITIM ESNEKLİĞİ
+CloudSecure Platform, kurum genelindeki tüm uç nokta ve ağ güvenlik cihazlarını tek bir merkezden izleyen, yapılandıran ve denetleyen bulut-yerel (cloud-native) yönetim yazılımıdır.
+
+1.1. MİKROSERVİS MİMARİSİ VE KUBERNETES DESTEĞİ
+Platform, modern bulut-yerel prensiplerine göre tamamen mikroservis mimarisinde geliştirilmiştir. Yazılım bileşenleri OCI uyumlu Docker konteynerleri olarak paketlenmiştir. Kurum içi (on-premise) özel veri merkezlerinde, hibrit ortamlarda veya genel bulut sağlayıcılarında Kubernetes (K8s) orkestrasyon motoru üzerinde yatayda otomatik ölçeklenebilir (horizontal auto-scaling) şekilde çalışmaktadır. Helm chart kurulum desteği hazır olarak sunulur.
+
+1.2. HİZMET KESİNTİSİZLİĞİ VE YÜKSEK ERİŞİLEBİLİRLİK (SLA)
+Çoklu coğrafi bölge (multi-region) ve aktif-aktif kümeleme yapısı sayesinde CloudSecure Platform, yıllık bazda %99.99 (dört dokuz) oranında hizmet düzeyi taahhüdü (SLA High Availability) garanti eder. Otomatik felaket kurtarma ve yük dengeleme algoritmaları yerleşiktir.
+
+[Sayfa: 2]
+2. KİMLİK DOĞRULAMA, YETKİLENDİRME VE VERİ TABANI UYUMLULUĞU
+
+2.1. MERKEZİ KİMLİK VE TEK NOKTADAN GİRİŞ (SSO)
+Kurumsal kimlik yönetim sistemleri ile doğrudan entegrasyon için endüstri standardı protokoller desteklenmektedir:
+- OAuth 2.0 ve OpenID Connect (OIDC) entegrasyonu sayesinde modern kimlik sağlayıcıları (Keycloak, Azure AD, Okta) ile güvenli belirteç doğrulaması yapılır.
+- SAML 2.0 protokol desteği ile kurumsal Tek Noktadan Giriş (Single Sign-On - SSO) ve IdP-initiated kimlik doğrulama mekanizmaları eksiksiz sağlanır.
+
+2.2. ROL TABANLI ERİŞİM KONTROLÜ (RBAC)
+Sistem yöneticileri, güvenlik analistleri ve denetçiler için detaylı yetki matrisi tanımlanabilen gelişmiş Rol Tabanlı Erişim Kontrolü (RBAC - Role-Based Access Control) mekanizması bulunmaktadır. Her bir aksiyon için en az yetki (least privilege) kuralı uygulanır ve tüm işlemler denetim günlüğüne (audit log) kriptografik damgayla kaydedilir.
+
+2.3. VERİ TABANI VE KALICI VERİ DEPOLAMA
+CloudSecure Platform, operasyonel veri depolama ve büyük hacimli log analitiği için hibrit veri tabanı mimarisini destekler:
+- Yapılandırılmış işlem kayıtları ve konfigürasyon verileri için ilişkisel PostgreSQL 15+ veri tabanı ile tam uyumludur.
+- Dinamik olay günlükleri, tehdit istihbaratı ve yarı yapısal veri akışları için NoSQL MongoDB 6.0+ veri tabanı desteği standart olarak sunulmaktadır.
+

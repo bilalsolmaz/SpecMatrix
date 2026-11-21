@@ -1,0 +1,35 @@
+================================================================================
+AEGISGUARD X-500 ENDÜSTRİYEL SİBER GÜVENLİK VE GÜVENLİK DUVARI DONANIMI
+TEKNİK VERİ DOKÜMANI (DATASHEET) - SÜRÜM 3.2
+================================================================================
+
+[Sayfa: 1]
+1. ÜRÜN GENEL BAKIŞI VE MİMARİSİ
+AegisGuard X-500, askeri standartlarda tasarlanmış, savunma sanayii, enerji santralleri ve kritik kamu altyapıları için geliştirilmiş yüksek dayanımlı yeni nesil güvenlik duvarı (NGFW) ve kriptografik ağ geçidi donanımıdır. 
+
+1.1. DONANIMSAL ŞİFRELEME VE KRİPTO MOTORU
+AegisGuard X-500, tüm veri iletim hatlarında maksimum gizlilik sağlamak amacıyla yerleşik donanımsal kriptografik hızlandırıcı çipine sahiptir. Cihaz, veri akışını kesintiye uğratmadan hat hızında 256-bit AES (Advanced Encryption Standard - GCM ve CBC modları) donanımsal şifreleme ve şifre çözme işlemlerini donanım seviyesinde desteklemektedir. Kriptografik anahtar yönetimi TPM 2.0 güvenli mikroişlemcisi üzerinde korunur.
+
+1.2. ÇEVRESEL DAYANIKLILIK VE MUHAFAZA STANDARTLARI
+Sistem, zorlu saha ve saha dışı koşullara uygun olarak üretilmiştir. Gövdesi güçlendirilmiş alüminyum döküm olup, toza ve suya karşı tam koruma sağlayan resmi IP67 (Ingress Protection 67) sertifikasyonuna sahiptir. 1 metre derinlikteki suda 30 dakika boyunca su geçirmezlik garantisi sunar.
+
+[Sayfa: 2]
+2. PERFORMANS, VERİM VE AĞ ÖZELLİKLERİ
+AegisGuard X-500, yüksek hızlı ağ altyapılarını güvence altına almak için optimize edilmiş veri işleme mimarisi sunar.
+
+2.1. VERİM (THROUGHPUT) VE PAKET İŞLEME KAPASİTESİ
+Donanım üzerinde yer alan 8 adet 10GbE SFP+ ve 4 adet 1GbE RJ45 portları üzerinden maksimum 10 Gbps güvenlik duvarı (Firewall Throughput) ve 6.5 Gbps IPSec VPN işlem kapasitesi sağlanmaktadır. Eşzamanlı oturum sayısı 2.000.000 (iki milyon) bağlantıyı destekler.
+
+2.2. ÇALIŞMA SICAKLIĞI VE ÇEVRESEL KOŞULLAR
+Cihaz endüstriyel sıcaklık sınıfında test edilmiş ve sertifikalandırılmıştır. AegisGuard X-500, fansız pasif soğutma teknolojisi sayesinde -40°C ile +85°C arasındaki aşırı sıcaklık ve donma koşullarında performans kaybı olmaksızın kesintisiz çalışabilmektedir.
+
+[Sayfa: 3]
+3. DONANIM GÜVENİLİRLİĞİ VE GÜÇ YÖNETİMİ
+Kritik görev (mission-critical) sistemleri için kesintisiz çalışma esastır.
+
+3.1. YEDEKLİ GÜÇ KAYNAĞI (REDUNDANT PSU)
+AegisGuard X-500, 100-240V AC / 48V DC çift girişli, çalışırken değiştirilebilir (Hot-Swappable) yedekli güç kaynağı (Redundant Dual Power Supply) ünitesi ile donatılmıştır. Birinci güç kaynağında meydana gelebilecek herhangi bir arıza durumunda, sistem kesinti yaşanmadan sıfır milisaniye geçiş süresi ile ikincil güç kaynağına yükü aktarır.
+
+3.2. YÖNETİM VE STANDARTLAR
+Cihaz yerel konsol (RS-232), güvenli SSHv2 ve TLS 1.3 destekli web arayüzü ile yönetilir. SNMP v3 desteği mevcuttur. Cihaz CE, FCC Part 15 ve MIL-STD-810H titreşim ve şok testlerini başarıyla tamamlamıştır.
+

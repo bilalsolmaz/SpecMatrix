@@ -1,0 +1,22 @@
+T.C. KAMU KURUMLARI BİLGİ İŞLEM BAŞKANLIĞI
+MERKEZİ SİBER GÜVENLİK ALTYAPISI VE TEKNİK ŞARTNAMESİ
+
+İHALE KAYIT NO: 2026/DMO-SBR-8492
+BÖLÜM 4: TEKNİK KRİTERLER VE DONANIM/YAZILIM GEREKSİNİMLERİ
+
+Madde 4.1.1: Teklif edilecek güvenlik duvarı donanımı, veri iletim hatlarında en az 256-bit AES donanımsal şifreleme desteğine sahip olmalı ve şifreleme motoru yerleşik bir mikroişlemci üzerinde çalışmalıdır.
+
+Madde 4.1.2: Donanım zorlu saha ve açık alan koşullarına karşı korumalı olmalı; toza ve suya karşı koruma sağlayan resmi IP67 sertifikasyonunu sağlamalıdır.
+
+Madde 4.2.1: Teklif edilen güvenlik duvarı cihazı, tüm güvenlik fonksiyonları ve IPSec filtreleme devredeyken en az 40 Gbps hat hızında toplam güvenlik duvarı (Firewall Throughput) verimine sahip olmalıdır.
+
+Madde 4.2.2: Kesintisiz çalışmanın temini için donanım üzerinde en az iki adet (çift), çalışırken değiştirilebilir (Hot-Swappable) yedekli güç kaynağı (Redundant PSU) bulunmalıdır.
+
+Madde 4.3.1: Teklif edilen merkezi yönetim yazılımı, kurum kimlik sistemleri ile tam entegre olabilmeli ve tek noktadan giriş (SSO) için hem OAuth 2.0 hem de SAML 2.0 protokollerini desteklemelidir.
+
+Madde 4.3.2: Donanım cihazı uluslararası FIPS 140-3 Seviye 3 Güvenlik Sertifikasına sahip olmalı ve sertifika ihale teklif dosyasında resmi olarak sunulmalıdır.
+
+Madde 4.4.1: Cihaz çöl ve aşırı endüstriyel sıcak ortamlarda kullanılacağından, çalışma sıcaklığı aralığı en az -40°C ile +95°C arasında kesintisiz operasyonu desteklemelidir.
+
+Madde 4.4.2: Merkezi yönetim yazılımı modern mikroservis mimarisinde geliştirilmiş olmalı ve kurum içi özel bulut altyapısında Kubernetes (K8s) orkestrasyon ortamında konteyner mimarisi ile çalışabilmelidir.
+

@@ -1,0 +1,20 @@
+T.C. SAĞLIK BAKANLIĞI KAMU HASTANELERİ GENEL MÜDÜRLÜĞÜ
+ŞEHİR HASTANESİ 50 YATAKLI GENEL YOĞUN BAKIM ÜNİTESİ
+HASTA BAŞI MONİTÖRÜ TEKNİK ŞARTNAMESİ
+
+İHALE KAYIT NO: 2026/SB-MED-49102
+BÖLÜM 2: TEKNİK KRİTERLER VE PERFORMANS İSTERLERİ
+
+Madde 2.1.1: Teklif edilecek hasta başı monitörü, yoğun bakım ortamında net ve uzaktan okunabilir izleme sağlamak üzere en az 12 inç genişliğinde renkli dokunmatik ekrana sahip olmalıdır.
+
+Madde 2.1.2: Cihaz standart olarak EKG, non-invaziv kan basıncı (NIBP), vücut sıcaklığı ve zorlu hasta hareket koşullarında dahi en az ±%2 ölçüm doğruluğuna sahip SpO2 (Oksijen Doygunluğu) ölçümünü desteklemelidir.
+
+Madde 2.2.1: Hasta transferlerinde ve şebeke elektriği kesintilerinde hastanın hayati fonksiyonlarının güvenle izlenebilmesi amacıyla, cihaz dahili bataryası üzerinden tam şarj ile en az 6 saat kesintisiz operasyon sağlamalıdır.
+
+Madde 2.2.2: Monitör Avrupa Birliği Tıbbi Cihaz Regülasyonu (CE MDR 2017/745) sertifikasyonuna ve üretici ISO 13485 kalite yönetim belgesine sahip olmalı, belgeler teklif dosyasında sunulmalıdır.
+
+Madde 2.3.1: Teklif edilen cihazlar, hastane merkezi monitör ağı ve Hastane Bilgi Yönetim Sistemi (HBYS) ile çift yönlü entegrasyonu sağlamak amacıyla HL7 (Health Level Seven) veri iletişim protokolünü standart olarak desteklemelidir.
+
+Madde 2.3.2: Cihaz uluslararası geçerliliği olan ABD Gıda ve İlaç Dairesi (US FDA 510k) resmi onay sertifikasına sahip olmalı ve onay numarası teklif mektubunda beyan edilmelidir.
+
+Madde 2.4.1: Cihaz yoğun bakım şartlarında aşırı ısınmaya maruz kalabileceğinden, çalışma ortamı sıcaklığı aralığı en az +5°C ile +55°C arasında kesintisiz operasyonu garanti etmelidir.

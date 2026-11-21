@@ -1,0 +1,18 @@
+DEVLET HAVA MEYDANLARI İŞLETMESİ GENEL MÜDÜRLÜĞÜ (DHMİ)
+YENİ HAVALİMANI TERMİNAL BİNASI MEKANİK TESİSAT İŞLERİ
+İKLİMLENDİRME VE KLİMA SANTRALİ TEKNİK ŞARTNAMESİ
+
+İHALE KAYIT NO: 2026/DHMI-MEK-1092
+KISIM 3: MODÜLER KLİMA SANTRALİ İSTERLERİ
+
+Madde 3.1.1: Teklif edilecek klima santrali karkası uluslararası EN 1886 standardına göre test edilmiş olmalı; mekanik dayanım sınıfı en az D1 ve gövde hava sızdırmazlık sınıfı en az L1 olmalıdır.
+
+Madde 3.1.2: Santral bataryaları sistemde oluşabilecek hidrolik şoklara dayanabilmek amacıyla en az 4.0 bar işletme basıncına dayanıklı olarak üretilmiş ve test edilmiş olmalıdır.
+
+Madde 3.2.1: Havalimanı yolcu bekleme ve gidiş salonlarının taze hava ihtiyacını karşılamak üzere, teklif edilen ana klima santrali ünitesi nominal en az 20.000 m³/h hava debisi sağlama kapasitesine sahip olmalıdır.
+
+Madde 3.2.2: Santral ünitesi terminal genel bina otomasyon sistemine (BMS) doğrudan veri aktarabilmeli; BACnet IP ve Modbus haberleşme protokollerini yerleşik DDC kontrol paneli üzerinden desteklemelidir.
+
+Madde 3.3.1: Dış ortam hava şartlandırmasının sürekliliği açısından klima santrali gövdesi ve motor üniteleri -20°C ile +50°C arasındaki zorlu iklim koşullarında kesintisiz operasyonu desteklemelidir.
+
+Madde 3.3.2: Teklif edilecek santral Amerikan Hava Hareketi ve Kontrol Derneği (AMCA) ve Eurovent Hijyen Seviye 3 Akreditasyon Belgesine sahip olmalı ve resmi sertifika teklife eklenmelidir.

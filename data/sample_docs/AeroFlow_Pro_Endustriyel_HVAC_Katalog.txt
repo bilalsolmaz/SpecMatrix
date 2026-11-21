@@ -1,0 +1,40 @@
+================================================================================
+AEROFLOW PRO SERİSİ MODÜLER HİJYENİK VE ENDÜSTRİYEL KLİMA SANTRALİ (AHU)
+ÜRÜN KATALOĞU VE TEKNİK ŞARTNAME KILAVUZU - SÜRÜM 5.1
+================================================================================
+
+[Sayfa: 1]
+1. MEKANİK YAPI VE GÖVDE STANDARTLARI
+AeroFlow Pro serisi klima santralleri, hastaneler, havalimanları, temiz odalar, veri merkezleri ve büyük ölçekli ticari kompleksler için yüksek enerji verimliliği ve hijyenik hava şartlandırma sağlamak üzere geliştirilmiştir.
+
+1.1. EN 1886 MEKANİK GÖVDE DAYANIM PERFORMANSI
+Santral karkası, korozyona dayanıklı eloksallı alüminyum profil ve 50 mm kalınlığında çift cidarlı taş yünü yalıtımlı galvaniz/paslanmaz sac panellerden imal edilmiştir. Uluslararası EN 1886 standardına göre akredite laboratuvarlarca test edilmiş ve aşağıdaki sınıfları elde etmiştir:
+- Mekanik Dayanım: D1 (En yüksek sınıf)
+- Gövde Hava Kaçağı Sınıfı: L1 (Maksimum sızdırmazlık)
+- Filtre Baypas Kaçağı: F9
+- Termal Yalıtım: T2
+- Termal Köprüleme: TB2
+
+[Sayfa: 2]
+2. HAVA DEBİSİ, VERİMLİLİK VE ÇALIŞMA BASINCI
+
+2.1. HAVA DEBİSİ KAPASİTESİ VE FAN MİMARİSİ
+AeroFlow Pro-15 modeli, nominal 15.000 m³/h (on beş bin metreküp/saat) hava debisi sağlamaktadır. Santral üzerinde yer alan doğrudan tahrikli geriye eğik kanatlı EC (Electronically Commutated) plug fan motorları sayesinde 3.000 m³/h ile 18.000 m³/h arasında dinamik frekans ve debi modülasyonu sunulur.
+
+2.2. İŞLETME BASINCI VE HİDROLİK DAYANIM
+Santral içerisinde kullanılan bakır boru / alüminyum kanatlı ısıtma ve soğutma bataryaları, azami 4.5 bar hidrolik işletme basıncına dayanacak şekilde tasarlanmış ve 10 bar fabrika basınç testine tabi tutulmuştur.
+
+2.3. DIŞ ORTAM ÇALIŞMA SICAKLIĞI
+Santral gövdesi ve mekanik bileşenleri, -25°C ile +55°C dış ortam sıcaklık aralığında donma veya aşırı ısınma kaynaklı verim kaybı yaşamaksızın 7/24 kesintisiz operasyonu destekler.
+
+[Sayfa: 3]
+3. OTOMASYON, PROTOKOL UYUMLULUĞU VE FİLTRASYON
+
+3.1. BİNA YÖNETİM SİSTEMİ (BMS) VE PROTOKOL ENTEGRASYONU
+AeroFlow Pro santraller, fabrikada kablajı tamamlanmış yerleşik DDC kontrol paneli ile sevk edilir. Bina Otomasyon Sistemleri (BMS / BVT) ile tam entegrasyon için aşağıdaki protokoller standart olarak desteklenmektedir:
+- BACnet IP ve BACnet MS/TP
+- Modbus RTU (RS-485) ve Modbus TCP/IP
+- KNX veri yolu uyumluluğu
+
+3.2. FİLTRASYON SEVİYELERİ
+Standart ünitede ISO 16890 ePM10 %70 (G4) kaba filtre ve ePM1 %80 (F7) torba filtre bulunmaktadır. Opsiyonel olarak HEPA H14 filtre hücresi eklenebilmektedir. Santral CE, TSEK ve ISO 9001 sertifikalıdır.

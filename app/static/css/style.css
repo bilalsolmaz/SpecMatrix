@@ -1,0 +1,133 @@
+/* SpecMatrix AI - Enterprise Mission Control Theme */
+
+/* Custom Dark Scrollbars */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
+
+/* Active Nav Tab */
+.nav-tab.active {
+    border-color: #38bdf8 !important;
+    color: #38bdf8 !important;
+    background: linear-gradient(to bottom, transparent, rgba(56, 189, 248, 0.05));
+}
+
+/* Active Filter Button */
+.filter-btn.active {
+    background-color: #38bdf8 !important;
+    color: #0f172a !important;
+    border-color: #38bdf8 !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);
+}
+
+/* Status Badges */
+.badge-tam-uyumlu {
+    background-color: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(52, 211, 153, 0.35);
+}
+
+.badge-kismen-uyumlu {
+    background-color: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.35);
+}
+
+.badge-uyumsuz {
+    background-color: rgba(244, 63, 94, 0.18);
+    color: #fb7185;
+    border: 1px solid rgba(251, 113, 133, 0.4);
+    box-shadow: 0 0 8px rgba(244, 63, 94, 0.15);
+}
+
+.badge-belirtilmemis {
+    background-color: rgba(100, 116, 139, 0.2);
+    color: #94a3b8;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+/* Row Hover & Clickable */
+tr.matrix-row {
+    transition: all 0.15s ease-in-out;
+    cursor: pointer;
+}
+
+tr.matrix-row:hover {
+    background-color: rgba(30, 41, 59, 0.8) !important;
+}
+
+/* Slide-over Drawer Animation */
+#evidence-drawer {
+    transition: opacity 0.25s ease-in-out;
+}
+
+#evidence-drawer.active {
+    display: block !important;
+}
+
+/* Chat Citation Chips */
+.citation-chip {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(14, 165, 233, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    color: #38bdf8;
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 6px;
+    margin-right: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.citation-chip:hover {
+    background: rgba(14, 165, 233, 0.25);
+    border-color: #38bdf8;
+    transform: translateY(-1px);
+}
+
+/* Chat Prompt Suggestion Chips */
+.chat-chip {
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s ease-in-out;
+}
+
+.chat-chip:hover {
+    border-color: #38bdf8 !important;
+    color: #38bdf8 !important;
+    background: rgba(56, 189, 248, 0.1) !important;
+}
+
+/* Toast Animations */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.toast-item {
+    animation: slideInUp 0.2s ease-out;
+}

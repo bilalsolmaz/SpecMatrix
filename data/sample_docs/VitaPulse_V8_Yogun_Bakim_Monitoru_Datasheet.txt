@@ -1,0 +1,37 @@
+================================================================================
+VITAPULSE V8 ÇOK PARAMETRELİ HASTA BAŞI VE YOĞUN BAKIM MONİTÖRÜ
+TEKNİK VERİ DOKÜMANI (DATASHEET) - SÜRÜM 2.4
+================================================================================
+
+[Sayfa: 1]
+1. GENEL BAKIŞ VE EKRAN TEKNOLOJİSİ
+VitaPulse V8, yetişkin, pediatrik ve yenidoğan (neonatal) kritik bakım hastalarının yaşamsal parametrelerini anlık, güvenilir ve yüksek çözünürlükle izlemek üzere geliştirilmiş yeni nesil yoğun bakım hasta başı monitörüdür.
+
+1.1. EKRAN VE GÖRÜNTÜLEME ÖZELLİKLERİ
+Cihaz, 12.1 inç diyagonal genişliğinde, yüksek kontrastlı renkli LED arkadan aydınlatmalı TFT dokunmatik ekrana sahiptir. 800x600 piksel çözünürlük sunar. Ekranda eşzamanlı olarak 8 adede kadar fizyolojik dalga formu (EKG, Pletismogram, Solunum dalgası, İnvaziv Basınç) ve büyük sayısal parametreler sergilenebilmektedir. Gece modu ve sessiz alarm özellikleri yerleşiktir.
+
+1.2. STANDART PARAMETRELER VE ÖLÇÜM PERFORMANSI
+- EKG: 3 derivasyonlu ve 5 derivasyonlu hasta kabloları ile tam uyumludur. Aritmi ve ST segment analizi standarttır.
+- SpO2 (Oksijen Doygunluğu): Masimo SET dijital darbe oksimetresi teknolojisi ile donatılmıştır. %1 ile %100 arasında ölçüm aralığı sunar. Düşük perfüzyon ve hasta hareketi koşullarında dahi ±%2 ölçüm doğruluğu garanti edilir.
+- NIBP (Non-İnvaziv Kan Basıncı): Otomatik osillometrik yöntem ile sistolik (40-270 mmHg), diyastolik (10-215 mmHg) ve ortalama basınç ölçümü yapar. Aşırı basınç koruma valfi mevcuttur.
+- Sıcaklık & Solunum: Çift kanallı vücut sıcaklığı ölçümü (0.1°C hassasiyet) ve göğüs empedansı üzerinden 0-150 rpm aralığında solunum takibi.
+
+[Sayfa: 2]
+2. BATARYA, GÜÇ VE ÇEVRESEL ÇALIŞMA KOŞULLARI
+
+2.1. BATARYA SÜRESİ VE KESİNTİSİZ GÜÇ
+VitaPulse V8, 100-240V AC / 50-60 Hz şebeke gerilimi ile çalışır. Cihaz üzerinde yerleşik şarj edilebilir Li-ion (Lityum-İyon) batarya ünitesi bulunmaktadır. Tam şarj durumunda aralıksız 4 saat (dört saat) boyunca tüm parametreler ve ekran açık halde kesintisiz taşınabilir çalışma süresi sağlar.
+
+2.2. ÇALIŞMA ORTAMI VE SICAKLIK
+Cihaz hastane içi acil servis, yoğun bakım ve ameliyathane koşullarına uygun olarak tasarlanmıştır. Çalışma sıcaklığı aralığı +5°C ile +40°C arasındadır. Saklama ve transfer sıcaklığı -20°C ile +55°C, çalışma bağıl nem oranı ise %15 ile %95 arasındadır.
+
+[Sayfa: 3]
+3. HASTANE BİLGİ SİSTEMLERİ ENTEGRASYONU VE SERTİFİKALAR
+
+3.1. VERİ İLETİŞİMİ VE HL7 DESTEĞİ
+VitaPulse V8, merkezi izleme istasyonları (Central Nursing Station) ve Hastane Bilgi Yönetim Sistemi (HBYS / HIS) ile doğrudan çift yönlü haberleşme için standart HL7 (Health Level Seven) protokol desteğine sahiptir. Cihaz üzerinde 1 adet RJ45 10/100 Mbps Ethernet portu ve dahili Wi-Fi (802.11 b/g/n) kablosuz ağ bağlantı modülü bulunmaktadır. USB üzerinden veri aktarımı ve hasta trend raporu yazdırma desteklenir.
+
+3.2. KALİTE VE REGÜLASYON SERTİFİKASYONLARI
+- Avrupa Birliği Tıbbi Cihaz Direktifi CE 0123 onaylıdır ve MDR (Medical Device Regulation - 2017/745) şartlarına tam uyumludur.
+- Üretici tesis ve cihaz ISO 13485 Tıbbi Cihazlar Kalite Yönetim Sistemi standardı ile belgelendirilmiştir.
+- IEC 60601-1 ve IEC 60601-1-2 elektriksel güvenlik ve elektromanyetik uyumluluk testlerinden başarıyla geçmiştir.
