@@ -84,6 +84,9 @@ KURALLAR:
             spec_context_str = "\nAKTİF İNCELENEN ŞARTNAME MADDE DURUMLARI:\n" + "\n".join(spec_lines)
 
         # 3. Check provider & run model or fallback
+        if request.force_mock:
+            return self._generate_deterministic_fallback(query, retrieved_chunks, active_clauses_context, request)
+
         provider = self.settings.LLM_PROVIDER.lower().strip()
         active_llm = self.rag_engine.llm_auditor if self.rag_engine else None
 
@@ -137,7 +140,7 @@ Lütfen yukarıdaki doküman kanıtlarına dayanarak geçerli bir JSON yanıtı 
                 {"role": "user", "content": user_prompt}
             ],
             temperature=0.2,
-            max_tokens=600,
+            max_tokens=250,
             response_format={"type": "json_object"}
         )
 
@@ -161,17 +164,28 @@ Lütfen yukarıdaki doküman kanıtlarına dayanarak geçerli bir JSON yanıtı 
                     relevance_score=0.95
                 ))
 
-        # If LLM didn't attach citations but we have relevant chunks, attach the top chunk as reference
+        # If LLM didn't attach citations but we have relevant chunks, attach the best sentence as reference
         if not citations and chunks and len(raw_answer) > 20 and "bulunamadı" not in raw_answer.lower():
-            top = chunks[0]
-            # find first sentence
-            sents = re.split(r"(?<=[.!?])\s+", top.text)
-            sample_quote = sents[0] if sents else top.text[:120]
+            best_chunk = chunks[0]
+            best_sentence = ""
+            best_score = -1
+
+            for chunk in chunks[:3]:
+                sent, score = self._find_best_sentence_with_score(chunk.text, query)
+                if score > best_score:
+                    best_score = score
+                    best_sentence = sent
+                    best_chunk = chunk
+
+            if not best_sentence:
+                raw_sents = [s.strip() for s in re.split(r"(?<=[.!?])\s+|\n{2,}", best_chunk.text) if s.strip()]
+                best_sentence = raw_sents[0] if raw_sents else best_chunk.text[:150]
+
             citations.append(ChatCitation(
-                doc_name=top.doc_name,
-                page_number=top.page_number,
-                section_title=top.section_title,
-                exact_quote=sample_quote,
+                doc_name=best_chunk.doc_name,
+                page_number=best_chunk.page_number,
+                section_title=best_chunk.section_title,
+                exact_quote=best_sentence,
                 relevance_score=0.9
             ))
 

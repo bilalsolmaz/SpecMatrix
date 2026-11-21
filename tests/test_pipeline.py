@@ -1209,7 +1209,8 @@ def test_conversational_rag_chat_service(hybrid_search, rag_engine):
         query="VitaPulse V8 monitörünün batarya süresi kaç saattir?",
         history=[],
         scope="all",
-        sector=SectorType.HEALTHCARE_MEDTECH
+        sector=SectorType.HEALTHCARE_MEDTECH,
+        force_mock=True
     )
     resp = chat_svc.ask(req)
 
@@ -1292,7 +1293,8 @@ def test_api_endpoints_multisector_chat_rebuttal_and_chunks():
             "query": "Bu cihazın batarya süresi nedir?",
             "history": [],
             "scope": "all",
-            "sector": "HEALTHCARE_MEDTECH"
+            "sector": "HEALTHCARE_MEDTECH",
+            "force_mock": True
         })
         assert chat_resp.status_code == 200
         chat_data = chat_resp.json()

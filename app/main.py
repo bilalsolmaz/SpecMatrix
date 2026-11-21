@@ -211,7 +211,7 @@ async def clear_knowledge_base():
 
 
 @app.post("/api/analyze/sample", response_model=AnalysisResponse)
-async def analyze_sample_specification(
+def analyze_sample_specification(
     sector: Optional[SectorType] = SectorType.UNIVERSAL,
     force_mock: bool = True
 ):
@@ -250,7 +250,7 @@ async def analyze_sample_specification(
 
 
 @app.post("/api/chat", response_model=ChatResponse)
-async def chat_with_documents(request: ChatRequest):
+def chat_with_documents(request: ChatRequest):
     """Interactive conversational RAG query over indexed documents and active specification."""
     global latest_analysis
     active_clauses = None
@@ -261,13 +261,13 @@ async def chat_with_documents(request: ChatRequest):
 
 
 @app.post("/api/rebuttal/generate", response_model=RebuttalResponse)
-async def generate_tender_rebuttal(request: RebuttalRequest):
+def generate_tender_rebuttal(request: RebuttalRequest):
     """Draft an official objection petition (Zeyilname / Şerh) for a specific non-compliant clause."""
     return rebuttal_service.generate_rebuttal(request)
 
 
 @app.get("/api/risk-score", response_model=RiskScoreResponse)
-async def get_tender_risk_score():
+def get_tender_risk_score():
     """Get the executive tender win probability and risk score breakdown for the latest analysis."""
     global latest_analysis
     if not latest_analysis:
@@ -341,7 +341,9 @@ async def analyze_uploaded_specification(
     if not clauses:
         raise HTTPException(status_code=400, detail="Sağlanan metinden hiçbir şartname maddesi ayrıştırılamadı.")
 
-    response = rag_engine.analyze_specification(
+    from starlette.concurrency import run_in_threadpool
+    response = await run_in_threadpool(
+        rag_engine.analyze_specification,
         clauses=clauses,
         spec_name=effective_name,
         force_mock=bool(force_mock)

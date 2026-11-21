@@ -143,6 +143,7 @@ class ChatRequest(BaseModel):
     scope: str = Field(default="all", description="'all', 'spec_only', or 'product_only'")
     sector: Optional[SectorType] = Field(default=SectorType.UNIVERSAL, description="Context sector")
     active_spec_name: Optional[str] = Field(default=None, description="Active analyzed specification name if any")
+    force_mock: Optional[bool] = Field(default=False, description="Whether to force fast deterministic rule auditor")
 
 
 class ChatResponse(BaseModel):

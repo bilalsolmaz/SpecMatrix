@@ -1456,10 +1456,16 @@ class RAGComplianceEngine:
         uyumsuz = 0
         belirtilmemis = 0
 
-        for clause in clauses:
-            res = self.audit_clause(clause, force_mock=force_mock)
-            results.append(res)
+        if force_mock or len(clauses) <= 1:
+            for clause in clauses:
+                results.append(self.audit_clause(clause, force_mock=force_mock))
+        else:
+            from concurrent.futures import ThreadPoolExecutor
+            with ThreadPoolExecutor(max_workers=min(4, len(clauses))) as executor:
+                futures = [executor.submit(self.audit_clause, c, force_mock) for c in clauses]
+                results = [f.result() for f in futures]
 
+        for res in results:
             if res.status == ComplianceStatus.TAM_UYUMLU:
                 tam_uyumlu += 1
             elif res.status == ComplianceStatus.KISMEN_UYUMLU:

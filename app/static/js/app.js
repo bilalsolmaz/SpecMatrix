@@ -43,6 +43,15 @@ const elements = {
     specFileLabel: document.getElementById('spec-file-label'),
     specRawTextarea: document.getElementById('spec-raw-textarea'),
     btnStartAnalysis: document.getElementById('btn-start-analysis'),
+    matrixEngineMode: document.getElementById('matrix-engine-mode'),
+
+    // Tab 1: Step 1 Proposal Upload & List
+    matrixActiveDocsList: document.getElementById('matrix-active-docs-list'),
+    matrixKbDropzone: document.getElementById('matrix-kb-dropzone'),
+    matrixKbFileInput: document.getElementById('matrix-kb-file-input'),
+    matrixKbFileLabel: document.getElementById('matrix-kb-file-label'),
+    btnMatrixUploadKb: document.getElementById('btn-matrix-upload-kb'),
+    btnMatrixLoadDemoKb: document.getElementById('btn-matrix-load-demo-kb'),
 
     // Risk Dial
     riskPctValue: document.getElementById('risk-pct-value'),
@@ -219,12 +228,12 @@ async function fetchSystemStatus() {
         const data = await resp.json();
 
         if (elements.engineModeText) {
-            if (data.llm_provider === 'ollama') {
-                elements.engineModeText.textContent = `Ollama: ${data.ollama.selected_model || 'llama3.2:3b'}`;
+            if (data.llm_provider === 'ollama' && data.ollama && data.ollama.available) {
+                elements.engineModeText.textContent = `🟢 Ollama: ${data.ollama.selected_model || 'llama3.2:3b'} (Aktif)`;
             } else if (data.llm_provider === 'openai') {
                 elements.engineModeText.textContent = `OpenAI: ${data.model}`;
             } else {
-                elements.engineModeText.textContent = 'Doğrulanmış Denetçi (Mock)';
+                elements.engineModeText.textContent = '🟡 Kural Motoru (Ollama Çevrimdışı)';
             }
         }
 
@@ -244,6 +253,7 @@ async function fetchKbStats() {
         if (!resp.ok) return;
         const stats = await resp.json();
 
+        // Render to Tab 4 explorer tags
         if (elements.kbDocsTags) {
             if (stats.documents && stats.documents.length > 0) {
                 elements.kbDocsTags.innerHTML = stats.documents.map(d => `
@@ -253,6 +263,19 @@ async function fetchKbStats() {
                 `).join('');
             } else {
                 elements.kbDocsTags.innerHTML = '<span class="text-slate-500 text-xs">Henüz doküman yüklenmedi.</span>';
+            }
+        }
+
+        // Render to Tab 1 active proposals list
+        if (elements.matrixActiveDocsList) {
+            if (stats.documents && stats.documents.length > 0) {
+                elements.matrixActiveDocsList.innerHTML = stats.documents.map(d => `
+                    <span class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-md bg-slate-900 border border-slate-700 text-sky-300 text-xs font-mono">
+                        <span>📄 ${escapeHtml(d)}</span>
+                    </span>
+                `).join('');
+            } else {
+                elements.matrixActiveDocsList.innerHTML = '<span class="text-amber-400 text-xs font-medium">⚠️ Henüz teklif/ürün dokümanı yüklenmedi. Lütfen yukarıdan yükleyin veya Demo Ürünler\'i seçin.</span>';
             }
         }
     } catch (e) {
@@ -276,6 +299,66 @@ function setupMatrixAudit() {
             elements.tabBtnFile.className = 'py-2 px-3 text-slate-400 hover:text-white border-b-2 border-transparent focus:outline-none';
             elements.tabPaneText.classList.remove('hidden');
             elements.tabPaneFile.classList.add('hidden');
+        });
+    }
+
+    // Dropzone for Proposal / KB File on Tab 1
+    if (elements.matrixKbDropzone && elements.matrixKbFileInput) {
+        elements.matrixKbDropzone.addEventListener('click', () => elements.matrixKbFileInput.click());
+        elements.matrixKbFileInput.addEventListener('change', () => {
+            if (elements.matrixKbFileInput.files.length > 0) {
+                const file = elements.matrixKbFileInput.files[0];
+                if (elements.matrixKbFileLabel) {
+                    elements.matrixKbFileLabel.textContent = `Seçildi: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                }
+                elements.matrixKbDropzone.classList.add('border-sky-500', 'bg-slate-850');
+            }
+        });
+    }
+
+    if (elements.btnMatrixUploadKb) {
+        elements.btnMatrixUploadKb.addEventListener('click', async () => {
+            if (!elements.matrixKbFileInput || !elements.matrixKbFileInput.files || elements.matrixKbFileInput.files.length === 0) {
+                if (elements.matrixKbFileInput) elements.matrixKbFileInput.click();
+                return;
+            }
+            const file = elements.matrixKbFileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+            try {
+                showToast(`'${file.name}' yükleniyor ve indeksleniyor...`, 'info');
+                const resp = await fetch('/api/knowledge-base/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                if (!resp.ok) {
+                    const err = await resp.json();
+                    throw new Error(err.detail || 'Yükleme başarısız');
+                }
+                showToast(`'${file.name}' teklif dokümanı başarıyla Bilgi Bankasına eklendi!`, 'success');
+                elements.matrixKbFileInput.value = '';
+                if (elements.matrixKbFileLabel) elements.matrixKbFileLabel.textContent = 'Teklif Dosyası / Datasheet Seçin';
+                if (elements.matrixKbDropzone) elements.matrixKbDropzone.classList.remove('border-sky-500', 'bg-slate-850');
+                fetchSystemStatus();
+                loadKnowledgeBaseChunks();
+            } catch (e) {
+                showToast(e.message, 'error');
+            }
+        });
+    }
+
+    if (elements.btnMatrixLoadDemoKb) {
+        elements.btnMatrixLoadDemoKb.addEventListener('click', async () => {
+            try {
+                showToast('Varsayılan teklif ürün dokümanları yükleniyor...', 'info');
+                const resp = await fetch('/api/knowledge-base/load-sample', { method: 'POST' });
+                if (!resp.ok) throw new Error('Demo ürünleri yükleme başarısız');
+                showToast('Demo teklif dokümanları başarıyla Bilgi Bankasına yüklendi!', 'success');
+                fetchSystemStatus();
+                loadKnowledgeBaseChunks();
+            } catch (e) {
+                showToast(e.message, 'error');
+            }
         });
     }
 
@@ -341,15 +424,23 @@ function setupMatrixAudit() {
 }
 
 async function handleAnalyzeSampleSpec() {
-    startProgressSimulation();
+    const useMock = elements.matrixEngineMode ? (elements.matrixEngineMode.value === 'mock') : true;
+    startProgressSimulation(useMock);
+
+    // Smooth scroll to progress panel immediately on button click
+    if (elements.analysisProgressPanel) {
+        elements.analysisProgressPanel.classList.remove('hidden');
+        elements.analysisProgressPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
     try {
         const sectorParam = elements.sampleSpecSelect ? elements.sampleSpecSelect.value : currentSector;
-        const resp = await fetch(`/api/analyze/sample?sector=${sectorParam}&force_mock=true`, {
+        const resp = await fetch(`/api/analyze/sample?sector=${sectorParam}&force_mock=${useMock}`, {
             method: 'POST'
         });
 
         if (!resp.ok) {
-            const err = await resp.json();
+            const err = await resp.json().catch(() => ({}));
             throw new Error(err.detail || 'Şartname analizi başarısız.');
         }
 
@@ -377,7 +468,15 @@ async function handleAnalyzeUploadedSpec() {
         return;
     }
 
-    startProgressSimulation();
+    const useMock = elements.matrixEngineMode ? (elements.matrixEngineMode.value === 'mock') : true;
+    startProgressSimulation(useMock);
+
+    // Smooth scroll to progress panel immediately on button click
+    if (elements.analysisProgressPanel) {
+        elements.analysisProgressPanel.classList.remove('hidden');
+        elements.analysisProgressPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
     const formData = new FormData();
     if (hasFile) {
         formData.append('file', elements.specFileInput.files[0]);
@@ -385,6 +484,7 @@ async function handleAnalyzeUploadedSpec() {
         formData.append('raw_text', rawText);
     }
     formData.append('spec_name', hasFile ? elements.specFileInput.files[0].name : 'Özel_Şartname');
+    formData.append('force_mock', useMock);
 
     try {
         const resp = await fetch('/api/analyze/upload', {
@@ -393,7 +493,7 @@ async function handleAnalyzeUploadedSpec() {
         });
 
         if (!resp.ok) {
-            const err = await resp.json();
+            const err = await resp.json().catch(() => ({}));
             throw new Error(err.detail || 'Analiz hatası');
         }
 
@@ -618,40 +718,61 @@ async function handleExportExcel() {
 
 // --- 5. PROGRESS BAR SIMULATION ---
 let progressTimer = null;
-function startProgressSimulation() {
+function startProgressSimulation(isFastMode = true) {
     if (!elements.analysisProgressPanel) return;
     elements.analysisProgressPanel.classList.remove('hidden');
-    let pct = 15;
-    elements.progressPct.textContent = `${pct}%`;
-    elements.progressBarFill.style.width = `${pct}%`;
-    elements.progressStepText.textContent = 'Şartname maddeleri ayrıştırılıyor ve vektör/kelime araması yapılıyor...';
 
     clearInterval(progressTimer);
-    progressTimer = setInterval(() => {
-        if (pct < 85) {
-            pct += Math.floor(Math.random() * 8) + 4;
-            if (pct > 85) pct = 85;
-            elements.progressPct.textContent = `${pct}%`;
-            elements.progressBarFill.style.width = `${pct}%`;
 
-            if (pct > 40 && pct <= 70) {
-                elements.progressStepText.textContent = 'Yapay zekâ denetçi motoru kanıt alıntılarını ve teknik eşikleri kontrol ediyor...';
-            } else if (pct > 70) {
-                elements.progressStepText.textContent = 'Uluslararası ihale uyumluluk matrisi ve risk endeksi derleniyor...';
+    if (isFastMode) {
+        let pct = 35;
+        elements.progressPct.textContent = `${pct}%`;
+        elements.progressBarFill.style.width = `${pct}%`;
+        elements.progressStepText.textContent = '1/3 Şartname maddeleri ayrıştırılıyor ve teklif dokümanlarıyla eşleştiriliyor...';
+
+        progressTimer = setInterval(() => {
+            if (pct < 85) {
+                pct += 15;
+                if (pct > 85) pct = 85;
+                elements.progressPct.textContent = `${pct}%`;
+                elements.progressBarFill.style.width = `${pct}%`;
+                elements.progressStepText.textContent = '2/3 Doğrulanmış denetim kuralları çalıştırılıyor ve matris derleniyor...';
             }
-        }
-    }, 300);
+        }, 70);
+    } else {
+        let pct = 15;
+        elements.progressPct.textContent = `${pct}%`;
+        elements.progressBarFill.style.width = `${pct}%`;
+        elements.progressStepText.textContent = '1/4 Şartname ayrıştırıldı. Yerel Ollama (llama3.2:3b) maddeleri derinlemesine denetliyor... Lütfen bekleyiniz.';
+
+        progressTimer = setInterval(() => {
+            if (pct < 88) {
+                pct += 2;
+                elements.progressPct.textContent = `${pct}%`;
+                elements.progressBarFill.style.width = `${pct}%`;
+
+                if (pct >= 30 && pct < 60) {
+                    elements.progressStepText.textContent = '2/4 Yerel model doküman alıntılarını ve teknik eşikleri kontrol ediyor...';
+                } else if (pct >= 60) {
+                    elements.progressStepText.textContent = '3/4 Kanıt alıntıları ve uyumluluk matrisi derleniyor...';
+                }
+            }
+        }, 800);
+    }
 }
 
 function finishProgressSimulation(callback) {
     clearInterval(progressTimer);
     elements.progressPct.textContent = '100%';
     elements.progressBarFill.style.width = '100%';
-    elements.progressStepText.textContent = 'Analiz tamamlandı!';
+    elements.progressStepText.textContent = 'Analiz başarıyla tamamlandı! (%100)';
     setTimeout(() => {
         elements.analysisProgressPanel.classList.add('hidden');
         if (callback) callback();
-    }, 400);
+        if (elements.resultsSection) {
+            elements.resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, 350);
 }
 
 function hideProgress() {
@@ -662,49 +783,80 @@ function hideProgress() {
 }
 
 // --- 6. CONVERSATIONAL RAG CHAT COPILOT ---
+async function executeChatQuery(queryText = null) {
+    const rawVal = queryText !== null ? queryText : (elements.chatInputText ? elements.chatInputText.value : '');
+    const query = String(rawVal).trim();
+    if (!query) return;
+
+    if (elements.chatInputText) {
+        elements.chatInputText.value = '';
+    }
+
+    // Render user message
+    appendChatMessage('user', query);
+
+    // Render loading assistant message
+    const loadingId = appendChatLoading();
+
+    try {
+        const useMock = elements.matrixEngineMode ? elements.matrixEngineMode.value === 'mock' : true;
+        const payload = {
+            query: query,
+            history: chatHistory.slice(-6),
+            scope: 'all',
+            sector: currentSector,
+            active_spec_name: currentAnalysis ? currentAnalysis.spec_name : null,
+            force_mock: useMock
+        };
+
+        const resp = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            throw new Error(err.detail || 'Chat API yanıt vermedi.');
+        }
+        const data = await resp.json();
+
+        // Replace loading with real response
+        removeChatLoading(loadingId);
+        appendChatMessage('assistant', data.answer, data.citations, data.suggested_followups, data.model);
+
+        // Update chat history
+        chatHistory.push({ role: 'user', content: query });
+        chatHistory.push({ role: 'assistant', content: data.answer });
+    } catch (e) {
+        removeChatLoading(loadingId);
+        appendChatMessage('assistant', `Sorunuz işlenirken bir hata oluştu: ${e.message}`);
+    }
+}
+
 function setupChatCopilot() {
     if (!elements.chatForm || !elements.chatInputText) return;
 
-    elements.chatForm.addEventListener('submit', async (e) => {
+    elements.chatForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const query = elements.chatInputText.value.trim();
-        if (!query) return;
+        e.stopPropagation();
+        executeChatQuery();
+        return false;
+    });
 
-        // Render user message
-        appendChatMessage('user', query);
-        elements.chatInputText.value = '';
+    if (elements.btnChatSend) {
+        elements.btnChatSend.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            executeChatQuery();
+        });
+    }
 
-        // Render loading assistant message
-        const loadingId = appendChatLoading();
-
-        try {
-            const payload = {
-                query: query,
-                history: chatHistory.slice(-6),
-                scope: 'all',
-                sector: currentSector,
-                active_spec_name: currentAnalysis ? currentAnalysis.spec_name : null
-            };
-
-            const resp = await fetch('/api/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (!resp.ok) throw new Error('Chat API yanıt vermedi.');
-            const data = await resp.json();
-
-            // Replace loading with real response
-            removeChatLoading(loadingId);
-            appendChatMessage('assistant', data.answer, data.citations, data.suggested_followups, data.model);
-
-            // Update chat history
-            chatHistory.push({ role: 'user', content: query });
-            chatHistory.push({ role: 'assistant', content: data.answer });
-        } catch (e) {
-            removeChatLoading(loadingId);
-            appendChatMessage('assistant', `Üzgünüm, sorunuzu işlerken bir hata oluştu: ${e.message}`);
+    elements.chatInputText.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            e.stopPropagation();
+            executeChatQuery();
         }
     });
 
@@ -760,9 +912,11 @@ function updateChatPromptChips() {
     `).join('');
 
     elements.chatPromptChips.querySelectorAll('.chat-chip').forEach(btn => {
-        btn.addEventListener('click', () => {
-            elements.chatInputText.value = btn.textContent.trim();
-            elements.chatForm.dispatchEvent(new Event('submit'));
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const text = btn.textContent.trim();
+            executeChatQuery(text);
         });
     });
 }
@@ -832,10 +986,11 @@ function appendChatMessage(role, text, citations = [], followups = [], model = n
 
     // Attach click events on citations and followups
     msgDiv.querySelectorAll('.chat-chip').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             const cleanText = btn.textContent.replace('💡', '').trim();
-            elements.chatInputText.value = cleanText;
-            elements.chatForm.dispatchEvent(new Event('submit'));
+            executeChatQuery(cleanText);
         });
     });
 
