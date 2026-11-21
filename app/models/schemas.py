@@ -13,6 +13,15 @@ class SectorType(str, Enum):
     CONSTRUCTION_HVAC = "CONSTRUCTION_HVAC"    # İnşaat, Taahhüt & Tesisat
     CONTRACTS_LEGAL = "CONTRACTS_LEGAL"        # Hukuk, Kurumsal Sözleşmeler & Şahsi
 
+    @classmethod
+    def _missing_(cls, value: object):
+        if isinstance(value, str):
+            norm = value.strip().upper().replace("-", "_").replace(" ", "_")
+            for member in cls:
+                if member.value == norm or member.name == norm:
+                    return member
+        return None
+
 
 class ComplianceStatus(str, Enum):
     """Compliance verification statuses."""

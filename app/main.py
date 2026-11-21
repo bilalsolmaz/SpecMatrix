@@ -255,7 +255,7 @@ async def chat_with_documents(request: ChatRequest):
     global latest_analysis
     active_clauses = None
     if latest_analysis and latest_analysis.results:
-        active_clauses = [r.dict() for r in latest_analysis.results]
+        active_clauses = [r.model_dump() for r in latest_analysis.results]
 
     return chat_service.ask(request, active_clauses_context=active_clauses)
 

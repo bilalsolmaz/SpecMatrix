@@ -223,30 +223,31 @@ Lütfen yukarıdaki doküman kanıtlarına dayanarak geçerli bir JSON yanıtı 
 
         # Case B: Specific hardware or technical queries (Throughput, Temp, Battery, Flow, etc.)
         elif chunks:
-            top = chunks[0]
-            answer_parts.append(f"İlgili ürün dokümanı (**{top.doc_name}**, Sayfa {top.page_number}) incelendiğinde:")
-            # Find relevant sentences in chunk
-            sents = re.split(r"(?<=[.!?])\s+", top.text)
-            matched_sents = [s for s in sents if any(word in s.lower() for word in q_lower.split() if len(word) > 3)]
-            if matched_sents:
-                answer_parts.append(f"> \"{matched_sents[0].strip()}\"")
-                answer_parts.append(f"\nBu bilgiye göre şartnamedeki kriteriniz ürün tarafından doğrulanmaktadır.")
-                citations.append(ChatCitation(
-                    doc_name=top.doc_name,
-                    page_number=top.page_number,
-                    section_title=top.section_title,
-                    exact_quote=matched_sents[0].strip(),
-                    relevance_score=0.95
-                ))
-            else:
-                answer_parts.append(f"> \"{sents[0].strip()}\"")
-                citations.append(ChatCitation(
-                    doc_name=top.doc_name,
-                    page_number=top.page_number,
-                    section_title=top.section_title,
-                    exact_quote=sents[0].strip(),
-                    relevance_score=0.90
-                ))
+            best_chunk = chunks[0]
+            best_sentence = ""
+            best_score = -1
+
+            for chunk in chunks[:3]:
+                sent, score = self._find_best_sentence_with_score(chunk.text, query)
+                if score > best_score:
+                    best_score = score
+                    best_sentence = sent
+                    best_chunk = chunk
+
+            if not best_sentence:
+                raw_sents = [s.strip() for s in re.split(r"(?<=[.!?])\s+|\n{2,}", best_chunk.text) if s.strip()]
+                best_sentence = raw_sents[0] if raw_sents else best_chunk.text[:150]
+
+            answer_parts.append(f"İlgili ürün dokümanı (**{best_chunk.doc_name}**, Sayfa {best_chunk.page_number}) incelendiğinde:")
+            answer_parts.append(f"> \"{best_sentence}\"")
+            answer_parts.append("\nBu teknik veriye göre şartnamedeki kriteriniz doğrulanmaktadır.")
+            citations.append(ChatCitation(
+                doc_name=best_chunk.doc_name,
+                page_number=best_chunk.page_number,
+                section_title=best_chunk.section_title,
+                exact_quote=best_sentence,
+                relevance_score=0.95
+            ))
         else:
             answer_parts.append("Sorduğunuz soruya ilişkin kurumsal bilgi bankasındaki ürün dokümanlarında doğrudan bir teknik veri veya alıntı bulunamadı.")
 
@@ -263,6 +264,48 @@ Lütfen yukarıdaki doküman kanıtlarına dayanarak geçerli bir JSON yanıtı 
             model="SpecMatrix Rule Engine (Doğrulanmış Kanıtlar)",
             sector=request.sector or SectorType.UNIVERSAL
         )
+
+    def _find_best_sentence_with_score(self, text: str, query: str) -> tuple[str, int]:
+        """Find the most relevant and informative sentence answering the query with relevance score."""
+        raw_sents = re.split(r"(?<=[.!?])\s+|\n{2,}", text)
+        sents = [s.strip() for s in raw_sents if s.strip() and len(s.strip()) > 8]
+        if not sents:
+            return (text[:150].strip(), 0)
+
+        q_lower = query.lower()
+        q_words = [re.sub(r"[^\wçğışöü]", "", w) for w in q_lower.split()]
+        q_words = [w for w in q_words if len(w) >= 3 and w not in ("için", "olan", "veya", "gibi", "kadar", "mıdır", "midir")]
+
+        scored: List[tuple[int, str]] = []
+        for s in sents:
+            s_lower = s.lower()
+            score = 0
+            for w in q_words:
+                if w in s_lower:
+                    score += 2
+                    if re.search(r"\b" + re.escape(w) + r"\b", s_lower):
+                        score += 2
+
+            if any(term in q_lower for term in ["kaç", "ne kadar", "süresi", "kapasite", "hız", "debi", "basınç", "oranı", "kaçtır"]):
+                if re.search(r"\d+\s*(?:saat|dakika|gbps|mbps|bar|m³/h|m3/h|rpm|inç|inch|v|hz|°c|%|kg|kw)", s_lower):
+                    score += 10
+                elif re.search(r"\b\d+\b", s_lower):
+                    score += 5
+
+            if "batarya" in q_lower or "pil" in q_lower:
+                if "saat" in s_lower and re.search(r"\d+", s_lower):
+                    score += 20
+            if "verim" in q_lower or "throughput" in q_lower:
+                if ("gbps" in s_lower or "mbps" in s_lower) and re.search(r"\d+", s_lower):
+                    score += 20
+            if "debi" in q_lower or "hava" in q_lower or "m3" in q_lower:
+                if ("m³/h" in s_lower or "m3/h" in s_lower) and re.search(r"\d+", s_lower):
+                    score += 20
+
+            scored.append((score, s))
+
+        scored.sort(key=lambda x: x[0], reverse=True)
+        return (scored[0][1], scored[0][0]) if scored else (sents[0], 0)
 
     def _generate_default_followups(self, query: str, sector: Optional[SectorType]) -> List[str]:
         """Generate intuitive next-step questions based on domain context."""
