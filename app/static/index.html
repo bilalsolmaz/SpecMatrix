@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SpecMatrix AI — Kurumsal Şartname, Sözleşme ve Teklif Uyumluluk Platformu</title>
+    <link rel="icon" type="image/svg+xml" href="/static/img/logo.svg">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -24,44 +25,36 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Architectural Design System Styles -->
-    <link rel="stylesheet" href="/static/css/style.css?v=3.0">
+    <link rel="stylesheet" href="/static/css/style.css?v=3.3">
 </head>
 <body class="min-h-full flex flex-col antialiased selection:bg-blue-600 selection:text-white">
 
     <!-- ===================================================================== -->
-    <!-- TOP EXECUTIVE COMMAND HEADER                                          -->
+    <!-- ARCHITECTURAL 2-TIER SLIM HEADER (Zero Overlap at Any Resolution)     -->
     <!-- ===================================================================== -->
     <header class="sm-header sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        <!-- Tier 1: Brand Identity (Left) & System Telemetry Controls (Right) -->
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-13 py-2 flex items-center justify-between gap-4">
 
-            <!-- Brand Identity & Bespoke Geometric Vector Mark -->
-            <div class="flex items-center space-x-3.5">
-                <div class="w-9 h-9 rounded-lg bg-[var(--btn-primary-bg)] text-[var(--btn-primary-text)] flex items-center justify-center shadow-sm shrink-0">
-                    <!-- Custom SpecMatrix Architectural Matrix SVG -->
-                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="7" height="7" rx="1.5" />
-                        <rect x="14" y="3" width="7" height="7" rx="1.5" />
-                        <rect x="3" y="14" width="7" height="7" rx="1.5" />
-                        <path d="M14 17.5l2.2 2.2 4.8-4.7" stroke="#2563eb" stroke-width="2.5" />
-                    </svg>
+            <!-- Left: Brand Identity & Custom SpecMatrix Architectural Emblem -->
+            <a href="/" class="flex items-center space-x-2.5 group focus:outline-none min-w-0 shrink-0">
+                <img src="/static/img/logo.svg" alt="SpecMatrix Logo" class="w-8 h-8 rounded-lg shadow-xs shrink-0 transition-transform group-hover:scale-105" />
+                <div class="flex items-center space-x-2 min-w-0">
+                    <span class="text-sm sm:text-base font-bold tracking-tight font-display text-[var(--text-primary)]">SpecMatrix</span>
+                    <span class="text-[10px] font-mono font-semibold uppercase tracking-widest px-1.5 py-0.5 rounded bg-[var(--accent-subtle)] text-[var(--accent-text)] border border-[var(--accent-border)] shrink-0">v3.2</span>
+                    <span class="hidden lg:inline-block text-[var(--border-strong)] select-none">|</span>
+                    <span class="text-xs text-[var(--text-muted)] hidden lg:inline-block truncate">Şartname, Sözleşme ve Teklif Doğrulama Sistemi</span>
                 </div>
-                <div class="flex flex-col">
-                    <div class="flex items-center space-x-2">
-                        <span class="text-base font-bold tracking-tight font-display text-[var(--text-primary)]">SpecMatrix</span>
-                        <span class="text-[10px] font-mono font-medium uppercase tracking-widest px-1.5 py-0.5 rounded bg-[var(--bg-subtle)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">CORE 3.0</span>
-                    </div>
-                    <p class="text-[11px] text-[var(--text-muted)] hidden sm:block">Şartname, Sözleşme ve Teklif Doğrulama Sistemi</p>
-                </div>
-            </div>
+            </a>
 
-            <!-- Right System Controls: Sector Profile, Engine Status, KB Count, Theme Switcher -->
-            <div class="flex items-center space-x-2.5">
+            <!-- Right: Sector Profile, KB Count, Engine Status, Theme Switcher -->
+            <div class="flex items-center space-x-2 shrink-0">
 
-                <!-- Sector Context Selector (Clean, No Emojis) -->
-                <div class="flex items-center space-x-2 sm-card-subtle px-3 py-1.5 text-xs">
-                    <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-[var(--text-muted)]"></i>
-                    <span class="text-[var(--text-muted)] hidden md:inline">Profil:</span>
-                    <select id="header-sector-select" class="bg-transparent text-[var(--text-primary)] font-medium focus:outline-none cursor-pointer pr-1">
+                <!-- Sector Context Selector -->
+                <div class="flex items-center space-x-1.5 sm-card-subtle px-2.5 py-1 text-xs">
+                    <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0"></i>
+                    <span class="text-[11px] text-[var(--text-muted)] hidden xl:inline">Profil:</span>
+                    <select id="header-sector-select" class="bg-transparent text-[var(--text-primary)] font-medium focus:outline-none cursor-pointer text-[11px] sm:text-xs max-w-[135px] sm:max-w-[185px] truncate">
                         <option value="UNIVERSAL" class="bg-[var(--bg-surface)] text-[var(--text-primary)]">Tüm Sektörler (Evrensel)</option>
                         <option value="DEFENSE_IT" class="bg-[var(--bg-surface)] text-[var(--text-primary)]">Savunma & Siber Güvenlik</option>
                         <option value="HEALTHCARE_MEDTECH" class="bg-[var(--bg-surface)] text-[var(--text-primary)]">Sağlık & Medikal Sistemler</option>
@@ -71,230 +64,232 @@
                 </div>
 
                 <!-- Indexed Knowledge Base Pill -->
-                <div id="kb-stats-badge" class="hidden lg:flex items-center space-x-2 sm-card-subtle px-3 py-1.5 text-xs text-[var(--text-secondary)]">
-                    <i data-lucide="database" class="w-3.5 h-3.5 text-[var(--text-muted)]"></i>
-                    <span id="header-kb-count" class="font-mono text-[11px]">0 Doküman</span>
+                <div id="kb-stats-badge" class="hidden lg:flex items-center space-x-1.5 sm-card-subtle px-2.5 py-1 text-xs text-[var(--text-secondary)] shrink-0">
+                    <i data-lucide="database" class="w-3 h-3 text-[var(--text-muted)] shrink-0"></i>
+                    <span id="header-kb-count" class="font-mono text-[11px] whitespace-nowrap">0 Doküman</span>
                 </div>
 
                 <!-- Live AI Engine Telemetry Pill -->
-                <div id="engine-status-badge" class="flex items-center space-x-2 sm-card-subtle px-3 py-1.5 text-xs">
-                    <span id="engine-status-dot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    <span id="engine-mode-text" class="font-mono text-[11px] font-medium text-[var(--text-primary)]">Ollama · llama3.2:3b</span>
+                <div id="engine-status-badge" class="hidden sm:flex items-center space-x-1.5 sm-card-subtle px-2.5 py-1 text-xs shrink-0">
+                    <span id="engine-status-dot" class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                    <span id="engine-mode-text" class="font-mono text-[11px] font-medium text-[var(--text-primary)] whitespace-nowrap">Ollama · llama3.2:3b</span>
                 </div>
 
                 <!-- Light / Dark Theme Toggle Button -->
-                <button id="btn-theme-toggle" type="button" class="sm-btn-secondary w-8 h-8 flex items-center justify-center" title="Görünüm Temasını Değiştir (Açık / Koyu)">
+                <button id="btn-theme-toggle" type="button" class="sm-btn-secondary w-8 h-8 flex items-center justify-center shrink-0" title="Görünüm Temasını Değiştir (Açık / Koyu)">
                     <i id="theme-toggle-icon" data-lucide="sun" class="w-4 h-4 text-[var(--text-secondary)]"></i>
                 </button>
 
             </div>
         </div>
 
-        <!-- Primary Navigation Bar -->
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-[var(--border-subtle)] flex items-center justify-between overflow-x-auto">
-            <nav class="flex space-x-6">
-                <button id="nav-btn-matrix" class="nav-tab active py-3 px-1 text-xs sm:text-[13px] flex items-center space-x-2 shrink-0">
-                    <i data-lucide="layout-grid" class="w-4 h-4"></i>
-                    <span>Uyumluluk Matrisi</span>
-                </button>
-                <button id="nav-btn-chat" class="nav-tab py-3 px-1 text-xs sm:text-[13px] flex items-center space-x-2 shrink-0">
-                    <i data-lucide="message-square" class="w-4 h-4"></i>
-                    <span>Doküman Asistanı</span>
-                </button>
-                <button id="nav-btn-rebuttal" class="nav-tab py-3 px-1 text-xs sm:text-[13px] flex items-center space-x-2 shrink-0">
-                    <i data-lucide="scale" class="w-4 h-4"></i>
-                    <span>Zeyilname & İtiraz</span>
-                </button>
-                <button id="nav-btn-kb" class="nav-tab py-3 px-1 text-xs sm:text-[13px] flex items-center space-x-2 shrink-0">
-                    <i data-lucide="folder-git-2" class="w-4 h-4"></i>
-                    <span>Bilgi Bankası & İndeks</span>
-                </button>
-            </nav>
+        <!-- Tier 2: Dedicated Navigation Bar (Clean Separation, Never Collides) -->
+        <div class="border-t border-[var(--border-subtle)] bg-[var(--bg-surface)]/50">
+            <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-10 flex items-center justify-between gap-4">
+                <nav class="flex items-center space-x-2 sm:space-x-6 h-full overflow-x-auto no-scrollbar">
+                    <button id="nav-btn-matrix" type="button" class="nav-tab active h-full px-2 text-xs sm:text-[13px] inline-flex items-center space-x-1.5 shrink-0 whitespace-nowrap">
+                        <i data-lucide="layout-grid" class="w-3.5 h-3.5 shrink-0"></i>
+                        <span>Uyumluluk Matrisi</span>
+                    </button>
+                    <button id="nav-btn-chat" type="button" class="nav-tab h-full px-2 text-xs sm:text-[13px] inline-flex items-center space-x-1.5 shrink-0 whitespace-nowrap">
+                        <i data-lucide="message-square" class="w-3.5 h-3.5 shrink-0"></i>
+                        <span>Doküman Asistanı</span>
+                    </button>
+                    <button id="nav-btn-rebuttal" type="button" class="nav-tab h-full px-2 text-xs sm:text-[13px] inline-flex items-center space-x-1.5 shrink-0 whitespace-nowrap">
+                        <i data-lucide="scale" class="w-3.5 h-3.5 shrink-0"></i>
+                        <span>Zeyilname & İtiraz</span>
+                    </button>
+                    <button id="nav-btn-kb" type="button" class="nav-tab h-full px-2 text-xs sm:text-[13px] inline-flex items-center space-x-1.5 shrink-0 whitespace-nowrap">
+                        <i data-lucide="folder-git-2" class="w-3.5 h-3.5 shrink-0"></i>
+                        <span>Bilgi Bankası & İndeks</span>
+                    </button>
+                </nav>
 
-            <div class="hidden md:flex items-center space-x-2 text-[11px] text-[var(--text-muted)] font-mono">
-                <i data-lucide="check-check" class="w-3.5 h-3.5 text-emerald-500"></i>
-                <span>Kanıt Zorunlu Denetim (Zero-Hallucination Guard)</span>
+                <div class="hidden xl:flex items-center space-x-1.5 text-[11px] text-[var(--text-muted)] font-mono shrink-0 whitespace-nowrap">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    <span>Kanıt Zorunlu Denetim (ChromaDB + BM25)</span>
+                </div>
             </div>
         </div>
     </header>
 
     <!-- ===================================================================== -->
-    <!-- MAIN WORKSPACE                                                        -->
+    <!-- MAIN WORKSPACE (Responsive & Viewport-Balanced)                       -->
     <!-- ===================================================================== -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 space-y-4">
 
         <!-- ================================================================= -->
         <!-- TAB 1: UYUMLULUK MATRİSİ VE GAP ANALİZİ                           -->
         <!-- ================================================================= -->
-        <section id="tab-pane-matrix" class="space-y-6">
+        <section id="tab-pane-matrix" class="space-y-4">
 
             <!-- 3-Column Command Architecture: 01 Proposal KB | 02 Tender Spec | 03 Risk Gauge -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4">
 
-                <!-- 01 / REFERANS TEKLİF & ÜRÜN DOKÜMANLARI (4 Cols) -->
-                <div class="lg:col-span-4 sm-card p-5 flex flex-col justify-between">
+                <!-- 01 / REFERANS TEKLİF & ÜRÜN DOKÜMANLARI (4 Cols on lg) -->
+                <div class="md:col-span-1 lg:col-span-4 sm-card p-4 flex flex-col justify-between">
                     <div>
-                        <div class="flex items-center justify-between pb-3.5 border-b border-[var(--border-subtle)]">
-                            <div class="flex items-center space-x-2.5">
-                                <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-[var(--bg-subtle)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">01</span>
-                                <h2 class="text-sm font-semibold text-[var(--text-primary)]">Teklif & Ürün Dokümanları</h2>
+                        <div class="flex items-center justify-between pb-2.5 border-b border-[var(--border-subtle)]">
+                            <div class="flex items-center space-x-2">
+                                <span class="font-mono text-[11px] font-semibold px-1.5 py-0.5 rounded bg-[var(--bg-subtle)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">01</span>
+                                <h2 class="text-xs sm:text-sm font-semibold text-[var(--text-primary)]">Teklif & Ürün Dokümanları</h2>
                             </div>
-                            <span class="text-[11px] font-mono text-[var(--text-muted)]">Referans Kaynak</span>
+                            <span class="text-[10px] font-mono text-[var(--text-muted)]">Referans Kaynak</span>
                         </div>
 
-                        <p class="text-xs text-[var(--text-secondary)] mt-3 leading-relaxed">
-                            Şartname maddelerinin doğrulanacağı firma ürün katalogları, teknik veri sayfaları (datasheet) ve teklif mektupları.
+                        <p class="text-[11px] text-[var(--text-secondary)] mt-2 leading-relaxed">
+                            Şartname maddelerinin doğrulanacağı firma ürün katalogları, teknik veri sayfaları ve teklif mektupları.
                         </p>
 
                         <!-- Active Indexed Proposal Documents -->
-                        <div class="mt-3.5 p-3 sm-card-subtle">
-                            <div class="flex items-center justify-between mb-2">
+                        <div class="mt-2.5 p-2.5 sm-card-subtle">
+                            <div class="flex items-center justify-between mb-1.5">
                                 <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold">Aktif İndeksli Dokümanlar</span>
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                             </div>
-                            <div id="matrix-active-docs-list" class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
+                            <div id="matrix-active-docs-list" class="flex flex-wrap gap-1.5 max-h-20 overflow-y-auto">
                                 <span class="text-[var(--text-muted)] text-xs">Yükleniyor...</span>
                             </div>
                         </div>
 
                         <!-- Dropzone for Proposal Upload -->
-                        <div class="mt-3">
-                            <div id="matrix-kb-dropzone" class="sm-dropzone p-3.5 text-center cursor-pointer flex items-center justify-between px-4">
-                                <div class="flex items-center space-x-3 text-left">
-                                    <div class="w-8 h-8 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-secondary)] shrink-0">
-                                        <i data-lucide="file-up" class="w-4 h-4"></i>
+                        <div class="mt-2.5">
+                            <div id="matrix-kb-dropzone" class="sm-dropzone p-2.5 text-center cursor-pointer flex items-center justify-between px-3">
+                                <div class="flex items-center space-x-2.5 text-left min-w-0">
+                                    <div class="w-7 h-7 rounded-md bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-secondary)] shrink-0">
+                                        <i data-lucide="file-up" class="w-3.5 h-3.5"></i>
                                     </div>
-                                    <div>
-                                        <p id="matrix-kb-file-label" class="text-xs font-medium text-[var(--text-primary)]">Yeni Teklif / Katalog Seçin</p>
+                                    <div class="min-w-0">
+                                        <p id="matrix-kb-file-label" class="text-xs font-medium text-[var(--text-primary)] truncate">Yeni Teklif / Katalog Seçin</p>
                                         <p class="text-[10px] font-mono text-[var(--text-muted)]">PDF, DOCX, TXT, MD</p>
                                     </div>
                                 </div>
-                                <i data-lucide="plus" class="w-4 h-4 text-[var(--text-muted)]"></i>
+                                <i data-lucide="plus" class="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0"></i>
                                 <input type="file" id="matrix-kb-file-input" class="hidden" accept=".txt,.pdf,.docx,.md">
                             </div>
                         </div>
                     </div>
 
                     <!-- Footer Actions -->
-                    <div class="mt-4 pt-3.5 border-t border-[var(--border-subtle)] flex items-center gap-2">
-                        <button id="btn-matrix-upload-kb" type="button" class="flex-1 sm-btn-secondary text-xs py-2 px-3 inline-flex items-center justify-center space-x-1.5">
+                    <div class="mt-3 pt-2.5 border-t border-[var(--border-subtle)] flex items-center gap-2">
+                        <button id="btn-matrix-upload-kb" type="button" class="flex-1 sm-btn-secondary text-xs py-1.5 px-2.5 inline-flex items-center justify-center space-x-1.5">
                             <i data-lucide="upload" class="w-3.5 h-3.5"></i>
                             <span>İndekse Ekle</span>
                         </button>
-                        <button id="btn-matrix-load-demo-kb" type="button" class="sm-btn-secondary text-xs py-2 px-3 inline-flex items-center justify-center space-x-1.5 text-[var(--text-secondary)]" title="Varsayılan sektör kataloglarını yükle">
+                        <button id="btn-matrix-load-demo-kb" type="button" class="sm-btn-secondary text-xs py-1.5 px-2.5 inline-flex items-center justify-center space-x-1.5 text-[var(--text-secondary)]" title="Varsayılan sektör kataloglarını yükle">
                             <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
                             <span>Örnek Kataloglar</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- 02 / İHALE TEKNİK ŞARTNAMESİ & DENETİM MOTORU (5 Cols) -->
-                <div class="lg:col-span-5 sm-card p-5 flex flex-col justify-between">
+                <!-- 02 / İHALE TEKNİK ŞARTNAMESİ & DENETİM MOTORU (5 Cols on lg) -->
+                <div class="md:col-span-1 lg:col-span-5 sm-card p-4 flex flex-col justify-between">
                     <div>
-                        <div class="flex items-center justify-between pb-3.5 border-b border-[var(--border-subtle)]">
-                            <div class="flex items-center space-x-2.5">
-                                <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-[var(--accent-subtle)] text-[var(--accent-text)] border border-[var(--accent-border)]">02</span>
-                                <h2 class="text-sm font-semibold text-[var(--text-primary)]">İhale Teknik Şartnamesi</h2>
+                        <div class="flex items-center justify-between pb-2.5 border-b border-[var(--border-subtle)]">
+                            <div class="flex items-center space-x-2">
+                                <span class="font-mono text-[11px] font-semibold px-1.5 py-0.5 rounded bg-[var(--accent-subtle)] text-[var(--accent-text)] border border-[var(--accent-border)]">02</span>
+                                <h2 class="text-xs sm:text-sm font-semibold text-[var(--text-primary)]">İhale Teknik Şartnamesi</h2>
                             </div>
-                            <span class="text-[11px] font-mono text-[var(--text-muted)]">Hedef İsterler</span>
+                            <span class="text-[10px] font-mono text-[var(--text-muted)]">Hedef İsterler</span>
                         </div>
 
                         <!-- Quick Benchmark Scenario Bar -->
-                        <div class="mt-3.5 p-2.5 sm-card-subtle flex items-center justify-between gap-2">
-                            <div class="flex items-center space-x-2 flex-1 min-w-0">
+                        <div class="mt-2.5 p-2 sm-card-subtle flex flex-wrap sm:flex-nowrap items-center justify-between gap-2">
+                            <div class="flex items-center space-x-1.5 flex-1 min-w-0">
                                 <span class="text-[11px] font-mono text-[var(--text-muted)] shrink-0">Senaryo:</span>
-                                <select id="sample-spec-select" class="w-full sm-input px-2.5 py-1.5 text-xs font-medium truncate">
+                                <select id="sample-spec-select" class="w-full sm-input px-2 py-1 text-xs font-medium truncate">
                                     <option value="DEFENSE_IT">Savunma Sanayii · Siber Güvenlik Şartnamesi</option>
                                     <option value="HEALTHCARE_MEDTECH">Sağlık Bakanlığı · Yoğun Bakım Monitör Şartnamesi</option>
                                     <option value="CONSTRUCTION_HVAC">Havalimanı · Mekanik İklimlendirme Şartnamesi</option>
                                 </select>
                             </div>
-                            <button id="btn-load-sample-spec" type="button" class="sm-btn-primary text-xs px-3.5 py-1.5 inline-flex items-center space-x-1.5 shrink-0">
+                            <button id="btn-load-sample-spec" type="button" class="sm-btn-primary text-xs px-3 py-1.5 inline-flex items-center justify-center space-x-1.5 shrink-0 w-full sm:w-auto">
                                 <i data-lucide="play" class="w-3 h-3 fill-current"></i>
                                 <span>Senaryoyu Denetle</span>
                             </button>
                         </div>
 
                         <!-- Custom Specification Upload or Paste -->
-                        <div class="mt-3.5 space-y-2.5">
+                        <div class="mt-2.5 space-y-2">
                             <div class="flex items-center justify-between">
-                                <span class="text-[11px] font-medium text-[var(--text-secondary)]">Veya Özel Şartname Yükleyin:</span>
+                                <span class="text-[11px] font-medium text-[var(--text-secondary)]">Özel Şartname Girişi:</span>
                                 <div class="inline-flex p-0.5 rounded-lg bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[11px]">
-                                    <button id="tab-btn-file" type="button" class="px-2.5 py-1 rounded-md bg-[var(--bg-surface)] text-[var(--text-primary)] font-medium shadow-sm transition-all">Dosya (.pdf/.docx/.txt)</button>
-                                    <button id="tab-btn-text" type="button" class="px-2.5 py-1 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all">Metin Yapıştır</button>
+                                    <button id="tab-btn-file" type="button" class="px-2 py-0.5 rounded-md bg-[var(--bg-surface)] text-[var(--text-primary)] font-medium shadow-xs transition-all">Dosya (.pdf/.docx/.txt)</button>
+                                    <button id="tab-btn-text" type="button" class="px-2 py-0.5 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all">Metin Yapıştır</button>
                                 </div>
                             </div>
 
                             <div id="tab-pane-file">
-                                <div id="spec-dropzone" class="sm-dropzone p-3.5 cursor-pointer flex items-center justify-between px-4">
-                                    <div class="flex items-center space-x-3 text-left">
-                                        <div class="w-8 h-8 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-secondary)] shrink-0">
-                                            <i data-lucide="file-Spreadsheet" class="w-4 h-4"></i>
+                                <div id="spec-dropzone" class="sm-dropzone p-2.5 cursor-pointer flex items-center justify-between px-3">
+                                    <div class="flex items-center space-x-2.5 text-left min-w-0">
+                                        <div class="w-7 h-7 rounded-md bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-secondary)] shrink-0">
+                                            <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
                                         </div>
-                                        <div>
-                                            <p id="spec-file-label" class="text-xs font-medium text-[var(--text-primary)]">Şartname Dosyası Seçin veya Sürükleyin</p>
+                                        <div class="min-w-0">
+                                            <p id="spec-file-label" class="text-xs font-medium text-[var(--text-primary)] truncate">Şartname Dosyası Seçin veya Sürükleyin</p>
                                             <p class="text-[10px] font-mono text-[var(--text-muted)]">Otomatik madde ayrıştırma (Madde 4.1, 4.1.1 vb.)</p>
                                         </div>
                                     </div>
-                                    <i data-lucide="arrow-up-right" class="w-4 h-4 text-[var(--text-muted)]"></i>
+                                    <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0"></i>
                                     <input type="file" id="spec-file-input" class="hidden" accept=".txt,.pdf,.docx">
                                 </div>
                             </div>
 
                             <div id="tab-pane-text" class="hidden">
-                                <textarea id="spec-raw-textarea" rows="2" placeholder="Madde 4.1.1: Teklif edilecek sistem en az 40 Gbps verim sağlamalıdır...&#10;Madde 4.1.2: Cihaz +95°C çalışma sıcaklığına dayanmalıdır..." class="w-full sm-input text-xs font-mono p-2.5"></textarea>
+                                <textarea id="spec-raw-textarea" rows="2" placeholder="Madde 4.1.1: Teklif edilecek sistem en az 40 Gbps verim sağlamalıdır...&#10;Madde 4.1.2: Cihaz +95°C çalışma sıcaklığına dayanmalıdır..." class="w-full sm-input text-xs font-mono p-2"></textarea>
                             </div>
                         </div>
                     </div>
 
                     <!-- Engine Selector & Primary Run Button -->
-                    <div class="mt-4 pt-3.5 border-t border-[var(--border-subtle)] space-y-2.5">
-                        <div class="flex items-center justify-between text-xs">
-                            <span class="text-[11px] text-[var(--text-muted)] flex items-center space-x-1.5">
+                    <div class="mt-3 pt-2.5 border-t border-[var(--border-subtle)] space-y-2">
+                        <div class="flex items-center justify-between text-xs gap-2">
+                            <span class="text-[11px] text-[var(--text-muted)] flex items-center space-x-1 shrink-0">
                                 <i data-lucide="cpu" class="w-3.5 h-3.5"></i>
-                                <span>Doğrulama Motoru:</span>
+                                <span>Denetim Motoru:</span>
                             </span>
-                            <select id="matrix-engine-mode" class="sm-input text-[11px] font-mono px-2.5 py-1">
+                            <select id="matrix-engine-mode" class="sm-input text-[11px] font-mono px-2 py-0.5 truncate">
                                 <option value="mock" selected>Hızlı Kural Motoru (Deterministik · 40ms)</option>
                                 <option value="ollama">Yerel LLM · Ollama (llama3.2:3b)</option>
                             </select>
                         </div>
 
-                        <button id="btn-start-analysis" type="button" class="w-full sm-btn-accent text-xs py-2.5 px-4 inline-flex items-center justify-center space-x-2">
+                        <button id="btn-start-analysis" type="button" class="w-full sm-btn-accent text-xs py-2 px-4 inline-flex items-center justify-center space-x-2">
                             <span>Şartnameyi Teklif Dokümanlarıyla Eşleştir & Denetle</span>
-                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
                         </button>
                     </div>
                 </div>
 
-                <!-- 03 / YÖNETİCİ UYUM & RİSK ENDEKSİ (3 Cols) -->
-                <div class="lg:col-span-3 sm-card p-5 flex flex-col justify-between">
+                <!-- 03 / YÖNETİCİ UYUM & RİSK ENDEKSİ (3 Cols on lg, Full width on md) -->
+                <div class="md:col-span-2 lg:col-span-3 sm-card p-4 flex flex-col justify-between">
                     <div>
-                        <div class="flex items-center justify-between pb-3.5 border-b border-[var(--border-subtle)]">
+                        <div class="flex items-center justify-between pb-2.5 border-b border-[var(--border-subtle)]">
                             <span class="text-xs font-semibold text-[var(--text-primary)]">Uyum & Risk Özeti</span>
                             <span id="risk-level-badge" class="text-[10px] font-mono font-semibold uppercase px-2 py-0.5 rounded bg-[var(--bg-subtle)] text-[var(--text-muted)] border border-[var(--border-subtle)]">Bekleniyor</span>
                         </div>
 
                         <!-- Precision SVG Circular Gauge -->
-                        <div class="my-3 flex items-center justify-center">
-                            <div class="relative w-28 h-28 flex items-center justify-center" id="risk-dial-border">
-                                <svg class="w-28 h-28" viewBox="0 0 100 100">
-                                    <circle cx="50" cy="50" r="42" fill="none" stroke="var(--ring-track)" stroke-width="6"></circle>
-                                    <circle id="risk-gauge-circle" class="gauge-ring-circle" cx="50" cy="50" r="42" fill="none" stroke="#2563eb" stroke-width="6" stroke-linecap="round" stroke-dasharray="263.89" stroke-dashoffset="263.89"></circle>
+                        <div class="my-2 flex items-center justify-center">
+                            <div class="relative w-24 h-24 flex items-center justify-center" id="risk-dial-border">
+                                <svg class="w-24 h-24" viewBox="0 0 100 100">
+                                    <circle cx="50" cy="50" r="42" fill="none" stroke="var(--ring-track)" stroke-width="6.5"></circle>
+                                    <circle id="risk-gauge-circle" class="gauge-ring-circle" cx="50" cy="50" r="42" fill="none" stroke="#2563eb" stroke-width="6.5" stroke-linecap="round" stroke-dasharray="263.89" stroke-dashoffset="263.89"></circle>
                                 </svg>
                                 <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                    <span id="risk-pct-value" class="text-xl font-bold font-mono text-[var(--text-primary)]">—</span>
-                                    <span class="text-[9px] font-mono uppercase tracking-widest text-[var(--text-muted)] mt-0.5">Uyum</span>
+                                    <span id="risk-pct-value" class="text-lg font-bold font-mono text-[var(--text-primary)]">—</span>
+                                    <span class="text-[9px] font-mono uppercase tracking-widest text-[var(--text-muted)]">Uyum</span>
                                 </div>
                             </div>
                         </div>
 
-                        <p id="risk-exec-summary" class="text-[11px] text-[var(--text-secondary)] text-center leading-relaxed line-clamp-3">
+                        <p id="risk-exec-summary" class="text-[11px] text-[var(--text-secondary)] text-center leading-relaxed line-clamp-2">
                             Analiz başlatıldığında ağırlıklı teknik uyum ve ihale yeterlilik skoru hesaplanır.
                         </p>
                     </div>
 
-                    <div class="mt-3 pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs">
+                    <div class="mt-2.5 pt-2.5 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs">
                         <span class="text-[11px] text-[var(--text-muted)]">Kritik Sapma (Gap):</span>
                         <span id="risk-gaps-count" class="font-mono text-xs font-semibold text-[var(--text-primary)]">—</span>
                     </div>
@@ -305,9 +300,9 @@
             <!-- ============================================================= -->
             <!-- LIVE PROGRESS BAR PANEL                                       -->
             <!-- ============================================================= -->
-            <div id="analysis-progress-panel" class="sm-card p-5 border-blue-500/40 hidden">
-                <div class="flex items-center justify-between mb-2.5">
-                    <div class="flex items-center space-x-3">
+            <div id="analysis-progress-panel" class="sm-card p-4 border-blue-500/40 hidden">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center space-x-2.5">
                         <div class="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                         <span id="progress-step-text" class="text-xs font-medium text-[var(--text-primary)]">Şartname maddeleri ayrıştırılıyor...</span>
                     </div>
@@ -321,61 +316,81 @@
             <!-- ============================================================= -->
             <!-- RESULTS & COMPLIANCE MATRIX TABLE                             -->
             <!-- ============================================================= -->
-            <section id="results-section" class="space-y-5 hidden">
+            <section id="results-section" class="space-y-4 hidden">
+
+                <!-- NEW DIFFERENTIATOR 1: Executive Go/No-Go Decision & Simulation Bar -->
+                <div class="sm-card p-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-l-4 border-l-blue-600">
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <span class="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-[var(--bg-subtle)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">İhale Karar Motoru</span>
+                        <span id="exec-decision-badge" class="text-xs font-semibold font-mono px-2.5 py-0.5 rounded badge-kismen-uyumlu">ŞARTLI KATILIM (Zeyilname Önerilir)</span>
+                        <span id="sim-active-badge" class="hidden text-[11px] font-mono px-2 py-0.5 rounded badge-simulated">Simülasyon Aktif</span>
+                        <div id="exec-redflags-list" class="flex flex-wrap items-center gap-1.5 text-xs"></div>
+                    </div>
+                    <div class="flex items-center space-x-2 shrink-0">
+                        <button id="btn-reset-simulation" type="button" class="hidden sm-btn-secondary text-[11px] px-2.5 py-1 inline-flex items-center space-x-1 text-[var(--text-secondary)]">
+                            <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                            <span>Simülasyonu Sıfırla</span>
+                        </button>
+                        <button id="btn-copy-exec-brief" type="button" class="sm-btn-secondary text-xs px-3 py-1.5 inline-flex items-center space-x-1.5">
+                            <i data-lucide="clipboard-check" class="w-3.5 h-3.5 text-blue-500"></i>
+                            <span>Yönetici Özeti Kopyala</span>
+                        </button>
+                    </div>
+                </div>
 
                 <!-- 5 Architectural Metric Cards -->
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
-                    <div class="sm-card p-4">
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                    <div class="sm-card p-3.5">
                         <div class="flex items-center justify-between">
                             <span class="text-[11px] font-medium text-[var(--text-secondary)]">İncelenen Madde</span>
                             <i data-lucide="list-checks" class="w-3.5 h-3.5 text-[var(--text-muted)]"></i>
                         </div>
-                        <div class="mt-2.5 flex items-baseline justify-between">
-                            <span id="kpi-total" class="text-2xl font-bold font-mono text-[var(--text-primary)]">0</span>
+                        <div class="mt-2 flex items-baseline justify-between">
+                            <span id="kpi-total" class="text-xl font-bold font-mono text-[var(--text-primary)]">0</span>
                             <span class="text-[11px] font-mono text-[var(--text-muted)]">100%</span>
                         </div>
                     </div>
 
-                    <div class="sm-card p-4 border-t-2 border-t-emerald-500">
+                    <div class="sm-card p-3.5 border-t-2 border-t-emerald-500">
                         <div class="flex items-center justify-between">
                             <span class="text-[11px] font-medium text-[var(--text-secondary)]">Tam Uyumlu</span>
                             <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                         </div>
-                        <div class="mt-2.5 flex items-baseline justify-between">
-                            <span id="kpi-tam" class="text-2xl font-bold font-mono text-[var(--text-primary)]">0</span>
+                        <div class="mt-2 flex items-baseline justify-between">
+                            <span id="kpi-tam" class="text-xl font-bold font-mono text-[var(--text-primary)]">0</span>
                             <span id="kpi-tam-pct" class="text-[11px] font-mono font-medium text-emerald-500">0%</span>
                         </div>
                     </div>
 
-                    <div class="sm-card p-4 border-t-2 border-t-amber-500">
+                    <div class="sm-card p-3.5 border-t-2 border-t-amber-500">
                         <div class="flex items-center justify-between">
                             <span class="text-[11px] font-medium text-[var(--text-secondary)]">Kısmen Uyumlu</span>
                             <span class="w-2 h-2 rounded-full bg-amber-500"></span>
                         </div>
-                        <div class="mt-2.5 flex items-baseline justify-between">
-                            <span id="kpi-kismen" class="text-2xl font-bold font-mono text-[var(--text-primary)]">0</span>
+                        <div class="mt-2 flex items-baseline justify-between">
+                            <span id="kpi-kismen" class="text-xl font-bold font-mono text-[var(--text-primary)]">0</span>
                             <span id="kpi-kismen-pct" class="text-[11px] font-mono font-medium text-amber-500">0%</span>
                         </div>
                     </div>
 
-                    <div class="sm-card p-4 border-t-2 border-t-rose-500">
+                    <div class="sm-card p-3.5 border-t-2 border-t-rose-500">
                         <div class="flex items-center justify-between">
                             <span class="text-[11px] font-medium text-[var(--text-secondary)]">Uyumsuz (Gap)</span>
                             <span class="w-2 h-2 rounded-full bg-rose-500"></span>
                         </div>
-                        <div class="mt-2.5 flex items-baseline justify-between">
-                            <span id="kpi-uyumsuz" class="text-2xl font-bold font-mono text-rose-500">0</span>
+                        <div class="mt-2 flex items-baseline justify-between">
+                            <span id="kpi-uyumsuz" class="text-xl font-bold font-mono text-rose-500">0</span>
                             <span id="kpi-uyumsuz-pct" class="text-[11px] font-mono font-medium text-rose-500">0%</span>
                         </div>
                     </div>
 
-                    <div class="sm-card p-4 border-t-2 border-t-zinc-500">
+                    <div class="col-span-2 sm:col-span-1 sm-card p-3.5 border-t-2 border-t-zinc-500">
                         <div class="flex items-center justify-between">
                             <span class="text-[11px] font-medium text-[var(--text-secondary)]">Belirtilmemiş</span>
                             <span class="w-2 h-2 rounded-full bg-zinc-500"></span>
                         </div>
-                        <div class="mt-2.5 flex items-baseline justify-between">
-                            <span id="kpi-belirtilmemis" class="text-2xl font-bold font-mono text-[var(--text-primary)]">0</span>
+                        <div class="mt-2 flex items-baseline justify-between">
+                            <span id="kpi-belirtilmemis" class="text-xl font-bold font-mono text-[var(--text-primary)]">0</span>
                             <span id="kpi-belirtilmemis-pct" class="text-[11px] font-mono text-[var(--text-muted)]">0%</span>
                         </div>
                     </div>
@@ -385,56 +400,56 @@
                 <div class="sm-card overflow-hidden">
 
                     <!-- Toolbar: Segmented Filter Bar + Search + Excel Export -->
-                    <div class="p-3.5 border-b border-[var(--border-subtle)] bg-[var(--bg-subtle)] flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                    <div class="p-3 border-b border-[var(--border-subtle)] bg-[var(--bg-subtle)] flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2.5">
 
                         <!-- Segmented Filter Pills -->
                         <div class="inline-flex flex-wrap items-center gap-1 p-1 rounded-lg bg-[var(--bg-app)] border border-[var(--border-subtle)]">
-                            <button data-filter="ALL" class="filter-btn active text-xs px-3 py-1.5">
+                            <button data-filter="ALL" class="filter-btn active text-xs px-2.5 py-1">
                                 Tüm Maddeler
                             </button>
-                            <button data-filter="UYUMSUZ" class="filter-btn text-xs px-3 py-1.5 flex items-center space-x-1.5">
+                            <button data-filter="UYUMSUZ" class="filter-btn text-xs px-2.5 py-1 flex items-center space-x-1.5">
                                 <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
                                 <span>Uyumsuz (Gap)</span>
                             </button>
-                            <button data-filter="TAM_UYUMLU" class="filter-btn text-xs px-3 py-1.5 flex items-center space-x-1.5">
+                            <button data-filter="TAM_UYUMLU" class="filter-btn text-xs px-2.5 py-1 flex items-center space-x-1.5">
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                 <span>Tam Uyumlu</span>
                             </button>
-                            <button data-filter="KISMEN_UYUMLU" class="filter-btn text-xs px-3 py-1.5 flex items-center space-x-1.5">
+                            <button data-filter="KISMEN_UYUMLU" class="filter-btn text-xs px-2.5 py-1 flex items-center space-x-1.5">
                                 <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
                                 <span>Kısmen Uyumlu</span>
                             </button>
-                            <button data-filter="BELIRTILMEMIS" class="filter-btn text-xs px-3 py-1.5 flex items-center space-x-1.5">
+                            <button data-filter="BELIRTILMEMIS" class="filter-btn text-xs px-2.5 py-1 flex items-center space-x-1.5">
                                 <span class="w-1.5 h-1.5 rounded-full bg-zinc-400"></span>
                                 <span>Belirtilmemiş</span>
                             </button>
                         </div>
 
                         <!-- Search & Excel Export -->
-                        <div class="flex items-center space-x-2.5">
-                            <div class="relative flex-1 sm:w-64">
-                                <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-[var(--text-muted)]"></i>
+                        <div class="flex items-center space-x-2">
+                            <div class="relative flex-1 sm:w-60">
+                                <i data-lucide="search" class="w-3.5 h-3.5 absolute left-2.5 top-2 text-[var(--text-muted)]"></i>
                                 <input id="matrix-search" type="text" placeholder="Madde no, terim veya ürün ara..." class="w-full sm-input text-xs pl-8 pr-3 py-1.5 bg-[var(--bg-surface)]">
                             </div>
 
-                            <button id="btn-export-excel" type="button" class="sm-btn-primary text-xs px-3.5 py-1.5 inline-flex items-center space-x-1.5 shrink-0">
+                            <button id="btn-export-excel" type="button" class="sm-btn-primary text-xs px-3 py-1.5 inline-flex items-center space-x-1.5 shrink-0">
                                 <i data-lucide="file-down" class="w-3.5 h-3.5"></i>
-                                <span>Excel Raporu (.xlsx)</span>
+                                <span>Excel İndir (.xlsx)</span>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Data Table -->
+                    <!-- Responsive Data Table -->
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs border-collapse">
                             <thead>
                                 <tr class="border-b border-[var(--border-subtle)] text-[11px] font-mono uppercase tracking-wider text-[var(--text-muted)] bg-[var(--bg-surface)]">
-                                    <th class="py-3 px-4 font-medium w-28">Madde No</th>
-                                    <th class="py-3 px-4 font-medium w-36">Kategori</th>
-                                    <th class="py-3 px-4 font-medium">Şartname Gereksinimi</th>
-                                    <th class="py-3 px-4 font-medium text-center w-40">Uyumluluk</th>
-                                    <th class="py-3 px-4 font-medium w-52">Referans Ürün & Kaynak</th>
-                                    <th class="py-3 px-4 font-medium text-right w-28">Doğrulama</th>
+                                    <th class="py-2.5 px-3.5 font-medium w-28">Madde No</th>
+                                    <th class="py-2.5 px-3.5 font-medium w-32 hidden sm:table-cell">Kategori</th>
+                                    <th class="py-2.5 px-3.5 font-medium">Şartname Gereksinimi</th>
+                                    <th class="py-2.5 px-3.5 font-medium text-center w-40">Uyumluluk</th>
+                                    <th class="py-2.5 px-3.5 font-medium w-48 hidden md:table-cell">Referans Ürün & Kaynak</th>
+                                    <th class="py-2.5 px-3.5 font-medium text-right w-36">Kanıt & Simülasyon</th>
                                 </tr>
                             </thead>
                             <tbody id="matrix-tbody">
@@ -444,7 +459,7 @@
                     </div>
 
                     <!-- Empty Filter State -->
-                    <div id="table-empty-state" class="py-14 text-center text-[var(--text-muted)] hidden">
+                    <div id="table-empty-state" class="py-12 text-center text-[var(--text-muted)] hidden">
                         <i data-lucide="search-x" class="w-6 h-6 mx-auto mb-2 opacity-60"></i>
                         <p class="text-xs font-medium">Seçili filtre kriterine uygun şartname maddesi bulunamadı.</p>
                     </div>
@@ -454,63 +469,96 @@
         </section>
 
         <!-- ================================================================= -->
-        <!-- TAB 2: DOKÜMAN ASİSTANI (Conversational RAG Copilot)              -->
+        <!-- TAB 2: DOKÜMAN ASİSTANI (Viewport-Fitted Responsive Split Layout) -->
         <!-- ================================================================= -->
-        <section id="tab-pane-chat" class="space-y-5 hidden">
+        <section id="tab-pane-chat" class="hidden">
 
-            <div class="sm-card flex flex-col h-[720px] overflow-hidden">
+            <div class="sm-card chat-viewport-fit flex flex-col lg:flex-row overflow-hidden">
 
-                <!-- Copilot Header -->
-                <div class="px-5 py-3.5 border-b border-[var(--border-subtle)] bg-[var(--bg-subtle)] flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 rounded-lg bg-[var(--btn-primary-bg)] text-[var(--btn-primary-text)] flex items-center justify-center">
-                            <i data-lucide="sparkles" class="w-4 h-4"></i>
+                <!-- Left Sidebar (Desktop lg+): Context & Vertically Wrapped Quick Prompts -->
+                <aside class="hidden lg:flex lg:w-72 border-r border-[var(--border-subtle)] bg-[var(--bg-subtle)] flex-col justify-between p-4 shrink-0">
+                    <div class="space-y-4 overflow-y-auto pr-1">
+                        <!-- Copilot Brand Card -->
+                        <div class="flex items-center space-x-2.5 pb-3 border-b border-[var(--border-subtle)]">
+                            <img src="/static/img/logo.svg" alt="SpecMatrix" class="w-7 h-7 rounded-md shrink-0" />
+                            <div>
+                                <h3 class="font-semibold text-[var(--text-primary)] text-xs">Doküman & İhale Asistanı</h3>
+                                <p class="text-[10px] font-mono text-[var(--text-muted)]">Kanıt Doğrulamalı RAG</p>
+                            </div>
                         </div>
+
+                        <!-- Vertically Stacked Suggested Prompts (Never overflows horizontally!) -->
                         <div>
-                            <h3 class="font-semibold text-[var(--text-primary)] text-sm">Doküman & Şartname Asistanı</h3>
-                            <p class="text-[11px] text-[var(--text-muted)]">İndekslenmiş ürün katalogları ve aktif şartname üzerinde sayfa kanıtlı sorgulama</p>
+                            <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] font-semibold block mb-2">Hazır Teknik Sorgular</span>
+                            <div id="chat-sidebar-prompts" class="space-y-1.5">
+                                <!-- Injected by updateChatPromptChips() -->
+                            </div>
+                        </div>
+
+                        <!-- RAG Verification Info Box -->
+                        <div class="p-3 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-1.5 text-[11px]">
+                            <div class="flex items-center space-x-1.5 font-semibold text-[var(--text-primary)]">
+                                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i>
+                                <span>Sıfır Halüsinasyon Kuralı</span>
+                            </div>
+                            <p class="text-[var(--text-secondary)] leading-relaxed">
+                                Asistan yalnızca indekslenmiş ürün katalogları ve aktif şartname maddelerinden sayfa numarasıyla kanıt alıntılar.
+                            </p>
                         </div>
                     </div>
-                    <button id="btn-clear-chat" type="button" class="sm-btn-secondary text-xs px-3 py-1.5 inline-flex items-center space-x-1.5 text-[var(--text-secondary)]">
+
+                    <button id="btn-clear-chat" type="button" class="sm-btn-secondary w-full text-xs py-2 px-3 inline-flex items-center justify-center space-x-1.5 text-[var(--text-secondary)] mt-3 shrink-0">
                         <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-                        <span>Oturumu Sıfırla</span>
+                        <span>Sohbet Oturumunu Sıfırla</span>
                     </button>
-                </div>
+                </aside>
 
-                <!-- Quick Inquiry Bar -->
-                <div class="px-5 py-2.5 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)] flex items-center space-x-2 overflow-x-auto text-xs">
-                    <span class="text-[11px] font-mono uppercase tracking-wider text-[var(--text-muted)] shrink-0">Örnek Sorgular:</span>
-                    <div id="chat-prompt-chips" class="flex items-center space-x-2 shrink-0"></div>
-                </div>
+                <!-- Right Main Chat Column: Fits 100% of remaining height -->
+                <div class="flex-1 flex flex-col min-w-0 min-h-0">
 
-                <!-- Conversation Stream -->
-                <div id="chat-messages-container" class="flex-1 p-6 overflow-y-auto space-y-5 bg-architectural-grid">
-
-                    <!-- Initial System Greeting -->
-                    <div class="flex items-start space-x-3.5">
-                        <div class="w-7 h-7 rounded-md bg-[var(--bg-elevated)] border border-[var(--border-strong)] flex items-center justify-center text-[var(--text-primary)] shrink-0 mt-0.5">
-                            <i data-lucide="terminal" class="w-3.5 h-3.5"></i>
+                    <!-- Compact Mobile/Tablet Header & Horizontal Chips (Hidden on lg+) -->
+                    <div class="lg:hidden px-3.5 py-2.5 border-b border-[var(--border-subtle)] bg-[var(--bg-subtle)] space-y-2 shrink-0">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <img src="/static/img/logo.svg" alt="SpecMatrix" class="w-6 h-6 rounded" />
+                                <span class="font-semibold text-xs text-[var(--text-primary)]">Doküman & Şartname Asistanı</span>
+                            </div>
+                            <button id="btn-clear-chat-mobile" type="button" class="text-[11px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center space-x-1">
+                                <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                                <span>Sıfırla</span>
+                            </button>
                         </div>
-                        <div class="sm-card p-4 max-w-2xl text-xs sm:text-[13px] text-[var(--text-primary)] leading-relaxed space-y-2">
-                            <p class="font-semibold">SpecMatrix Doküman Asistanı hazır.</p>
-                            <p class="text-[var(--text-secondary)]">Yüklediğiniz teknik veri sayfaları, ürün katalogları veya incelenen şartnamedeki kritik sapmalar (Gap) hakkında doğrudan soru sorabilirsiniz. Yanıtlar ilgili dokümanın sayfa ve paragraf alıntısıyla doğrulanır.</p>
-                        </div>
+                        <div id="chat-prompt-chips" class="flex items-center space-x-1.5 overflow-x-auto pb-0.5 text-xs"></div>
                     </div>
 
-                </div>
+                    <!-- Scrollable Conversation Stream (flex-1 min-h-0 ensures it scrolls inside without pushing input bar off screen) -->
+                    <div id="chat-messages-container" class="flex-1 min-h-0 p-4 sm:p-5 overflow-y-auto space-y-4 bg-architectural-grid">
 
-                <!-- Command Input Footer -->
-                <div class="p-4 bg-[var(--bg-surface)] border-t border-[var(--border-subtle)]">
-                    <form id="chat-form" onsubmit="event.preventDefault(); return false;" class="flex items-center space-x-2.5">
-                        <div class="relative flex-1">
-                            <input id="chat-input-text" type="text" placeholder="Teknik bir soru sorun (örn: 'AegisGuard çalışma sıcaklığı nedir?', 'En riskli maddeler hangileri?')..." class="w-full sm-input pl-4 pr-16 py-2.5 text-xs sm:text-[13px]">
-                            <span class="hidden sm:inline-block absolute right-3 top-2.5 text-[10px] font-mono text-[var(--text-muted)] border border-[var(--border-subtle)] rounded px-1.5 py-0.5">Enter ↵</span>
+                        <!-- Initial System Greeting -->
+                        <div class="flex items-start space-x-3">
+                            <img src="/static/img/logo.svg" alt="AI" class="w-7 h-7 rounded-md shrink-0 mt-0.5" />
+                            <div class="sm-card p-3.5 max-w-2xl text-xs sm:text-[13px] text-[var(--text-primary)] leading-relaxed space-y-1.5">
+                                <p class="font-semibold">SpecMatrix Doküman Asistanı hazır.</p>
+                                <p class="text-[var(--text-secondary)]">Yüklediğiniz teknik veri sayfaları, ürün katalogları veya incelenen şartnamedeki kritik sapmalar (Gap) hakkında doğrudan soru sorabilirsiniz. Yanıtlar ilgili dokümanın sayfa ve paragraf alıntısıyla doğrulanır.</p>
+                            </div>
                         </div>
-                        <button type="button" id="btn-chat-send" class="sm-btn-primary px-4 py-2.5 text-xs sm:text-[13px] inline-flex items-center space-x-1.5 shrink-0">
-                            <span>Sorgula</span>
-                            <i data-lucide="corner-down-left" class="w-3.5 h-3.5"></i>
-                        </button>
-                    </form>
+
+                    </div>
+
+                    <!-- Pinned Bottom Command Input Bar -->
+                    <div class="p-3 sm:p-3.5 bg-[var(--bg-surface)] border-t border-[var(--border-subtle)] shrink-0">
+                        <form id="chat-form" onsubmit="event.preventDefault(); return false;" class="flex items-center space-x-2">
+                            <div class="relative flex-1 min-w-0">
+                                <input id="chat-input-text" type="text" placeholder="Teknik bir soru sorun (örn: 'AegisGuard çalışma sıcaklığı nedir?', 'En riskli maddeler hangileri?')..." class="w-full sm-input pl-3.5 pr-14 py-2.5 text-xs sm:text-[13px]">
+                                <span class="hidden sm:inline-block absolute right-2.5 top-2 text-[10px] font-mono text-[var(--text-muted)] border border-[var(--border-subtle)] rounded px-1.5 py-0.5">Enter ↵</span>
+                            </div>
+                            <button type="button" id="btn-chat-send" class="sm-btn-primary px-4 py-2.5 text-xs sm:text-[13px] inline-flex items-center space-x-1.5 shrink-0">
+                                <span>Sorgula</span>
+                                <i data-lucide="corner-down-left" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </form>
+                    </div>
+
                 </div>
 
             </div>
@@ -520,36 +568,36 @@
         <!-- ================================================================= -->
         <!-- TAB 3: ZEYİLNAME & İTİRAZ ROBOTU                                  -->
         <!-- ================================================================= -->
-        <section id="tab-pane-rebuttal" class="space-y-6 hidden">
+        <section id="tab-pane-rebuttal" class="space-y-4 hidden">
 
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
 
                 <!-- Left Panel: Objection Parameters (5 Cols) -->
-                <div class="lg:col-span-5 sm-card p-6 space-y-4">
-                    <div class="pb-3.5 border-b border-[var(--border-subtle)]">
+                <div class="lg:col-span-5 sm-card p-5 space-y-3.5">
+                    <div class="pb-3 border-b border-[var(--border-subtle)]">
                         <div class="flex items-center space-x-2">
                             <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-[var(--bg-subtle)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">KİK</span>
                             <h3 class="font-semibold text-[var(--text-primary)] text-sm">Resmi Zeyilname & İtiraz Parametreleri</h3>
                         </div>
-                        <p class="text-xs text-[var(--text-secondary)] mt-1.5">Tespit edilen uyumsuz (Gap) maddeler için mevzuata uygun teknik ve hukuki itiraz dilekçesi oluşturun.</p>
+                        <p class="text-xs text-[var(--text-secondary)] mt-1">Tespit edilen uyumsuz (Gap) maddeler için mevzuata uygun teknik ve hukuki itiraz dilekçesi oluşturun.</p>
                     </div>
 
-                    <div class="space-y-3.5 text-xs">
+                    <div class="space-y-3 text-xs">
                         <div>
-                            <label class="block font-medium text-[var(--text-secondary)] mb-1.5">İtiraz Konusu Şartname Maddesi</label>
-                            <select id="rebuttal-clause-select" class="w-full sm-input p-2.5 text-xs font-medium">
+                            <label class="block font-medium text-[var(--text-secondary)] mb-1">İtiraz Konusu Şartname Maddesi</label>
+                            <select id="rebuttal-clause-select" class="w-full sm-input p-2 text-xs font-medium">
                                 <option value="">Aktif analizden bir madde seçin...</option>
                             </select>
                         </div>
 
                         <div>
-                            <label class="block font-medium text-[var(--text-secondary)] mb-1.5">Şartname Maddesi Metni</label>
-                            <textarea id="rebuttal-clause-text" rows="3" class="w-full sm-input p-2.5 font-mono text-[11px] leading-relaxed"></textarea>
+                            <label class="block font-medium text-[var(--text-secondary)] mb-1">Şartname Maddesi Metni</label>
+                            <textarea id="rebuttal-clause-text" rows="3" class="w-full sm-input p-2 font-mono text-[11px] leading-relaxed"></textarea>
                         </div>
 
                         <div>
-                            <label class="block font-medium text-[var(--text-secondary)] mb-1.5">Dayanak & Argüman Stratejisi</label>
-                            <select id="rebuttal-strategy-select" class="w-full sm-input p-2.5 text-xs font-medium">
+                            <label class="block font-medium text-[var(--text-secondary)] mb-1">Dayanak & Argüman Stratejisi</label>
+                            <select id="rebuttal-strategy-select" class="w-full sm-input p-2 text-xs font-medium">
                                 <option value="rekabeti_artirma">Rekabeti Artırma & 4734 Sayılı KİK Madde 5 (Önerilen)</option>
                                 <option value="teknik_esdegerlik">Teknik Eşdeğerlik & Fonksiyonel Yeterlilik</option>
                                 <option value="maliyet_ve_kamu_yarari">Kaynak Verimliliği & Kamu Yararı İlkesi</option>
@@ -557,18 +605,18 @@
                             </select>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                             <div>
-                                <label class="block font-medium text-[var(--text-secondary)] mb-1.5">Başvuran Firma Adı</label>
+                                <label class="block font-medium text-[var(--text-secondary)] mb-1">Başvuran Firma Adı</label>
                                 <input type="text" id="rebuttal-company-name" value="ABC Teknoloji ve Savunma Sanayii A.Ş." class="w-full sm-input p-2 text-xs">
                             </div>
                             <div>
-                                <label class="block font-medium text-[var(--text-secondary)] mb-1.5">Muhatap İhale Makamı</label>
+                                <label class="block font-medium text-[var(--text-secondary)] mb-1">Muhatap İhale Makamı</label>
                                 <input type="text" id="rebuttal-authority-name" value="Devlet Malzeme Ofisi Genel Müdürlüğü" class="w-full sm-input p-2 text-xs">
                             </div>
                         </div>
 
-                        <div class="pt-2">
+                        <div class="pt-1">
                             <button id="btn-generate-rebuttal" type="button" class="w-full sm-btn-primary py-2.5 px-4 text-xs inline-flex items-center justify-center space-x-2">
                                 <i data-lucide="file-check-2" class="w-4 h-4"></i>
                                 <span>Resmi Zeyilname Talebi Oluştur</span>
@@ -578,9 +626,9 @@
                 </div>
 
                 <!-- Right Panel: Official Document Dossier Preview (7 Cols) -->
-                <div class="lg:col-span-7 sm-card p-6 flex flex-col justify-between">
+                <div class="lg:col-span-7 sm-card p-5 flex flex-col justify-between">
                     <div>
-                        <div class="flex items-center justify-between pb-3.5 border-b border-[var(--border-subtle)]">
+                        <div class="flex items-center justify-between pb-3 border-b border-[var(--border-subtle)]">
                             <div class="flex items-center space-x-2">
                                 <i data-lucide="file-text" class="w-4 h-4 text-[var(--text-muted)]"></i>
                                 <span class="text-xs font-semibold text-[var(--text-primary)]">Resmi Dilekçe Taslağı</span>
@@ -597,11 +645,11 @@
                             </div>
                         </div>
 
-                        <!-- A4 Style Legal Document Box -->
-                        <div class="mt-4 sm-card-subtle p-6 text-xs font-mono text-[var(--text-primary)] leading-relaxed whitespace-pre-wrap max-h-[500px] overflow-y-auto" id="rebuttal-letter-preview">Sol panelden itiraz edilecek şartname maddesini seçin ve "Resmi Zeyilname Talebi Oluştur" butonuna tıklayın.</div>
+                        <!-- Viewport-Constrained A4 Legal Document Box -->
+                        <div class="mt-3 sm-card-subtle p-5 text-xs font-mono text-[var(--text-primary)] leading-relaxed whitespace-pre-wrap max-h-[calc(100dvh-260px)] min-h-[280px] overflow-y-auto" id="rebuttal-letter-preview">Sol panelden itiraz edilecek şartname maddesini seçin ve "Resmi Zeyilname Talebi Oluştur" butonuna tıklayın.</div>
                     </div>
 
-                    <div class="mt-4 pt-3 border-t border-[var(--border-subtle)] text-[11px] text-[var(--text-muted)] flex items-center justify-between">
+                    <div class="mt-3 pt-2.5 border-t border-[var(--border-subtle)] text-[11px] text-[var(--text-muted)] flex items-center justify-between">
                         <span>4734 Sayılı Kamu İhale Kanunu Madde 5 ve Madde 12 uyumlu şablon</span>
                         <span class="font-mono">FORM · ZYL-2026</span>
                     </div>
@@ -614,20 +662,20 @@
         <!-- ================================================================= -->
         <!-- TAB 4: KURUMSAL BİLGİ BANKASI & VEKTÖR İNDEKS GEZGİNİ             -->
         <!-- ================================================================= -->
-        <section id="tab-pane-kb" class="space-y-6 hidden">
+        <section id="tab-pane-kb" class="space-y-4 hidden">
 
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
 
                 <!-- Left: Document Upload & Index Control (5 Cols) -->
-                <div class="lg:col-span-5 sm-card p-6 space-y-4">
-                    <div class="pb-3.5 border-b border-[var(--border-subtle)]">
+                <div class="lg:col-span-5 sm-card p-5 space-y-3.5">
+                    <div class="pb-3 border-b border-[var(--border-subtle)]">
                         <h3 class="font-semibold text-[var(--text-primary)] text-sm">Bilgi Bankası Doküman Yönetimi</h3>
                         <p class="text-xs text-[var(--text-secondary)] mt-1">Hibrit arama motoruna (ChromaDB + BM25) yeni ürün dokümanları ekleyin.</p>
                     </div>
 
-                    <div id="kb-dropzone" class="sm-dropzone p-7 text-center cursor-pointer group">
-                        <div class="w-10 h-10 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex items-center justify-center mx-auto mb-3 text-[var(--text-secondary)] group-hover:text-blue-500 transition-colors">
-                            <i data-lucide="folder-plus" class="w-5 h-5"></i>
+                    <div id="kb-dropzone" class="sm-dropzone p-6 text-center cursor-pointer group">
+                        <div class="w-9 h-9 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex items-center justify-center mx-auto mb-2.5 text-[var(--text-secondary)] group-hover:text-blue-500 transition-colors">
+                            <i data-lucide="folder-plus" class="w-4 h-4"></i>
                         </div>
                         <p class="text-xs font-semibold text-[var(--text-primary)]">Katalog veya Datasheet Yükleyin</p>
                         <p class="text-[11px] text-[var(--text-muted)] mt-1">PDF, DOCX, TXT veya MD dosyasını sürükleyin veya seçin</p>
@@ -645,7 +693,7 @@
                     </div>
 
                     <div class="pt-3 border-t border-[var(--border-subtle)]">
-                        <span class="text-[11px] font-mono uppercase tracking-wider text-[var(--text-muted)] block mb-2.5">İndekslenmiş Kaynak Dosyalar</span>
+                        <span class="text-[11px] font-mono uppercase tracking-wider text-[var(--text-muted)] block mb-2">İndekslenmiş Kaynak Dosyalar</span>
                         <div id="kb-docs-tags" class="flex flex-wrap gap-1.5 text-xs">
                             <span class="text-[var(--text-muted)] text-xs">Yükleniyor...</span>
                         </div>
@@ -653,20 +701,20 @@
                 </div>
 
                 <!-- Right: Vector Chunks Inspector (7 Cols) -->
-                <div class="lg:col-span-7 sm-card p-6 flex flex-col justify-between">
+                <div class="lg:col-span-7 sm-card p-5 flex flex-col justify-between">
                     <div>
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-[var(--border-subtle)]">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-[var(--border-subtle)]">
                             <div>
                                 <h3 class="font-semibold text-[var(--text-primary)] text-sm">Vektör & Metin Parçası (Chunk) Gezgini</h3>
-                                <p class="text-xs text-[var(--text-secondary)] mt-0.5">Sayfa ve başlık метаverisi korunarak ayrıştırılmış doküman blokları</p>
+                                <p class="text-xs text-[var(--text-secondary)] mt-0.5">Sayfa ve başlık metaverisi korunarak ayrıştırılmış doküman blokları</p>
                             </div>
                             <div class="relative w-full sm:w-56">
-                                <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-[var(--text-muted)]"></i>
+                                <i data-lucide="search" class="w-3.5 h-3.5 absolute left-2.5 top-2 text-[var(--text-muted)]"></i>
                                 <input type="text" id="chunk-search-input" placeholder="Metin bloklarında ara..." class="w-full sm-input text-xs pl-8 pr-3 py-1.5">
                             </div>
                         </div>
 
-                        <div id="chunks-list-container" class="mt-4 space-y-2.5 max-h-[500px] overflow-y-auto pr-1">
+                        <div id="chunks-list-container" class="mt-3 space-y-2 max-h-[calc(100dvh-260px)] min-h-[280px] overflow-y-auto pr-1">
                             <div class="text-center py-8 text-[var(--text-muted)] text-xs">Parçalar yükleniyor...</div>
                         </div>
                     </div>
@@ -687,13 +735,16 @@
             <div class="drawer-panel w-screen max-w-xl bg-[var(--bg-surface)] border-l border-[var(--border-subtle)] shadow-2xl flex flex-col">
 
                 <!-- Dossier Header -->
-                <div class="px-6 py-5 border-b border-[var(--border-subtle)] bg-[var(--bg-subtle)] flex items-center justify-between">
-                    <div>
-                        <div class="flex items-center space-x-2">
-                            <span id="drawer-clause-id" class="text-xs font-mono font-semibold px-2.5 py-0.5 rounded bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-strong)]">Madde 4.1.1</span>
-                            <span id="drawer-category" class="text-xs text-[var(--text-muted)] font-medium">Kategori</span>
+                <div class="px-5 py-4 border-b border-[var(--border-subtle)] bg-[var(--bg-subtle)] flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <img src="/static/img/logo.svg" alt="SpecMatrix" class="w-7 h-7 rounded-md shrink-0" />
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <span id="drawer-clause-id" class="text-xs font-mono font-semibold px-2 py-0.5 rounded bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-strong)]">Madde 4.1.1</span>
+                                <span id="drawer-category" class="text-xs text-[var(--text-muted)] font-medium">Kategori</span>
+                            </div>
+                            <h3 class="text-xs sm:text-sm font-semibold text-[var(--text-primary)] mt-1">Teknik Kanıt ve Doğrulama Dosyası</h3>
                         </div>
-                        <h3 class="text-sm font-semibold text-[var(--text-primary)] mt-1.5">Teknik Kanıt ve Doğrulama Dosyası</h3>
                     </div>
                     <button id="drawer-close-btn" type="button" class="sm-btn-secondary w-8 h-8 flex items-center justify-center text-[var(--text-secondary)]">
                         <i data-lucide="x" class="w-4 h-4"></i>
@@ -701,20 +752,25 @@
                 </div>
 
                 <!-- Dossier Body -->
-                <div class="flex-1 overflow-y-auto p-6 space-y-5">
+                <div class="flex-1 overflow-y-auto p-5 space-y-4">
 
-                    <!-- Status Banner -->
-                    <div id="drawer-status-card" class="p-4 rounded-xl border flex items-center justify-between">
+                    <!-- Status Banner + What-If Simulation Toggle -->
+                    <div id="drawer-status-card" class="p-3.5 rounded-xl border flex items-center justify-between">
                         <div>
                             <span class="text-[10px] font-mono uppercase tracking-widest opacity-80">Denetim Kararı</span>
                             <p id="drawer-status-text" class="text-sm font-bold font-mono mt-0.5">TAM UYUMLU</p>
                         </div>
-                        <div id="drawer-status-icon" class="w-9 h-9 rounded-lg flex items-center justify-center">
-                            <i data-lucide="check-circle" class="w-5 h-5"></i>
+                        <div class="flex items-center space-x-2">
+                            <button id="btn-drawer-toggle-sim" type="button" class="hidden sm-btn-secondary text-[11px] px-2.5 py-1 font-mono">
+                                + Simüle Et (Çözüldü Varsay)
+                            </button>
+                            <div id="drawer-status-icon" class="w-8 h-8 rounded-lg flex items-center justify-center">
+                                <i data-lucide="check-circle" class="w-5 h-5"></i>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Target Requirement -->
+                    <!-- Target Requirement (With Automatic Technical Parameter Highlighting) -->
                     <div>
                         <h4 class="text-[11px] font-mono uppercase tracking-wider text-[var(--text-muted)] mb-1.5">İhale Şartname Gereksinimi</h4>
                         <div id="drawer-clause-text" class="sm-card-subtle p-3.5 text-xs text-[var(--text-primary)] leading-relaxed">
@@ -734,13 +790,13 @@
                         </div>
                     </div>
 
-                    <!-- Verbatim Document Quote (Editorial Serif Typography) -->
+                    <!-- Verbatim Document Quote (Editorial Serif Typography + Parameter Highlight) -->
                     <div>
                         <h4 class="text-[11px] font-mono uppercase tracking-wider text-[var(--text-muted)] mb-1.5 flex items-center space-x-1.5">
                             <i data-lucide="quote" class="w-3.5 h-3.5 text-blue-500"></i>
                             <span>Doğrudan Doküman Kanıtı (Harfiyen Alıntı)</span>
                         </h4>
-                        <div class="p-4 rounded-xl bg-[var(--accent-subtle)] border-l-2 border-blue-500 text-sm text-[var(--text-primary)] font-editorial italic leading-relaxed">
+                        <div class="p-3.5 rounded-xl bg-[var(--accent-subtle)] border-l-2 border-blue-500 text-sm text-[var(--text-primary)] font-editorial italic leading-relaxed">
                             <p id="drawer-exact-quote">—</p>
                         </div>
                     </div>
@@ -754,7 +810,7 @@
                     </div>
 
                     <!-- Rebuttal Action Callout (Visible on GAP / Partial) -->
-                    <div id="drawer-rebuttal-jump-box" class="p-4 rounded-xl sm-card-subtle border-rose-500/30 space-y-2.5">
+                    <div id="drawer-rebuttal-jump-box" class="p-4 rounded-xl sm-card-subtle border-rose-500/30 space-y-2">
                         <div class="flex items-center space-x-2 text-[var(--text-primary)] text-xs font-semibold">
                             <i data-lucide="scale" class="w-4 h-4 text-rose-500"></i>
                             <span>Resmi Zeyilname / İtiraz Dilekçesi Hazırla</span>
@@ -771,7 +827,7 @@
                 </div>
 
                 <!-- Dossier Footer -->
-                <div class="px-6 py-3.5 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)] flex justify-end">
+                <div class="px-5 py-3 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)] flex justify-end">
                     <button id="drawer-bottom-close" type="button" class="sm-btn-secondary text-xs px-4 py-1.5">
                         Kapat
                     </button>
@@ -785,6 +841,6 @@
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
 
     <!-- Application Controller -->
-    <script type="module" src="/static/js/app.js?v=3.0"></script>
+    <script type="module" src="/static/js/app.js?v=3.3"></script>
 </body>
 </html>

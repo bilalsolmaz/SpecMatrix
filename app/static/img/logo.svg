@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Deep Obsidian Architectural Squircle Container -->
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="#09090B" stroke="#27272A" stroke-width="2"/>
+  <!-- Top-Left Matrix Cell -->
+  <rect x="13" y="13" width="17" height="17" rx="1.5" fill="#F4F4F6"/>
+  <!-- Top-Right Matrix Cell -->
+  <rect x="34" y="13" width="17" height="17" rx="1.5" fill="#F4F4F6"/>
+  <!-- Bottom-Left Matrix Cell -->
+  <rect x="13" y="34" width="17" height="17" rx="1.5" fill="#F4F4F6"/>
+  <!-- Bottom-Right Cobalt Geometric Verification Chevron (Grid-Aligned) -->
+  <path d="M34 39.5L40.5 46L51 35.5V42L40.5 52.5L34 46V39.5Z" fill="#2563EB"/>
+</svg>

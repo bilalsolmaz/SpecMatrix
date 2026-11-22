@@ -1,6 +1,6 @@
 /* ==========================================================================
-   SpecMatrix AI — Architectural Enterprise Design System (v3.0)
-   Swiss-Grid Precision · Dual Theme (Obsidian Dark & Alabaster Light)
+   SpecMatrix AI — Architectural Enterprise Design System (v3.2)
+   Swiss-Grid Precision · Responsive Viewport Fit · Dual Theme
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
@@ -12,7 +12,7 @@ html.dark {
     --bg-elevated: #17171c;
     --bg-subtle: #141418;
     --bg-hover: #1c1c22;
-    --bg-glass: rgba(17, 17, 20, 0.86);
+    --bg-glass: rgba(17, 17, 20, 0.88);
 
     --border-subtle: #232329;
     --border-strong: #32323b;
@@ -53,7 +53,7 @@ html.dark {
     --status-neutral-dot: #71717a;
 
     --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px -1px rgba(0, 0, 0, 0.4);
-    --shadow-elevated: 0 12px 32px -4px rgba(0, 0, 0, 0.6);
+    --shadow-elevated: 0 12px 32px -4px rgba(0, 0, 0, 0.65);
     --ring-track: #232329;
 }
 
@@ -63,7 +63,7 @@ html.light {
     --bg-elevated: #ffffff;
     --bg-subtle: #f1f1f4;
     --bg-hover: #f4f4f6;
-    --bg-glass: rgba(255, 255, 255, 0.88);
+    --bg-glass: rgba(255, 255, 255, 0.9);
 
     --border-subtle: #e4e4e7;
     --border-strong: #d4d4d8;
@@ -75,8 +75,8 @@ html.light {
 
     --accent-primary: #2563eb;
     --accent-primary-hover: #1d4ed8;
-    --accent-subtle: rgba(37, 99, 235, 0.07);
-    --accent-border: rgba(37, 99, 235, 0.22);
+    --accent-subtle: rgba(37, 99, 235, 0.08);
+    --accent-border: rgba(37, 99, 235, 0.24);
     --accent-text: #2563eb;
 
     --btn-primary-bg: #09090b;
@@ -115,6 +115,7 @@ body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     letter-spacing: -0.011em;
     transition: background-color 0.2s ease, color 0.2s ease;
+    overflow-x: hidden;
 }
 
 h1, h2, h3, h4, .font-display {
@@ -134,7 +135,22 @@ h1, h2, h3, h4, .font-display {
 /* Subtle Architectural Grid Background */
 .bg-architectural-grid {
     background-image: radial-gradient(var(--border-subtle) 1px, transparent 1px);
-    background-size: 24px 24px;
+    background-size: 22px 22px;
+}
+
+/* Responsive Viewport-Fitting Containers */
+.chat-viewport-fit {
+    height: calc(100dvh - 132px);
+    min-height: 440px;
+    max-height: 800px;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
 /* Ultra-slim Minimal Scrollbars */
@@ -312,6 +328,12 @@ h1, h2, h3, h4, .font-display {
     border: 1px solid var(--status-neutral-border);
 }
 
+.badge-simulated {
+    background-color: var(--accent-subtle);
+    color: var(--accent-text);
+    border: 1px solid var(--accent-border);
+}
+
 .status-dot {
     width: 6px;
     height: 6px;
@@ -325,6 +347,7 @@ h1, h2, h3, h4, .font-display {
 .badge-kismen-uyumlu .status-dot { background-color: var(--status-warn-dot); }
 .badge-uyumsuz .status-dot { background-color: var(--status-gap-dot); }
 .badge-belirtilmemis .status-dot { background-color: var(--status-neutral-dot); }
+.badge-simulated .status-dot { background-color: var(--accent-primary); }
 
 /* Dropzone Styling */
 .sm-dropzone {
@@ -349,6 +372,18 @@ tr.matrix-row {
 
 tr.matrix-row:hover {
     background-color: var(--bg-hover) !important;
+}
+
+/* Technical Parameter Delta Highlight Pill */
+.tech-param-pill {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 1px 5px;
+    border-radius: 4px;
+    background-color: var(--accent-subtle);
+    color: var(--accent-text);
+    border: 1px solid var(--accent-border);
 }
 
 /* Slide-over Drawer Smooth Hardware Transition */
@@ -406,7 +441,7 @@ tr.matrix-row:hover {
 }
 
 .chat-chip:hover {
-    border-color: var(--border-strong);
+    border-color: var(--accent-primary);
     color: var(--text-primary);
     background-color: var(--bg-hover);
 }
