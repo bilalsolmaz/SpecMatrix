@@ -1,6 +1,6 @@
 /**
- * SpecMatrix AI - Enterprise Mission Control Application Controller
- * Universal Specification, Contract & Proposal Compliance Intelligence Suite.
+ * SpecMatrix AI — Enterprise Compliance & Tender Verification Platform (v3.0)
+ * Architectural UI Controller · Dual-Theme Support · Zero-Hallucination RAG
  */
 
 // Global State
@@ -12,14 +12,17 @@ let currentSector = 'UNIVERSAL';
 let chatHistory = [];
 let allChunks = [];
 
-// DOM Elements
+// DOM Elements Registry
 const elements = {
-    // Top Bar & Navigation
+    // Header & Theme
     headerSectorSelect: document.getElementById('header-sector-select'),
     engineModeText: document.getElementById('engine-mode-text'),
+    engineStatusDot: document.getElementById('engine-status-dot'),
     headerKbCount: document.getElementById('header-kb-count'),
-    
-    // Tab Navigation Buttons
+    btnThemeToggle: document.getElementById('btn-theme-toggle'),
+    themeToggleIcon: document.getElementById('theme-toggle-icon'),
+
+    // Navigation Tabs
     navBtnMatrix: document.getElementById('nav-btn-matrix'),
     navBtnChat: document.getElementById('nav-btn-chat'),
     navBtnRebuttal: document.getElementById('nav-btn-rebuttal'),
@@ -31,7 +34,7 @@ const elements = {
     tabPaneRebuttal: document.getElementById('tab-pane-rebuttal'),
     tabPaneKb: document.getElementById('tab-pane-kb'),
 
-    // Tab 1: Matrix View
+    // Tab 1: Specification Input & Engine
     sampleSpecSelect: document.getElementById('sample-spec-select'),
     btnLoadSampleSpec: document.getElementById('btn-load-sample-spec'),
     tabBtnFile: document.getElementById('tab-btn-file'),
@@ -45,7 +48,7 @@ const elements = {
     btnStartAnalysis: document.getElementById('btn-start-analysis'),
     matrixEngineMode: document.getElementById('matrix-engine-mode'),
 
-    // Tab 1: Step 1 Proposal Upload & List
+    // Tab 1: Step 1 Proposal Documents
     matrixActiveDocsList: document.getElementById('matrix-active-docs-list'),
     matrixKbDropzone: document.getElementById('matrix-kb-dropzone'),
     matrixKbFileInput: document.getElementById('matrix-kb-file-input'),
@@ -53,20 +56,21 @@ const elements = {
     btnMatrixUploadKb: document.getElementById('btn-matrix-upload-kb'),
     btnMatrixLoadDemoKb: document.getElementById('btn-matrix-load-demo-kb'),
 
-    // Risk Dial
+    // Risk Gauge
     riskPctValue: document.getElementById('risk-pct-value'),
     riskLevelBadge: document.getElementById('risk-level-badge'),
     riskExecSummary: document.getElementById('risk-exec-summary'),
     riskGapsCount: document.getElementById('risk-gaps-count'),
     riskDialBorder: document.getElementById('risk-dial-border'),
+    riskGaugeCircle: document.getElementById('risk-gauge-circle'),
 
-    // Progress
+    // Progress Bar
     analysisProgressPanel: document.getElementById('analysis-progress-panel'),
     progressStepText: document.getElementById('progress-step-text'),
     progressPct: document.getElementById('progress-pct'),
     progressBarFill: document.getElementById('progress-bar-fill'),
 
-    // Results KPI Cards
+    // KPI Cards
     resultsSection: document.getElementById('results-section'),
     kpiTotal: document.getElementById('kpi-total'),
     kpiTam: document.getElementById('kpi-tam'),
@@ -78,14 +82,14 @@ const elements = {
     kpiBelirtilmemis: document.getElementById('kpi-belirtilmemis'),
     kpiBelirtilmemisPct: document.getElementById('kpi-belirtilmemis-pct'),
 
-    // Table & Filter
+    // Matrix Table & Filters
     matrixTbody: document.getElementById('matrix-tbody'),
     tableEmptyState: document.getElementById('table-empty-state'),
     matrixSearch: document.getElementById('matrix-search'),
     filterButtons: document.querySelectorAll('.filter-btn'),
     btnExportExcel: document.getElementById('btn-export-excel'),
 
-    // Drawer Modal
+    // Slide-Over Evidence Drawer
     evidenceDrawer: document.getElementById('evidence-drawer'),
     drawerBackdrop: document.getElementById('drawer-backdrop'),
     drawerCloseBtn: document.getElementById('drawer-close-btn'),
@@ -121,7 +125,7 @@ const elements = {
     btnCopyRebuttal: document.getElementById('btn-copy-rebuttal'),
     btnDownloadRebuttal: document.getElementById('btn-download-rebuttal'),
 
-    // Tab 4: Knowledge Base Explorer
+    // Tab 4: Knowledge Base
     kbDropzone: document.getElementById('kb-dropzone'),
     kbFileInput: document.getElementById('kb-file-input'),
     btnLoadDemoKb: document.getElementById('btn-load-demo-kb'),
@@ -136,6 +140,7 @@ const elements = {
 
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
+    setupThemeToggle();
     initLucide();
     setupNavigation();
     setupSectorPresets();
@@ -151,6 +156,39 @@ function initLucide() {
     if (window.lucide) {
         lucide.createIcons();
     }
+}
+
+// --- 0. THEME CONTROLLER (DARK / LIGHT) ---
+function setupThemeToggle() {
+    const savedTheme = localStorage.getItem('specmatrix-theme') || 'dark';
+    applyTheme(savedTheme);
+
+    if (elements.btnThemeToggle) {
+        elements.btnThemeToggle.addEventListener('click', () => {
+            const isLight = document.documentElement.classList.contains('light');
+            const nextTheme = isLight ? 'dark' : 'light';
+            applyTheme(nextTheme);
+            localStorage.setItem('specmatrix-theme', nextTheme);
+        });
+    }
+}
+
+function applyTheme(theme) {
+    const root = document.documentElement;
+    if (theme === 'light') {
+        root.classList.remove('dark');
+        root.classList.add('light');
+        if (elements.btnThemeToggle) {
+            elements.btnThemeToggle.innerHTML = '<i data-lucide="moon" class="w-4 h-4 text-[var(--text-secondary)]"></i>';
+        }
+    } else {
+        root.classList.remove('light');
+        root.classList.add('dark');
+        if (elements.btnThemeToggle) {
+            elements.btnThemeToggle.innerHTML = '<i data-lucide="sun" class="w-4 h-4 text-[var(--text-secondary)]"></i>';
+        }
+    }
+    initLucide();
 }
 
 // --- 1. TAB NAVIGATION CONTROLLER ---
@@ -195,7 +233,7 @@ function setupSectorPresets() {
             else elements.sampleSpecSelect.value = 'DEFENSE_IT';
         }
         updateChatPromptChips();
-        showToast(`Sektörel profil güncellendi: ${getSectorLabel(currentSector)}`, 'info');
+        showToast(`Sektör profili: ${getSectorLabel(currentSector)}`, 'info');
     });
 
     if (elements.sampleSpecSelect) {
@@ -213,9 +251,9 @@ function getSectorLabel(sector) {
     const map = {
         'UNIVERSAL': 'Tüm Sektörler (Evrensel)',
         'DEFENSE_IT': 'Savunma & Siber Güvenlik',
-        'HEALTHCARE_MEDTECH': 'Sağlık & Medikal',
-        'CONSTRUCTION_HVAC': 'İnşaat & Tesisat',
-        'CONTRACTS_LEGAL': 'Hukuk & Sözleşmeler'
+        'HEALTHCARE_MEDTECH': 'Sağlık & Medikal Sistemler',
+        'CONSTRUCTION_HVAC': 'İnşaat & Mekanik Tesisat',
+        'CONTRACTS_LEGAL': 'Hukuk & İhale Sözleşmeleri'
     };
     return map[sector] || sector;
 }
@@ -229,16 +267,19 @@ async function fetchSystemStatus() {
 
         if (elements.engineModeText) {
             if (data.llm_provider === 'ollama' && data.ollama && data.ollama.available) {
-                elements.engineModeText.textContent = `🟢 Ollama: ${data.ollama.selected_model || 'llama3.2:3b'} (Aktif)`;
+                elements.engineModeText.textContent = `Ollama · ${data.ollama.selected_model || 'llama3.2:3b'}`;
+                if (elements.engineStatusDot) elements.engineStatusDot.className = 'w-2 h-2 rounded-full bg-emerald-500';
             } else if (data.llm_provider === 'openai') {
-                elements.engineModeText.textContent = `OpenAI: ${data.model}`;
+                elements.engineModeText.textContent = `OpenAI · ${data.model}`;
+                if (elements.engineStatusDot) elements.engineStatusDot.className = 'w-2 h-2 rounded-full bg-blue-500';
             } else {
-                elements.engineModeText.textContent = '🟡 Kural Motoru (Ollama Çevrimdışı)';
+                elements.engineModeText.textContent = 'Kural Motoru · Aktif';
+                if (elements.engineStatusDot) elements.engineStatusDot.className = 'w-2 h-2 rounded-full bg-amber-500';
             }
         }
 
         if (elements.headerKbCount && data.knowledge_base) {
-            elements.headerKbCount.textContent = `${data.knowledge_base.total_documents} Doküman (${data.knowledge_base.total_chunks} Parça)`;
+            elements.headerKbCount.textContent = `${data.knowledge_base.total_documents} Doküman · ${data.knowledge_base.total_chunks} Blok`;
         }
 
         fetchKbStats();
@@ -253,31 +294,29 @@ async function fetchKbStats() {
         if (!resp.ok) return;
         const stats = await resp.json();
 
-        // Render to Tab 4 explorer tags
+        const renderDocPill = (d) => `
+            <span class="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-md bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)] text-[11px] font-mono">
+                <i data-lucide="file-text" class="w-3 h-3 text-blue-500 shrink-0"></i>
+                <span class="truncate max-w-[180px]">${escapeHtml(d)}</span>
+            </span>
+        `;
+
         if (elements.kbDocsTags) {
             if (stats.documents && stats.documents.length > 0) {
-                elements.kbDocsTags.innerHTML = stats.documents.map(d => `
-                    <span class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-md bg-slate-800 border border-slate-700 text-sky-300 text-xs font-mono">
-                        <span>📄 ${escapeHtml(d)}</span>
-                    </span>
-                `).join('');
+                elements.kbDocsTags.innerHTML = stats.documents.map(renderDocPill).join('');
             } else {
-                elements.kbDocsTags.innerHTML = '<span class="text-slate-500 text-xs">Henüz doküman yüklenmedi.</span>';
+                elements.kbDocsTags.innerHTML = '<span class="text-[var(--text-muted)] text-xs">Henüz doküman yüklenmedi.</span>';
             }
         }
 
-        // Render to Tab 1 active proposals list
         if (elements.matrixActiveDocsList) {
             if (stats.documents && stats.documents.length > 0) {
-                elements.matrixActiveDocsList.innerHTML = stats.documents.map(d => `
-                    <span class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-md bg-slate-900 border border-slate-700 text-sky-300 text-xs font-mono">
-                        <span>📄 ${escapeHtml(d)}</span>
-                    </span>
-                `).join('');
+                elements.matrixActiveDocsList.innerHTML = stats.documents.map(renderDocPill).join('');
             } else {
-                elements.matrixActiveDocsList.innerHTML = '<span class="text-amber-400 text-xs font-medium">⚠️ Henüz teklif/ürün dokümanı yüklenmedi. Lütfen yukarıdan yükleyin veya Demo Ürünler\'i seçin.</span>';
+                elements.matrixActiveDocsList.innerHTML = '<span class="text-amber-500 text-xs font-medium">Henüz referans ürün dokümanı yüklenmedi.</span>';
             }
         }
+        initLucide();
     } catch (e) {
         console.error('Failed to fetch KB stats:', e);
     }
@@ -285,33 +324,33 @@ async function fetchKbStats() {
 
 // --- 4. MATRIX & GAP AUDIT CONTROLLER ---
 function setupMatrixAudit() {
-    // Tab switch inside Step 1 (Upload File vs Text)
+    // Segmented Tab Switch: File vs Raw Text
     if (elements.tabBtnFile && elements.tabBtnText) {
         elements.tabBtnFile.addEventListener('click', () => {
-            elements.tabBtnFile.className = 'py-2 px-3 border-b-2 border-sky-400 text-sky-400 font-bold focus:outline-none';
-            elements.tabBtnText.className = 'py-2 px-3 text-slate-400 hover:text-white border-b-2 border-transparent focus:outline-none';
+            elements.tabBtnFile.className = 'px-2.5 py-1 rounded-md bg-[var(--bg-surface)] text-[var(--text-primary)] font-medium shadow-sm transition-all';
+            elements.tabBtnText.className = 'px-2.5 py-1 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all';
             elements.tabPaneFile.classList.remove('hidden');
             elements.tabPaneText.classList.add('hidden');
         });
 
         elements.tabBtnText.addEventListener('click', () => {
-            elements.tabBtnText.className = 'py-2 px-3 border-b-2 border-sky-400 text-sky-400 font-bold focus:outline-none';
-            elements.tabBtnFile.className = 'py-2 px-3 text-slate-400 hover:text-white border-b-2 border-transparent focus:outline-none';
+            elements.tabBtnText.className = 'px-2.5 py-1 rounded-md bg-[var(--bg-surface)] text-[var(--text-primary)] font-medium shadow-sm transition-all';
+            elements.tabBtnFile.className = 'px-2.5 py-1 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all';
             elements.tabPaneText.classList.remove('hidden');
             elements.tabPaneFile.classList.add('hidden');
         });
     }
 
-    // Dropzone for Proposal / KB File on Tab 1
+    // Proposal KB File Dropzone
     if (elements.matrixKbDropzone && elements.matrixKbFileInput) {
         elements.matrixKbDropzone.addEventListener('click', () => elements.matrixKbFileInput.click());
         elements.matrixKbFileInput.addEventListener('change', () => {
             if (elements.matrixKbFileInput.files.length > 0) {
                 const file = elements.matrixKbFileInput.files[0];
                 if (elements.matrixKbFileLabel) {
-                    elements.matrixKbFileLabel.textContent = `Seçildi: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                    elements.matrixKbFileLabel.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
                 }
-                elements.matrixKbDropzone.classList.add('border-sky-500', 'bg-slate-850');
+                elements.matrixKbDropzone.classList.add('file-selected');
             }
         });
     }
@@ -326,7 +365,7 @@ function setupMatrixAudit() {
             const formData = new FormData();
             formData.append('file', file);
             try {
-                showToast(`'${file.name}' yükleniyor ve indeksleniyor...`, 'info');
+                showToast(`'${file.name}' indeksleniyor...`, 'info');
                 const resp = await fetch('/api/knowledge-base/upload', {
                     method: 'POST',
                     body: formData
@@ -335,10 +374,10 @@ function setupMatrixAudit() {
                     const err = await resp.json();
                     throw new Error(err.detail || 'Yükleme başarısız');
                 }
-                showToast(`'${file.name}' teklif dokümanı başarıyla Bilgi Bankasına eklendi!`, 'success');
+                showToast(`'${file.name}' bilgi bankasına eklendi.`, 'success');
                 elements.matrixKbFileInput.value = '';
-                if (elements.matrixKbFileLabel) elements.matrixKbFileLabel.textContent = 'Teklif Dosyası / Datasheet Seçin';
-                if (elements.matrixKbDropzone) elements.matrixKbDropzone.classList.remove('border-sky-500', 'bg-slate-850');
+                if (elements.matrixKbFileLabel) elements.matrixKbFileLabel.textContent = 'Yeni Teklif / Katalog Seçin';
+                if (elements.matrixKbDropzone) elements.matrixKbDropzone.classList.remove('file-selected');
                 fetchSystemStatus();
                 loadKnowledgeBaseChunks();
             } catch (e) {
@@ -350,10 +389,10 @@ function setupMatrixAudit() {
     if (elements.btnMatrixLoadDemoKb) {
         elements.btnMatrixLoadDemoKb.addEventListener('click', async () => {
             try {
-                showToast('Varsayılan teklif ürün dokümanları yükleniyor...', 'info');
+                showToast('Örnek ürün katalogları yükleniyor...', 'info');
                 const resp = await fetch('/api/knowledge-base/load-sample', { method: 'POST' });
-                if (!resp.ok) throw new Error('Demo ürünleri yükleme başarısız');
-                showToast('Demo teklif dokümanları başarıyla Bilgi Bankasına yüklendi!', 'success');
+                if (!resp.ok) throw new Error('Örnek katalogları yükleme başarısız');
+                showToast('Örnek teklif dokümanları bilgi bankasına eklendi.', 'success');
                 fetchSystemStatus();
                 loadKnowledgeBaseChunks();
             } catch (e) {
@@ -362,29 +401,27 @@ function setupMatrixAudit() {
         });
     }
 
-    // Dropzone for Spec File
+    // Specification File Dropzone
     if (elements.specDropzone && elements.specFileInput) {
         elements.specDropzone.addEventListener('click', () => elements.specFileInput.click());
         elements.specFileInput.addEventListener('change', () => {
             if (elements.specFileInput.files.length > 0) {
                 const file = elements.specFileInput.files[0];
-                elements.specFileLabel.textContent = `Seçildi: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
-                elements.specDropzone.classList.add('border-sky-500', 'bg-slate-850');
+                elements.specFileLabel.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                elements.specDropzone.classList.add('file-selected');
             }
         });
     }
 
-    // Fast Sample Spec Load & Audit
     if (elements.btnLoadSampleSpec) {
         elements.btnLoadSampleSpec.addEventListener('click', handleAnalyzeSampleSpec);
     }
 
-    // Uploaded Spec Audit Button
     if (elements.btnStartAnalysis) {
         elements.btnStartAnalysis.addEventListener('click', handleAnalyzeUploadedSpec);
     }
 
-    // Filters
+    // Filter Buttons
     elements.filterButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             elements.filterButtons.forEach(b => b.classList.remove('active'));
@@ -402,7 +439,7 @@ function setupMatrixAudit() {
         });
     }
 
-    // Export Excel
+    // Excel Export
     if (elements.btnExportExcel) {
         elements.btnExportExcel.addEventListener('click', handleExportExcel);
     }
@@ -412,13 +449,14 @@ function setupMatrixAudit() {
     if (elements.drawerBottomClose) elements.drawerBottomClose.addEventListener('click', closeEvidenceDrawer);
     if (elements.drawerBackdrop) elements.drawerBackdrop.addEventListener('click', closeEvidenceDrawer);
 
-    // Jump to Rebuttal Button in Drawer
+    // Drawer Jump to Rebuttal
     if (elements.btnDrawerCreateRebuttal) {
         elements.btnDrawerCreateRebuttal.addEventListener('click', () => {
             if (!activeClause) return;
+            const targetClause = activeClause;
             closeEvidenceDrawer();
             switchTab('rebuttal');
-            populateRebuttalClause(activeClause);
+            populateRebuttalClause(targetClause);
         });
     }
 }
@@ -427,7 +465,6 @@ async function handleAnalyzeSampleSpec() {
     const useMock = elements.matrixEngineMode ? (elements.matrixEngineMode.value === 'mock') : true;
     startProgressSimulation(useMock);
 
-    // Smooth scroll to progress panel immediately on button click
     if (elements.analysisProgressPanel) {
         elements.analysisProgressPanel.classList.remove('hidden');
         elements.analysisProgressPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -451,7 +488,7 @@ async function handleAnalyzeSampleSpec() {
             populateRebuttalClauseDropdown();
             fetchRiskScore();
             fetchSystemStatus();
-            showToast('Şartname analizi ve denetim matrisi başarıyla tamamlandı.', 'success');
+            showToast('Uyumluluk matrisi ve kanıt doğrulaması tamamlandı.', 'success');
         });
     } catch (e) {
         hideProgress();
@@ -464,14 +501,13 @@ async function handleAnalyzeUploadedSpec() {
     const rawText = elements.specRawTextarea.value.trim();
 
     if (!hasFile && !rawText) {
-        showToast('Lütfen bir şartname dosyası yükleyin veya şartname metnini yapıştırın.', 'error');
+        showToast('Lütfen bir şartname dosyası seçin veya şartname maddelerini yapıştırın.', 'error');
         return;
     }
 
     const useMock = elements.matrixEngineMode ? (elements.matrixEngineMode.value === 'mock') : true;
     startProgressSimulation(useMock);
 
-    // Smooth scroll to progress panel immediately on button click
     if (elements.analysisProgressPanel) {
         elements.analysisProgressPanel.classList.remove('hidden');
         elements.analysisProgressPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -483,7 +519,7 @@ async function handleAnalyzeUploadedSpec() {
     } else {
         formData.append('raw_text', rawText);
     }
-    formData.append('spec_name', hasFile ? elements.specFileInput.files[0].name : 'Özel_Şartname');
+    formData.append('spec_name', hasFile ? elements.specFileInput.files[0].name : 'Ozel_Teknik_Sartname');
     formData.append('force_mock', useMock);
 
     try {
@@ -504,7 +540,7 @@ async function handleAnalyzeUploadedSpec() {
             populateRebuttalClauseDropdown();
             fetchRiskScore();
             fetchSystemStatus();
-            showToast('Yüklenen şartname başarıyla denetlendi.', 'success');
+            showToast('Şartname başarıyla denetlendi.', 'success');
         });
     } catch (e) {
         hideProgress();
@@ -536,22 +572,33 @@ async function fetchRiskScore() {
         if (!resp.ok) return;
         const risk = await resp.json();
 
-        if (elements.riskPctValue) elements.riskPctValue.textContent = `%${risk.weighted_compliance_pct}`;
-        if (elements.riskGapsCount) elements.riskGapsCount.textContent = `${risk.critical_gaps_count} Kritik Uyumsuzluk`;
+        const pct = Number(risk.weighted_compliance_pct || 0);
+        if (elements.riskPctValue) elements.riskPctValue.textContent = `%${pct}`;
+        if (elements.riskGapsCount) elements.riskGapsCount.textContent = `${risk.critical_gaps_count} Madde`;
         if (elements.riskExecSummary) elements.riskExecSummary.textContent = risk.executive_summary;
 
+        // Animate SVG Circular Ring (circumference = 2 * pi * 42 = 263.89)
+        const circumference = 263.89;
+        const offset = circumference - (Math.min(100, Math.max(0, pct)) / 100) * circumference;
+
+        let strokeColor = '#10b981';
+        let badgeClass = 'badge-tam-uyumlu';
+        if (risk.risk_level === 'ORTA') {
+            strokeColor = '#f59e0b';
+            badgeClass = 'badge-kismen-uyumlu';
+        } else if (risk.risk_level === 'YÜKSEK' || risk.risk_level === 'KRİTİK') {
+            strokeColor = '#f43f5e';
+            badgeClass = 'badge-uyumsuz';
+        }
+
+        if (elements.riskGaugeCircle) {
+            elements.riskGaugeCircle.style.strokeDashoffset = `${offset}`;
+            elements.riskGaugeCircle.setAttribute('stroke', strokeColor);
+        }
+
         if (elements.riskLevelBadge) {
-            elements.riskLevelBadge.textContent = risk.risk_level;
-            if (risk.risk_level === 'DÜŞÜK') {
-                elements.riskLevelBadge.className = 'text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30';
-                elements.riskDialBorder.className = 'w-32 h-32 rounded-full border-8 border-emerald-500/60 flex flex-col items-center justify-center';
-            } else if (risk.risk_level === 'ORTA') {
-                elements.riskLevelBadge.className = 'text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30';
-                elements.riskDialBorder.className = 'w-32 h-32 rounded-full border-8 border-amber-500/60 flex flex-col items-center justify-center';
-            } else {
-                elements.riskLevelBadge.className = 'text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-400/30';
-                elements.riskDialBorder.className = 'w-32 h-32 rounded-full border-8 border-rose-500/60 flex flex-col items-center justify-center';
-            }
+            elements.riskLevelBadge.textContent = `${risk.risk_level} RİSK`;
+            elements.riskLevelBadge.className = `text-[10px] font-mono font-semibold uppercase px-2 py-0.5 rounded ${badgeClass}`;
         }
     } catch (e) {
         console.error('Failed to fetch risk score:', e);
@@ -586,23 +633,28 @@ function renderMatrixTable() {
     elements.tableEmptyState.classList.add('hidden');
     elements.matrixTbody.innerHTML = items.map((item, idx) => {
         const badge = getStatusBadge(item.status);
-        const productInfo = item.matched_product ? `${item.matched_product} <span class="text-slate-500">(${item.matched_doc || ''})</span>` : '—';
+        const productInfo = item.matched_product
+            ? `<div class="font-medium text-[var(--text-primary)]">${escapeHtml(item.matched_product)}</div><div class="text-[11px] font-mono text-[var(--text-muted)] truncate max-w-[190px]">${escapeHtml(item.matched_doc || '')}</div>`
+            : '<span class="text-[var(--text-muted)]">—</span>';
 
         return `
-            <tr class="matrix-row border-b border-slate-800/60 hover:bg-slate-850/80 transition-colors" data-idx="${idx}">
-                <td class="py-3 px-4 font-mono font-bold text-sky-400">${escapeHtml(item.clause_id)}</td>
-                <td class="py-3 px-4 text-slate-400">${escapeHtml(item.category || 'Genel')}</td>
-                <td class="py-3 px-4 text-slate-200 leading-relaxed font-sans">${escapeHtml(item.clause_text)}</td>
-                <td class="py-3 px-4 text-center">
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold ${badge.cssClass}">
-                        ${badge.label}
+            <tr class="matrix-row" data-idx="${idx}">
+                <td class="py-3.5 px-4 font-mono font-semibold text-[var(--text-primary)] whitespace-nowrap">${escapeHtml(item.clause_id)}</td>
+                <td class="py-3.5 px-4">
+                    <span class="inline-block text-[11px] px-2 py-0.5 rounded bg-[var(--bg-subtle)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">${escapeHtml(item.category || 'Genel')}</span>
+                </td>
+                <td class="py-3.5 px-4 text-[var(--text-primary)] leading-relaxed">${escapeHtml(item.clause_text)}</td>
+                <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-mono font-medium ${badge.cssClass}">
+                        <span class="status-dot"></span>
+                        <span>${badge.label}</span>
                     </span>
                 </td>
-                <td class="py-3 px-4 text-slate-300 text-xs">${productInfo}</td>
-                <td class="py-3 px-4 text-center">
-                    <button class="btn-inspect-clause bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1 rounded-lg text-xs font-semibold border border-slate-700 hover:border-slate-600 transition-colors inline-flex items-center space-x-1" data-id="${item.clause_id}">
-                        <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                <td class="py-3.5 px-4 text-xs">${productInfo}</td>
+                <td class="py-3.5 px-4 text-right whitespace-nowrap">
+                    <button type="button" class="btn-inspect-clause sm-btn-secondary px-2.5 py-1 text-xs inline-flex items-center space-x-1" data-id="${escapeHtml(item.clause_id)}">
                         <span>Kanıt</span>
+                        <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-[var(--text-muted)]"></i>
                     </button>
                 </td>
             </tr>
@@ -611,7 +663,6 @@ function renderMatrixTable() {
 
     initLucide();
 
-    // Attach click events
     elements.matrixTbody.querySelectorAll('.matrix-row').forEach(row => {
         row.addEventListener('click', (e) => {
             const btn = e.target.closest('.btn-inspect-clause');
@@ -641,30 +692,28 @@ function openEvidenceDrawer(item) {
     const badge = getStatusBadge(item.status);
 
     elements.drawerClauseId.textContent = item.clause_id;
-    elements.drawerCategory.textContent = item.category || 'Teknik Kriter';
+    elements.drawerCategory.textContent = item.category || 'Teknik İster';
     elements.drawerStatusText.textContent = badge.label;
     elements.drawerStatusCard.className = `p-4 rounded-xl border flex items-center justify-between ${badge.cssClass}`;
 
-    let iconName = 'help-circle';
-    if (item.status === 'TAM_UYUMLU') iconName = 'check-circle';
-    else if (item.status === 'KISMEN_UYUMLU') iconName = 'alert-triangle';
+    let iconName = 'minus-circle';
+    if (item.status === 'TAM_UYUMLU') iconName = 'check-circle-2';
+    else if (item.status === 'KISMEN_UYUMLU') iconName = 'alert-circle';
     else if (item.status === 'UYUMSUZ') iconName = 'x-circle';
-    elements.drawerStatusIcon.innerHTML = `<i data-lucide="${iconName}" class="w-6 h-6"></i>`;
+    elements.drawerStatusIcon.innerHTML = `<i data-lucide="${iconName}" class="w-5 h-5"></i>`;
 
     elements.drawerClauseText.textContent = item.clause_text;
     elements.drawerMatchedProduct.textContent = item.matched_product || 'Eşleşen Ürün Yok';
-    elements.drawerDocPage.textContent = item.page_or_section ? `${item.matched_doc || ''} (${item.page_or_section})` : (item.matched_doc || '—');
+    elements.drawerDocPage.textContent = item.page_or_section ? `${item.matched_doc || ''} · ${item.page_or_section}` : (item.matched_doc || '—');
 
     if (item.exact_quote) {
         elements.drawerExactQuote.textContent = `"${item.exact_quote}"`;
-        elements.drawerExactQuote.parentElement.classList.remove('hidden');
     } else {
-        elements.drawerExactQuote.textContent = 'Bu madde için doğrudan bir metin alıntısı bulunmamaktadır.';
+        elements.drawerExactQuote.textContent = 'Bu madde için referans dokümanlarda doğrudan bir kanıt ifadesi yer almamaktadır.';
     }
 
     elements.drawerExplanation.textContent = item.explanation || '—';
 
-    // Show/hide Rebuttal Jump Box
     const rebuttalJump = document.getElementById('drawer-rebuttal-jump-box');
     if (rebuttalJump) {
         if (item.status === 'UYUMSUZ' || item.status === 'KISMEN_UYUMLU') {
@@ -675,48 +724,52 @@ function openEvidenceDrawer(item) {
     }
 
     elements.evidenceDrawer.classList.remove('hidden');
-    elements.evidenceDrawer.classList.add('active');
+    requestAnimationFrame(() => {
+        elements.evidenceDrawer.classList.add('active');
+    });
     initLucide();
 }
 
 function closeEvidenceDrawer() {
-    elements.evidenceDrawer.classList.add('hidden');
     elements.evidenceDrawer.classList.remove('active');
+    setTimeout(() => {
+        elements.evidenceDrawer.classList.add('hidden');
+    }, 240);
     activeClause = null;
 }
 
 async function handleExportExcel() {
     if (!currentAnalysis) {
-        showToast('İndirilecek analiz bulunamadı.', 'error');
+        showToast('İndirilecek aktif bir analiz bulunamadı.', 'error');
         return;
     }
 
     try {
-        showToast('Excel raporu hazırlanıyor...', 'info');
+        showToast('Kurumsal Excel raporu oluşturuluyor...', 'info');
         const resp = await fetch('/api/export/excel', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(currentAnalysis)
         });
 
-        if (!resp.ok) throw new Error('Excel indirme başarısız.');
+        if (!resp.ok) throw new Error('Excel dışa aktarma başarısız.');
 
         const blob = await resp.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `Compliance_Matrix_${currentAnalysis.spec_name.replace(/\.[^/.]+$/, '')}.xlsx`;
+        a.download = `SpecMatrix_Uyumluluk_${currentAnalysis.spec_name.replace(/\.[^/.]+$/, '')}.xlsx`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
-        showToast('Excel Uyumluluk Matrisi başarıyla indirildi.', 'success');
+        showToast('Excel Uyumluluk Matrisi indirildi.', 'success');
     } catch (e) {
         showToast(e.message, 'error');
     }
 }
 
-// --- 5. PROGRESS BAR SIMULATION ---
+// --- 5. PROGRESS BAR CONTROLLER ---
 let progressTimer = null;
 function startProgressSimulation(isFastMode = true) {
     if (!elements.analysisProgressPanel) return;
@@ -728,7 +781,7 @@ function startProgressSimulation(isFastMode = true) {
         let pct = 35;
         elements.progressPct.textContent = `${pct}%`;
         elements.progressBarFill.style.width = `${pct}%`;
-        elements.progressStepText.textContent = '1/3 Şartname maddeleri ayrıştırılıyor ve teklif dokümanlarıyla eşleştiriliyor...';
+        elements.progressStepText.textContent = '1/3 Şartname maddeleri ayrıştırılıyor ve hibrit arama (ChromaDB + BM25) çalıştırılıyor...';
 
         progressTimer = setInterval(() => {
             if (pct < 85) {
@@ -736,14 +789,14 @@ function startProgressSimulation(isFastMode = true) {
                 if (pct > 85) pct = 85;
                 elements.progressPct.textContent = `${pct}%`;
                 elements.progressBarFill.style.width = `${pct}%`;
-                elements.progressStepText.textContent = '2/3 Doğrulanmış denetim kuralları çalıştırılıyor ve matris derleniyor...';
+                elements.progressStepText.textContent = '2/3 Sayısal eşikler ve kanıt alıntıları doğrulanıyor...';
             }
         }, 70);
     } else {
         let pct = 15;
         elements.progressPct.textContent = `${pct}%`;
         elements.progressBarFill.style.width = `${pct}%`;
-        elements.progressStepText.textContent = '1/4 Şartname ayrıştırıldı. Yerel Ollama (llama3.2:3b) maddeleri derinlemesine denetliyor... Lütfen bekleyiniz.';
+        elements.progressStepText.textContent = '1/4 Şartname ayrıştırıldı. Yerel Ollama (llama3.2:3b) maddeleri paralel denetliyor...';
 
         progressTimer = setInterval(() => {
             if (pct < 88) {
@@ -754,7 +807,7 @@ function startProgressSimulation(isFastMode = true) {
                 if (pct >= 30 && pct < 60) {
                     elements.progressStepText.textContent = '2/4 Yerel model doküman alıntılarını ve teknik eşikleri kontrol ediyor...';
                 } else if (pct >= 60) {
-                    elements.progressStepText.textContent = '3/4 Kanıt alıntıları ve uyumluluk matrisi derleniyor...';
+                    elements.progressStepText.textContent = '3/4 Kanıt doğrulama kuralları ve uyumluluk matrisi derleniyor...';
                 }
             }
         }, 800);
@@ -765,14 +818,14 @@ function finishProgressSimulation(callback) {
     clearInterval(progressTimer);
     elements.progressPct.textContent = '100%';
     elements.progressBarFill.style.width = '100%';
-    elements.progressStepText.textContent = 'Analiz başarıyla tamamlandı! (%100)';
+    elements.progressStepText.textContent = 'Denetim tamamlandı (100%)';
     setTimeout(() => {
         elements.analysisProgressPanel.classList.add('hidden');
         if (callback) callback();
         if (elements.resultsSection) {
             elements.resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-    }, 350);
+    }, 320);
 }
 
 function hideProgress() {
@@ -792,10 +845,7 @@ async function executeChatQuery(queryText = null) {
         elements.chatInputText.value = '';
     }
 
-    // Render user message
     appendChatMessage('user', query);
-
-    // Render loading assistant message
     const loadingId = appendChatLoading();
 
     try {
@@ -817,20 +867,18 @@ async function executeChatQuery(queryText = null) {
 
         if (!resp.ok) {
             const err = await resp.json().catch(() => ({}));
-            throw new Error(err.detail || 'Chat API yanıt vermedi.');
+            throw new Error(err.detail || 'Doküman asistanı yanıt vermedi.');
         }
         const data = await resp.json();
 
-        // Replace loading with real response
         removeChatLoading(loadingId);
         appendChatMessage('assistant', data.answer, data.citations, data.suggested_followups, data.model);
 
-        // Update chat history
         chatHistory.push({ role: 'user', content: query });
         chatHistory.push({ role: 'assistant', content: data.answer });
     } catch (e) {
         removeChatLoading(loadingId);
-        appendChatMessage('assistant', `Sorunuz işlenirken bir hata oluştu: ${e.message}`);
+        appendChatMessage('assistant', `Sorgu işlenirken hata oluştu: ${e.message}`);
     }
 }
 
@@ -864,13 +912,13 @@ function setupChatCopilot() {
         elements.btnClearChat.addEventListener('click', () => {
             chatHistory = [];
             elements.chatMessagesContainer.innerHTML = `
-                <div class="flex items-start space-x-3">
-                    <div class="w-8 h-8 rounded-lg bg-sky-600/30 border border-sky-400/40 flex items-center justify-center text-sky-400 shrink-0 mt-0.5">
-                        <i data-lucide="bot" class="w-4 h-4"></i>
+                <div class="flex items-start space-x-3.5">
+                    <div class="w-7 h-7 rounded-md bg-[var(--bg-elevated)] border border-[var(--border-strong)] flex items-center justify-center text-[var(--text-primary)] shrink-0 mt-0.5">
+                        <i data-lucide="terminal" class="w-3.5 h-3.5"></i>
                     </div>
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl rounded-tl-sm p-4 max-w-2xl text-xs sm:text-sm text-slate-200 leading-relaxed space-y-2 shadow-md">
-                        <p class="font-bold text-white">Sohbet sıfırlandı. Yeni bir soru sorabilirsiniz!</p>
-                        <p class="text-xs text-slate-400">Yüklenen tüm ürün dokümanları ve şartname kriterleri hakkında anlık bilgi alabilirsiniz.</p>
+                    <div class="sm-card p-4 max-w-2xl text-xs sm:text-[13px] text-[var(--text-primary)] leading-relaxed space-y-1.5">
+                        <p class="font-semibold">Oturum sıfırlandı.</p>
+                        <p class="text-[var(--text-secondary)]">İndekslenmiş ürün dokümanları ve şartname maddeleri hakkında yeni bir soru sorabilirsiniz.</p>
                     </div>
                 </div>
             `;
@@ -887,26 +935,26 @@ function updateChatPromptChips() {
     let chips = [];
     if (currentSector === 'HEALTHCARE_MEDTECH') {
         chips = [
-            'VitaPulse V8 monitörün batarya kesintisiz çalışma süresi nedir?',
+            'VitaPulse V8 monitörün batarya çalışma süresi kaç saattir?',
             'Cihazın CE MDR ve ISO 13485 sertifikasyon durumu nedir?',
-            'Şartnamedeki 6 saat batarya açığını zeyilname ile nasıl savunabiliriz?'
+            'Şartnamedeki 6 saat batarya şartı için nasıl zeyilname talep edebiliriz?'
         ];
     } else if (currentSector === 'CONSTRUCTION_HVAC') {
         chips = [
-            'AeroFlow Pro santralin nominal hava debisi ve mekanik sızdırmazlık sınıfı nedir?',
+            'AeroFlow Pro santralin nominal hava debisi ve sızdırmazlık sınıfı nedir?',
             'Santral EN 1886 D1 ve L1 standartlarını karşılıyor mu?',
-            'Havalimanı şartnamesindeki 20.000 m³/h açığı için itiraz metni hazırla'
+            'Havalimanı şartnamesindeki 20.000 m³/h farkı için itiraz stratejisi nedir?'
         ];
     } else {
         chips = [
-            'Bu şartnamede elenmemize yol açacak en riskli 2 madde nedir?',
+            'Bu şartnamede elenmemize yol açabilecek uyumsuz maddeler hangileri?',
             'AegisGuard X-500 cihazının çalışma sıcaklığı ve iklim dayanımı nedir?',
-            '40 Gbps verim açığımızı zeyilname ile nasıl savunabiliriz?'
+            '40 Gbps verim farkını zeyilname ile nasıl savunabiliriz?'
         ];
     }
 
     elements.chatPromptChips.innerHTML = chips.map(q => `
-        <button class="chat-chip bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1 rounded-full border border-slate-700 transition-colors shrink-0 text-xs">
+        <button type="button" class="chat-chip px-3 py-1 rounded-md shrink-0 text-xs">
             ${escapeHtml(q)}
         </button>
     `).join('');
@@ -915,8 +963,7 @@ function updateChatPromptChips() {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            const text = btn.textContent.trim();
-            executeChatQuery(text);
+            executeChatQuery(btn.textContent.trim());
         });
     });
 }
@@ -924,27 +971,25 @@ function updateChatPromptChips() {
 function appendChatMessage(role, text, citations = [], followups = [], model = null) {
     const isUser = role === 'user';
     const msgDiv = document.createElement('div');
-    msgDiv.className = `flex items-start space-x-3 ${isUser ? 'justify-end' : ''}`;
+    msgDiv.className = `flex items-start space-x-3.5 ${isUser ? 'justify-end' : ''}`;
 
     if (isUser) {
         msgDiv.innerHTML = `
-            <div class="bg-gradient-to-r from-sky-600 to-indigo-600 text-white rounded-2xl rounded-tr-sm p-4 max-w-xl text-xs sm:text-sm leading-relaxed shadow-lg">
+            <div class="bg-[var(--btn-primary-bg)] text-[var(--btn-primary-text)] rounded-xl rounded-tr-xs px-4 py-3 max-w-xl text-xs sm:text-[13px] font-medium leading-relaxed shadow-xs">
                 <p>${escapeHtml(text)}</p>
-            </div>
-            <div class="w-8 h-8 rounded-lg bg-sky-500/20 border border-sky-400/30 flex items-center justify-center text-sky-400 shrink-0 mt-0.5">
-                <i data-lucide="user" class="w-4 h-4"></i>
             </div>
         `;
     } else {
         let citationsHtml = '';
         if (citations && citations.length > 0) {
             citationsHtml = `
-                <div class="mt-3 pt-3 border-t border-slate-800">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Doğrulanmış Kanıt Alıntıları (Citations):</span>
+                <div class="mt-3.5 pt-3 border-t border-[var(--border-subtle)] space-y-1.5">
+                    <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] block">Doğrulanmış Doküman Kanıtları</span>
                     <div class="flex flex-wrap gap-1.5">
                         ${citations.map(c => `
                             <div class="citation-chip" title="${escapeHtml(c.exact_quote)}">
-                                <span>📄 ${escapeHtml(c.doc_name)} (Sayfa ${c.page_number})</span>
+                                <i data-lucide="file-check" class="w-3 h-3 text-blue-500"></i>
+                                <span>${escapeHtml(c.doc_name)} · S.${c.page_number}</span>
                             </div>
                         `).join('')}
                     </div>
@@ -955,23 +1000,24 @@ function appendChatMessage(role, text, citations = [], followups = [], model = n
         let followupsHtml = '';
         if (followups && followups.length > 0) {
             followupsHtml = `
-                <div class="mt-3 pt-2.5 border-t border-slate-800/80 flex flex-wrap gap-1.5">
+                <div class="mt-3 pt-2.5 border-t border-[var(--border-subtle)] flex flex-wrap gap-1.5">
                     ${followups.map(f => `
-                        <button class="chat-chip bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-sky-300 text-[11px] px-2.5 py-1 rounded-full border border-slate-700/80 transition-colors">
-                            💡 ${escapeHtml(f)}
+                        <button type="button" class="chat-chip text-[11px] px-2.5 py-1 rounded-md inline-flex items-center space-x-1">
+                            <i data-lucide="corner-down-right" class="w-3 h-3 text-[var(--text-muted)]"></i>
+                            <span>${escapeHtml(f)}</span>
                         </button>
                     `).join('')}
                 </div>
             `;
         }
 
-        const modelBadge = model ? `<span class="text-[10px] text-slate-500 float-right font-mono">${escapeHtml(model)}</span>` : '';
+        const modelBadge = model ? `<span class="text-[10px] font-mono text-[var(--text-muted)] float-right ml-3">${escapeHtml(model)}</span>` : '';
 
         msgDiv.innerHTML = `
-            <div class="w-8 h-8 rounded-lg bg-sky-600/30 border border-sky-400/40 flex items-center justify-center text-sky-400 shrink-0 mt-0.5">
-                <i data-lucide="bot" class="w-4 h-4"></i>
+            <div class="w-7 h-7 rounded-md bg-[var(--bg-elevated)] border border-[var(--border-strong)] flex items-center justify-center text-[var(--text-primary)] shrink-0 mt-0.5">
+                <i data-lucide="terminal" class="w-3.5 h-3.5"></i>
             </div>
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl rounded-tl-sm p-4 max-w-2xl text-xs sm:text-sm text-slate-200 leading-relaxed shadow-md space-y-2">
+            <div class="sm-card p-4 max-w-2xl text-xs sm:text-[13px] text-[var(--text-primary)] leading-relaxed space-y-2">
                 ${modelBadge}
                 <div class="whitespace-pre-wrap">${formatMarkdown(text)}</div>
                 ${citationsHtml}
@@ -984,19 +1030,17 @@ function appendChatMessage(role, text, citations = [], followups = [], model = n
     elements.chatMessagesContainer.scrollTop = elements.chatMessagesContainer.scrollHeight;
     initLucide();
 
-    // Attach click events on citations and followups
     msgDiv.querySelectorAll('.chat-chip').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            const cleanText = btn.textContent.replace('💡', '').trim();
-            executeChatQuery(cleanText);
+            executeChatQuery(btn.textContent.trim());
         });
     });
 
     msgDiv.querySelectorAll('.citation-chip').forEach(chip => {
         chip.addEventListener('click', () => {
-            showToast(`Kanıt Alıntısı: ${chip.getAttribute('title')}`, 'info');
+            showToast(`Alıntı: "${chip.getAttribute('title')}"`, 'info');
         });
     });
 }
@@ -1005,14 +1049,14 @@ function appendChatLoading() {
     const id = `loading-${Date.now()}`;
     const msgDiv = document.createElement('div');
     msgDiv.id = id;
-    msgDiv.className = 'flex items-start space-x-3';
+    msgDiv.className = 'flex items-start space-x-3.5';
     msgDiv.innerHTML = `
-        <div class="w-8 h-8 rounded-lg bg-sky-600/30 border border-sky-400/40 flex items-center justify-center text-sky-400 shrink-0 mt-0.5">
-            <i data-lucide="bot" class="w-4 h-4"></i>
+        <div class="w-7 h-7 rounded-md bg-[var(--bg-elevated)] border border-[var(--border-strong)] flex items-center justify-center text-[var(--text-primary)] shrink-0 mt-0.5">
+            <i data-lucide="terminal" class="w-3.5 h-3.5"></i>
         </div>
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl rounded-tl-sm p-4 text-xs text-slate-400 flex items-center space-x-2">
-            <div class="w-3 h-3 rounded-full bg-sky-400 animate-ping"></div>
-            <span>Doküman parçaları taranıyor ve yanıt üretiliyor...</span>
+        <div class="sm-card px-4 py-3 text-xs text-[var(--text-secondary)] flex items-center space-x-2.5">
+            <div class="w-3.5 h-3.5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <span>İndekslenmiş doküman parçaları taranıyor...</span>
         </div>
     `;
     elements.chatMessagesContainer.appendChild(msgDiv);
@@ -1028,14 +1072,12 @@ function removeChatLoading(id) {
 
 function formatMarkdown(text) {
     if (!text) return '';
-    // Basic bolding and bullet list styling
-    let formatted = escapeHtml(text)
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    return escapeHtml(text)
+        .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-[var(--text-primary)]">$1</strong>')
         .replace(/^\- (.*?)$/gm, '<li class="ml-4 list-disc">$1</li>');
-    return formatted;
 }
 
-// --- 7. TENDER REBUTTAL & EXCEPTION ROBOT ---
+// --- 7. TENDER REBUTTAL & EXCEPTION GENERATOR ---
 function setupRebuttalGenerator() {
     if (!elements.btnGenerateRebuttal) return;
 
@@ -1071,7 +1113,7 @@ function setupRebuttalGenerator() {
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            showToast('Zeyilname dilekçesi metin dosyası olarak indirildi.', 'success');
+            showToast('Resmi dilekçe indirildi.', 'success');
         });
     }
 }
@@ -1080,14 +1122,16 @@ function populateRebuttalClauseDropdown() {
     if (!elements.rebuttalClauseSelect || !currentAnalysis) return;
 
     const clauses = currentAnalysis.results;
-    elements.rebuttalClauseSelect.innerHTML = '<option value="">İtiraz edilecek bir madde seçin...</option>' +
-        clauses.map(c => `
-            <option value="${escapeHtml(c.clause_id)}">
-                ${c.status === 'UYUMSUZ' ? '🔴' : (c.status === 'KISMEN_UYUMLU' ? '🟡' : '🟢')} ${escapeHtml(c.clause_id)}: ${escapeHtml(c.clause_text.slice(0, 60))}...
-            </option>
-        `).join('');
+    elements.rebuttalClauseSelect.innerHTML = '<option value="">İtiraz edilecek şartname maddesini seçin...</option>' +
+        clauses.map(c => {
+            const tag = c.status === 'UYUMSUZ' ? '[GAP]' : (c.status === 'KISMEN_UYUMLU' ? '[KISMEN]' : '[UYUMLU]');
+            return `
+                <option value="${escapeHtml(c.clause_id)}">
+                    ${tag} ${escapeHtml(c.clause_id)} — ${escapeHtml(c.clause_text.slice(0, 62))}...
+                </option>
+            `;
+        }).join('');
 
-    // Preselect the first non-compliant item if available
     const firstGap = clauses.find(c => c.status === 'UYUMSUZ');
     if (firstGap) {
         elements.rebuttalClauseSelect.value = firstGap.clause_id;
@@ -1107,17 +1151,17 @@ async function handleGenerateRebuttal() {
     const clauseText = elements.rebuttalClauseText.value.trim();
 
     if (!clauseText) {
-        showToast('Lütfen itiraz konusu şartname maddesini girin.', 'error');
+        showToast('Lütfen itiraz edilecek şartname maddesini seçin veya girin.', 'error');
         return;
     }
 
     try {
-        showToast('Resmi Zeyilname / İtiraz dilekçesi üretiliyor...', 'info');
+        showToast('Resmi zeyilname dilekçesi hazırlanıyor...', 'info');
         const payload = {
             clause_id: clauseId,
             clause_text: clauseText,
             sector: currentSector,
-            company_name: elements.rebuttalCompanyName.value.trim() || 'Yüklenici Firma',
+            company_name: elements.rebuttalCompanyName.value.trim() || 'İstekli Firma',
             authority_name: elements.rebuttalAuthorityName.value.trim() || 'İhale Komisyonu Başkanlığı',
             rebuttal_strategy: elements.rebuttalStrategySelect.value
         };
@@ -1132,7 +1176,7 @@ async function handleGenerateRebuttal() {
         const data = await resp.json();
 
         elements.rebuttalLetterPreview.textContent = data.official_letter_body;
-        showToast('Resmi dilekçe taslağı başarıyla oluşturuldu.', 'success');
+        showToast('Resmi zeyilname taslağı oluşturuldu.', 'success');
     } catch (e) {
         showToast(e.message, 'error');
     }
@@ -1148,10 +1192,10 @@ function setupKnowledgeBase() {
     if (elements.btnLoadDemoKb) {
         elements.btnLoadDemoKb.addEventListener('click', async () => {
             try {
-                showToast('Tüm demo ürün dokümanları indeksleniyor...', 'info');
+                showToast('Sektör demo katalogları indeksleniyor...', 'info');
                 const resp = await fetch('/api/knowledge-base/load-sample', { method: 'POST' });
                 if (!resp.ok) throw new Error('Demo yükleme başarısız');
-                showToast('Tüm sektörlerin demo katalogları başarıyla indekslendi.', 'success');
+                showToast('Tüm sektör katalogları indekslendi.', 'success');
                 fetchSystemStatus();
                 loadKnowledgeBaseChunks();
             } catch (e) {
@@ -1162,11 +1206,11 @@ function setupKnowledgeBase() {
 
     if (elements.btnClearKb) {
         elements.btnClearKb.addEventListener('click', async () => {
-            if (!confirm('Bilgi bankasındaki tüm ürün dokümanları ve vektör indeksleri silinecektir. Emin misiniz?')) return;
+            if (!confirm('Bilgi bankasındaki tüm dokümanlar ve vektör indeksleri temizlenecektir. Onaylıyor musunuz?')) return;
             try {
                 const resp = await fetch('/api/knowledge-base/clear', { method: 'DELETE' });
-                if (!resp.ok) throw new Error('Silme işlemi başarısız');
-                showToast('Bilgi bankası temizlendi.', 'success');
+                if (!resp.ok) throw new Error('Temizleme işlemi başarısız');
+                showToast('Bilgi bankası sıfırlandı.', 'success');
                 fetchSystemStatus();
                 loadKnowledgeBaseChunks();
             } catch (e) {
@@ -1190,7 +1234,7 @@ async function handleUploadKbDocument() {
     formData.append('file', file);
 
     try {
-        showToast(`'${file.name}' yükleniyor ve indeksleniyor...`, 'info');
+        showToast(`'${file.name}' ayrıştırılıyor ve vektörleştiriliyor...`, 'info');
         const resp = await fetch('/api/knowledge-base/upload', {
             method: 'POST',
             body: formData
@@ -1201,7 +1245,7 @@ async function handleUploadKbDocument() {
             throw new Error(err.detail || 'Yükleme hatası');
         }
 
-        showToast(`'${file.name}' başarıyla indekslendi!`, 'success');
+        showToast(`'${file.name}' başarıyla indekslendi.`, 'success');
         elements.kbFileInput.value = '';
         fetchSystemStatus();
         loadKnowledgeBaseChunks();
@@ -1235,48 +1279,49 @@ function renderChunksList(filterQuery = '') {
     }
 
     if (items.length === 0) {
-        elements.chunksListContainer.innerHTML = '<div class="text-center py-8 text-slate-500 text-xs">Aramanıza uygun parça bulunamadı.</div>';
+        elements.chunksListContainer.innerHTML = '<div class="text-center py-8 text-[var(--text-muted)] text-xs">Eşleşen metin bloğu bulunamadı.</div>';
         return;
     }
 
     elements.chunksListContainer.innerHTML = items.map(c => `
-        <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl space-y-1.5 hover:border-slate-700 transition-colors">
-            <div class="flex items-center justify-between text-[11px]">
-                <span class="font-bold text-sky-400 font-mono">${escapeHtml(c.doc_name)}</span>
-                <span class="text-slate-500 font-mono">Sayfa ${c.page_number} ${c.section_title ? '• ' + escapeHtml(c.section_title) : ''}</span>
+        <div class="p-3.5 sm-card-subtle space-y-1.5 hover:border-[var(--border-strong)] transition-colors">
+            <div class="flex items-center justify-between text-[11px] font-mono">
+                <span class="font-semibold text-[var(--text-primary)] flex items-center space-x-1.5">
+                    <i data-lucide="file-code" class="w-3.5 h-3.5 text-blue-500"></i>
+                    <span>${escapeHtml(c.doc_name)}</span>
+                </span>
+                <span class="text-[var(--text-muted)]">S.${c.page_number} ${c.section_title ? '· ' + escapeHtml(c.section_title) : ''}</span>
             </div>
-            <p class="text-xs text-slate-300 font-sans leading-relaxed line-clamp-3">${escapeHtml(c.text_preview)}</p>
+            <p class="text-xs text-[var(--text-secondary)] leading-relaxed line-clamp-3">${escapeHtml(c.text_preview)}</p>
         </div>
     `).join('');
+    initLucide();
 }
 
-// --- 9. TOAST NOTIFICATIONS ---
+// --- 9. ARCHITECTURAL TOAST NOTIFICATIONS ---
 function showToast(message, type = 'info') {
     if (!elements.toastContainer) return;
 
     const toast = document.createElement('div');
-    toast.className = `toast-item pointer-events-auto flex items-center space-x-2 px-4 py-2.5 rounded-xl shadow-2xl text-xs font-semibold text-white transition-all ${
-        type === 'success' ? 'bg-emerald-600 border border-emerald-400' :
-        type === 'error' ? 'bg-rose-600 border border-rose-400' : 'bg-slate-800 border border-slate-700'
-    }`;
+    toast.className = 'toast-item pointer-events-auto flex items-center space-x-2.5 px-4 py-2.5 rounded-lg text-xs font-medium';
 
-    let iconName = 'info';
-    if (type === 'success') iconName = 'check-circle';
-    else if (type === 'error') iconName = 'alert-circle';
+    let iconHtml = '<span class="w-2 h-2 rounded-full bg-blue-500 shrink-0"></span>';
+    if (type === 'success') iconHtml = '<span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>';
+    else if (type === 'error') iconHtml = '<span class="w-2 h-2 rounded-full bg-rose-500 shrink-0"></span>';
 
     toast.innerHTML = `
-        <i data-lucide="${iconName}" class="w-4 h-4 shrink-0"></i>
+        ${iconHtml}
         <span>${escapeHtml(message)}</span>
     `;
 
     elements.toastContainer.appendChild(toast);
-    initLucide();
 
     setTimeout(() => {
         toast.style.opacity = '0';
-        toast.style.transform = 'translateY(10px)';
-        setTimeout(() => toast.remove(), 250);
-    }, 3500);
+        toast.style.transform = 'translateY(8px)';
+        toast.style.transition = 'all 0.2s ease';
+        setTimeout(() => toast.remove(), 220);
+    }, 3200);
 }
 
 function escapeHtml(str) {
