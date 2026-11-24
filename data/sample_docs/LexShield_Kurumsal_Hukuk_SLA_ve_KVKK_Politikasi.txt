@@ -1,0 +1,26 @@
+================================================================================
+LEXSHIELD KURUMSAL BİLİŞİM HİZMETLERİ, SLA, BİLGİ GÜVENLİĞİ VE SÖZLEŞME POLİTİKASI
+STANDART HİZMET SEVİYESİ VE HUKUKİ UYUM REFERANS DOKÜMANI - SÜRÜM 4.0
+================================================================================
+
+[Sayfa: 1]
+1. HİZMET SEVİYESİ TAAHHÜTLERİ (SLA) VE KESİNTİSİZ ÇALIŞMA GARANTİSİ
+Şirketimiz tarafından sunulan tüm kurumsal yönetilen bilişim, bulut ve siber güvenlik hizmetlerinde uluslararası standartlara uygun Hizmet Seviyesi Anlaşması (SLA) uygulanır.
+
+1.1. ERİŞİLEBİLİRLİK (UPTIME) VE MÜDAHALE SÜRELERİ
+Yıllık bazda garanti edilen sistem erişilebilirlik ve çalışma süresi (SLA Uptime) oranı %99.9 (yüzde doksan dokuz nokta dokuz) seviyesindedir. Kritik seviye (Seviye-1) arıza ve kesinti bildirimlerine 7/24 uzaktan ilk müdahale süresi azami 30 dakika, yerinde veya kalıcı çözüm süresi azami 4 saattir.
+
+1.2. VERİ KORUMA, KVKK VE BİLGİ GÜVENLİĞİ UYUMLULUĞU
+Şirketimiz 6698 Sayılı Kişisel Verilerin Korunması Kanunu (KVKK) ve Avrupa Birliği Genel Veri Koruma Tüzüğü (GDPR) hükümlerine tam uyumlu olarak faaliyet göstermektedir. Tüm veri işleme süreçleri ISO 27001 Bilgi Güvenliği Yönetim Sistemi ve ISO 22301 İş Sürekliliği Yönetim Sistemi sertifikaları kapsamında denetlenmektedir. Müşteri verileri yurt içi Tier-3 veri merkezlerinde şifreli olarak barındırılır.
+
+[Sayfa: 2]
+2. MALİ SORUMLULUK SINIRI, CEZAİ ŞARTLAR VE FİKRİ MÜLKİYET HAKLARI
+
+2.1. CEZAİ ŞART VE TAZMİNAT ÜST SINIRI (LIABILITY CAP)
+Sözleşme kapsamındaki gecikme ve SLA ihlallerinden doğabilecek toplam cezai şart tutarı, ilgili hizmet dönemine ait toplam sözleşme bedelinin azami %10 (yüzde on) oranını aşamaz. Dolaylı zararlar, kâr kaybı ve mücbir sebep hallerinden kaynaklanan kesintiler cezai şart kapsamı dışındadır.
+
+2.2. FİKRİ VE SINAİ MÜLKİYET HAKLARI (IP & KAYNAK KOD)
+Projede kullanılan standart yazılım platformlarının fikri mülkiyet hakları ve kaynak kodları (source code) üretici firmamıza aittir. Müşteriye sözleşme süresince münhasır olmayan, süresiz kullanım lisansı verilir; ticari sır niteliğindeki çekirdek kaynak kodların koşulsuz devri yapılmaz (talep halinde bağımsız yedekleme / yazılım escrow anlaşması yapılabilir).
+
+2.3. GARANTİ SÜRESİ VE MÜCBİR SEBEP (FORCE MAJEURE)
+Teslim edilen sistem ve entegrasyon işleri kesin kabul tarihinden itibaren 24 ay (2 yıl) tam kapsamlı bakım, yama ve garanti kapsamındadır. Doğal afet, siber savaş, genel iletişim altyapısı kesintileri ve yasal mevzuat değişiklikleri mücbir sebep kabul edilir.

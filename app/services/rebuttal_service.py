@@ -7,6 +7,9 @@ Construction, and B2B Contracts in accordance with applicable procurement regula
 
 from typing import List, Dict, Any, Optional
 from app.models.schemas import (
+    AnalysisResponse,
+    BatchRebuttalRequest,
+    BatchRebuttalResponse,
     RebuttalRequest,
     RebuttalResponse,
     SectorType,
@@ -123,5 +126,79 @@ class TenderRebuttalService:
             return clean_text.replace("20.000 m³/h", "nominal en az 15.000 m³/h veya dinamik EC fan modülasyonu ile")
         elif "fda" in clean_text.lower():
             return clean_text + " (Veya geçerli CE MDR ve ISO 13485 sertifikası eşdeğer kabul edilecektir.)"
+        elif "%99.999" in clean_text.lower():
+            return clean_text.replace("%99.999", "%99.9 (planlı bakım pencereleri hariç)")
+        elif "%50" in clean_text.lower() or "sınırsız" in clean_text.lower():
+            return "Hizmet seviyesi ihlallerinde toplam cezai şart üst sınırı ilgili dönem sözleşme bedelinin %10 oranını aşamaz ve dolaylı zararlar kapsam dışıdır."
+        elif "kaynak kod" in clean_text.lower() or "source code" in clean_text.lower():
+            return "Standart yazılım platformu için İdareye süresiz kullanım lisansı verilecek olup, çekirdek kaynak kodlar bağımsız Yazılım Escrow hesabı altında güvenceye alınacaktır."
         else:
             return clean_text + " veya idarece onaylanacak fonksiyonel ve teknik eşdeğer çözümler kabul edilecektir."
+
+    def generate_batch_rebuttal(self, analysis: AnalysisResponse, req: BatchRebuttalRequest) -> BatchRebuttalResponse:
+        """Generate a consolidated multi-clause official Zeyilname petition for all non-compliant or vendor-locked clauses."""
+        sector = req.sector or analysis.sector or SectorType.UNIVERSAL
+        authority = req.authority_name or "İhale ve Satın Alma Komisyonu Başkanlığına"
+        company = req.company_name or "ABC Teknoloji ve Savunma Sanayii A.Ş."
+
+        target_clauses = [
+            r for r in analysis.results
+            if r.status in (ComplianceStatus.UYUMSUZ, ComplianceStatus.KISMEN_UYUMLU, ComplianceStatus.BELIRTILMEMIS)
+            or r.vendor_lock_risk in ("ORTA", "YÜKSEK")
+        ]
+        if not target_clauses and analysis.results:
+            target_clauses = [analysis.results[0]]
+
+        items: List[RebuttalResponse] = []
+        clause_sections: List[str] = []
+
+        for idx, c in enumerate(target_clauses, start=1):
+            single_req = RebuttalRequest(
+                clause_id=c.clause_id,
+                clause_text=c.clause_text,
+                status=c.status,
+                sector=sector,
+                company_name=company,
+                authority_name=authority,
+                rebuttal_strategy=req.rebuttal_strategy,
+                explanation=c.explanation,
+                exact_quote=c.exact_quote
+            )
+            single_resp = self.generate_rebuttal(single_req)
+            items.append(single_resp)
+
+            lock_note = f"\n   [REKABET KISITI ANALİZİ]: {c.vendor_lock_reason}" if c.vendor_lock_reason else ""
+            clause_sections.append(
+                f"------------------------------------------------------------------------\n"
+                f"İTİRAZ KALEMİ #{idx} — {c.clause_id} ({c.category}) | Mevcut Durum: {c.status.value}\n"
+                f"------------------------------------------------------------------------\n"
+                f"• Mevcut Şartname İfadesi:\n  \"{c.clause_text}\"\n"
+                f"• Teknik Gerekçe:\n  {c.explanation}{lock_note}\n"
+                f"• Talep Edilen Zeyilname Tadil Metni:\n  \"{single_resp.suggested_clause_amendment}\"\n"
+            )
+
+        grounds = self.LEGAL_GROUNDS.get(sector, self.LEGAL_GROUNDS[SectorType.UNIVERSAL])
+        combined_letter = "\n".join([
+            f"{authority.upper()}\n",
+            f"KONU: {analysis.spec_name} Kapsamındaki {len(items)} Adet Teknik Şartname Maddesine İlişkin Toplu Açıklama, Rekabet Kısıtı İtirazı ve Zeyilname Talebimiz Hk.\n",
+            f"Sayın Başkanlık,\n",
+            f"İdarenizce yürütülen ihale kapsamında yayımlanan '{analysis.spec_name}' dokümanı şirketimiz teknik ve hukuk heyeti tarafından incelenmiştir. "
+            f"4734 Sayılı Kamu İhale Kanunu Madde 5 (Temel İlkeler / Rekabet) ve Madde 12 (Şartnamelerde Rekabeti Engelleyici Hususlar) hükümleri çerçevesinde, "
+            f"aşağıda detaylandırılan {len(items)} adet şartname maddesinin kamu yararı ve adil rekabetin tesisi amacıyla zeyilname ile tadil edilmesini arz ederiz.\n",
+            f"GENEL HUKUKİ DAYANAKLARIMIZ:",
+            f"1. {grounds[0]}",
+            f"2. {grounds[1]}\n",
+            "\n".join(clause_sections),
+            f"\nSONUÇ VE İSTEM:",
+            f"Yukarıda teknik ve hukuki gerekçeleriyle arz edilen {len(items)} adet şartname maddesinin önerilen tadil metinleri doğrultusunda zeyilname düzenlenerek "
+            f"revize edilmesini bilgilerinize ve tensiplerinize saygılarımızla arz ederiz.\n",
+            f"{company}",
+            f"Teklif, İhale ve Hukuk Müşavirliği Direktörlüğü"
+        ])
+
+        return BatchRebuttalResponse(
+            spec_name=analysis.spec_name,
+            total_objected_clauses=len(items),
+            combined_official_letter=combined_letter,
+            items=items
+        )

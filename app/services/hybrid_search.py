@@ -6,6 +6,7 @@ with Reciprocal Rank Fusion (RRF) for technical specification compliance verific
 import os
 import re
 import hashlib
+import threading
 from typing import List, Dict, Optional, Tuple, Any
 import numpy as np
 
@@ -175,6 +176,7 @@ class HybridSearchEngine:
         self._collection = None
 
         # In-memory chunk repository for BM25 and exact retrieval
+        self._lock = threading.RLock()
         self.chunks_map: Dict[str, DocumentChunk] = {}
         self.bm25: Optional[BM25Okapi] = None
         self.bm25_chunk_ids: List[str] = []
@@ -304,30 +306,46 @@ class HybridSearchEngine:
         if not chunks:
             return
 
-        ids = [c.chunk_id for c in chunks]
-        documents = [c.text for c in chunks]
-        metadatas = [
-            {
-                "doc_name": c.doc_name,
-                "page_number": c.page_number,
-                "section_title": c.section_title
-            }
-            for c in chunks
-        ]
+        with self._lock:
+            ids = [c.chunk_id for c in chunks]
+            documents = [c.text for c in chunks]
+            metadatas = [
+                {
+                    "doc_name": c.doc_name,
+                    "page_number": c.page_number,
+                    "section_title": c.section_title
+                }
+                for c in chunks
+            ]
 
-        # Upsert into ChromaDB
-        self.collection.upsert(
-            ids=ids,
-            documents=documents,
-            metadatas=metadatas
-        )
+            # Upsert into ChromaDB
+            self.collection.upsert(
+                ids=ids,
+                documents=documents,
+                metadatas=metadatas
+            )
 
-        # Update in-memory mapping
-        for chunk in chunks:
-            self.chunks_map[chunk.chunk_id] = chunk
+            # Update in-memory mapping
+            for chunk in chunks:
+                self.chunks_map[chunk.chunk_id] = chunk
 
-        # Rebuild BM25 index with all chunks
-        self._rebuild_bm25()
+            # Rebuild BM25 index with all chunks
+            self._rebuild_bm25()
+
+    def delete_document(self, doc_name: str) -> int:
+        """Delete all chunks belonging to a specific document from ChromaDB and BM25."""
+        with self._lock:
+            target_ids = [cid for cid, c in self.chunks_map.items() if c.doc_name == doc_name]
+            if not target_ids:
+                return 0
+            try:
+                self.collection.delete(ids=target_ids)
+            except Exception:
+                pass
+            for cid in target_ids:
+                self.chunks_map.pop(cid, None)
+            self._rebuild_bm25()
+            return len(target_ids)
 
     def _rebuild_bm25(self):
         """Reconstruct BM25 model from current in-memory chunks."""
@@ -340,30 +358,32 @@ class HybridSearchEngine:
 
     def clear_index(self):
         """Clear all indexed documents from ChromaDB and BM25 index."""
-        try:
-            records = self.collection.get()
-            if records and records.get("ids"):
-                self.collection.delete(ids=records["ids"])
-        except Exception:
+        with self._lock:
             try:
-                self.chroma_client.delete_collection(self.collection_name)
+                records = self.collection.get()
+                if records and records.get("ids"):
+                    self.collection.delete(ids=records["ids"])
             except Exception:
-                pass
-            self._collection = None
+                try:
+                    self.chroma_client.delete_collection(self.collection_name)
+                except Exception:
+                    pass
+                self._collection = None
 
-        self.chunks_map.clear()
-        self.bm25 = None
-        self.bm25_chunk_ids = []
+            self.chunks_map.clear()
+            self.bm25 = None
+            self.bm25_chunk_ids = []
 
     def get_stats(self) -> KnowledgeBaseStats:
         """Get summary statistics of the indexed knowledge base."""
-        total_chunks = len(self.chunks_map)
-        doc_names = sorted(list({c.doc_name for c in self.chunks_map.values()}))
-        return KnowledgeBaseStats(
-            total_documents=len(doc_names),
-            total_chunks=total_chunks,
-            documents=doc_names
-        )
+        with self._lock:
+            total_chunks = len(self.chunks_map)
+            doc_names = sorted(list({c.doc_name for c in self.chunks_map.values()}))
+            return KnowledgeBaseStats(
+                total_documents=len(doc_names),
+                total_chunks=total_chunks,
+                documents=doc_names
+            )
 
     def search_dense(self, query: str, top_k: int = 5) -> List[Tuple[str, float]]:
         """Retrieve top chunks via ChromaDB dense cosine similarity."""

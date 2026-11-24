@@ -318,6 +318,18 @@ class SpecParserService:
         ],
         "Çalışma Koşulları ve Sıcaklık": [
             "sıcaklık", "çalışma sıcaklığı", "-40", "+85", "+95", "derece", "nem", "çöl", "iklim"
+        ],
+        "Tıbbi Cihaz ve Klinik Parametreler": [
+            "ekg", "spo2", "nibp", "hasta başı", "monitör", "yoğun bakım", "hl7", "hbys", "ce mdr",
+            "iso 13485", "fda", "510k", "batarya", "inç", "dokunmatik"
+        ],
+        "Mekanik Tesisat ve İklimlendirme (HVAC)": [
+            "klima santrali", "hava debisi", "m³/h", "m3/h", "en 1886", "sızdırmazlık", "d1", "l1",
+            "bacnet", "modbus", "bms", "bar", "hidrolik", "eurovent", "amca", "filtre"
+        ],
+        "Hukuk, SLA ve Sözleşme Hükümleri": [
+            "kvkk", "gdpr", "iso 27001", "cezai şart", "tazminat", "fikri mülkiyet", "kaynak kod",
+            "source code", "mücbir sebep", "garanti süresi", "uptime", "erişilebilirlik", "yüklenici"
         ]
     }
 

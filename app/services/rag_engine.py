@@ -581,6 +581,123 @@ class MockRuleAuditor:
                         confidence_score=0.98
                     )
 
+        # 17. SLA Uptime Percentage Check (e.g. %99.9 vs %99.999)
+        sla_req_m = re.search(r"%\s*(99(?:\.\d+)?)", c_lower)
+        if sla_req_m and ("sla" in c_lower or "uptime" in c_lower or "erişilebilirlik" in c_lower):
+            req_sla = float(sla_req_m.group(1))
+            for chunk in retrieved_chunks:
+                ch_l = chunk.text.lower()
+                doc_sla_m = re.search(r"%\s*(99(?:\.\d+)?)", ch_l)
+                if doc_sla_m and ("sla" in ch_l or "uptime" in ch_l or "erişilebilirlik" in ch_l):
+                    doc_sla = float(doc_sla_m.group(1))
+                    quote = self._find_matching_sentence(chunk.text, [doc_sla_m.group(0), "sla", "erişilebilirlik"])
+                    product = self._detect_product_name([chunk]) or matched_product
+                    if doc_sla >= req_sla:
+                        return ComplianceResult(
+                            clause_id=clause.clause_id,
+                            clause_text=clause.clause_text,
+                            category="Hizmet Seviyesi (SLA)",
+                            status=ComplianceStatus.TAM_UYUMLU,
+                            matched_product=product,
+                            matched_doc=chunk.doc_name,
+                            page_or_section=f"Sayfa {chunk.page_number} / {chunk.section_title}",
+                            exact_quote=quote,
+                            explanation=f"Talep edilen %{req_sla} SLA erişilebilirlik oranı, kurumsal politikada garanti edilen %{doc_sla} oranı ile karşılanmaktadır.",
+                            confidence_score=0.98
+                        )
+                    else:
+                        return ComplianceResult(
+                            clause_id=clause.clause_id,
+                            clause_text=clause.clause_text,
+                            category="Hizmet Seviyesi (SLA)",
+                            status=ComplianceStatus.UYUMSUZ,
+                            matched_product=product,
+                            matched_doc=chunk.doc_name,
+                            page_or_section=f"Sayfa {chunk.page_number} / {chunk.section_title}",
+                            exact_quote=quote,
+                            explanation=f"Sözleşme taslağı en az %{req_sla} SLA Uptime talep ederken, kurumsal standart SLA taahhüdümüz %{doc_sla} seviyesindedir.",
+                            confidence_score=0.97
+                        )
+
+        # 18. Contractual Penalty / Liability Cap (%10 vs %50 / Sınırsız Tazminat)
+        if "cezai şart" in c_lower or "tazminat" in c_lower:
+            pen_req_m = re.search(r"%\s*(\d+)", c_lower)
+            for chunk in retrieved_chunks:
+                ch_l = chunk.text.lower()
+                if "cezai şart" in ch_l or "tazminat" in ch_l:
+                    doc_pen_m = re.search(r"%\s*(\d+)", ch_l)
+                    quote = self._find_matching_sentence(chunk.text, ["cezai şart", "%10", "dolaylı"])
+                    product = self._detect_product_name([chunk]) or matched_product
+                    req_pen = int(pen_req_m.group(1)) if pen_req_m else 10
+                    doc_pen = int(doc_pen_m.group(1)) if doc_pen_m else 10
+                    if req_pen > doc_pen or "sınırsız" in c_lower:
+                        return ComplianceResult(
+                            clause_id=clause.clause_id,
+                            clause_text=clause.clause_text,
+                            category="Mali Sorumluluk & Ceza",
+                            status=ComplianceStatus.UYUMSUZ,
+                            matched_product=product,
+                            matched_doc=chunk.doc_name,
+                            page_or_section=f"Sayfa {chunk.page_number} / {chunk.section_title}",
+                            exact_quote=quote,
+                            explanation=f"Sözleşmede %{req_pen} cezai şart üst sınırı ve dolaylı zarar tazmini istenirken, kurumsal hukuk politikamız azami %{doc_pen} üst sınır kabul etmektedir.",
+                            confidence_score=0.97
+                        )
+                    return ComplianceResult(
+                        clause_id=clause.clause_id,
+                        clause_text=clause.clause_text,
+                        category="Mali Sorumluluk & Ceza",
+                        status=ComplianceStatus.TAM_UYUMLU,
+                        matched_product=product,
+                        matched_doc=chunk.doc_name,
+                        page_or_section=f"Sayfa {chunk.page_number} / {chunk.section_title}",
+                        exact_quote=quote,
+                        explanation="Cezai şart üst sınırı kurumsal hukuk politikamız ile uyumludur.",
+                        confidence_score=0.96
+                    )
+
+        # 19. Intellectual Property / Source Code Transfer Check
+        if "kaynak kod" in c_lower or "source code" in c_lower or ("fikri mülkiyet" in c_lower and "devr" in c_lower):
+            for chunk in retrieved_chunks:
+                ch_l = chunk.text.lower()
+                if "kaynak kod" in ch_l or "fikri" in ch_l:
+                    quote = self._find_matching_sentence(chunk.text, ["kaynak kod", "fikri mülkiyet", "escrow"])
+                    product = self._detect_product_name([chunk]) or matched_product
+                    if "devri yapılmaz" in ch_l or "münhasır olmayan" in ch_l:
+                        return ComplianceResult(
+                            clause_id=clause.clause_id,
+                            clause_text=clause.clause_text,
+                            category="Fikri Mülkiyet (IP)",
+                            status=ComplianceStatus.KISMEN_UYUMLU,
+                            matched_product=product,
+                            matched_doc=chunk.doc_name,
+                            page_or_section=f"Sayfa {chunk.page_number} / {chunk.section_title}",
+                            exact_quote=quote,
+                            explanation="Koşulsuz çekirdek kaynak kod devri politikamıza aykırıdır; ancak süresiz kullanım lisansı ve bağımsız Yazılım Escrow (Yedekleme) anlaşması ile kısmi/eşdeğer uyum sağlanmaktadır.",
+                            confidence_score=0.95
+                        )
+
+        # 20. KVKK, ISO 27001, Response Time (30 dk / 4 saat) & Warranty (24 ay)
+        if ("kvkk" in c_lower and "iso 27001" in c_lower) or ("30 dakika" in c_lower) or ("24 ay" in c_lower and "garanti" in c_lower):
+            for chunk in retrieved_chunks:
+                ch_l = chunk.text.lower()
+                if ("kvkk" in c_lower and "kvkk" in ch_l) or ("30 dakika" in c_lower and "30 dakika" in ch_l) or ("24 ay" in c_lower and "24 ay" in ch_l):
+                    kw = ["kvkk", "iso 27001"] if "kvkk" in c_lower else (["30 dakika", "4 saat"] if "30 dakika" in c_lower else ["24 ay", "garanti"])
+                    quote = self._find_matching_sentence(chunk.text, kw)
+                    product = self._detect_product_name([chunk]) or matched_product
+                    return ComplianceResult(
+                        clause_id=clause.clause_id,
+                        clause_text=clause.clause_text,
+                        category="Hukuk & Hizmet Taahhüdü",
+                        status=ComplianceStatus.TAM_UYUMLU,
+                        matched_product=product,
+                        matched_doc=chunk.doc_name,
+                        page_or_section=f"Sayfa {chunk.page_number} / {chunk.section_title}",
+                        exact_quote=quote,
+                        explanation="Sözleşmede talep edilen yasal uyum, müdahale süresi ve garanti şartları kurumsal standart politikamızda birebir karşılanmaktadır.",
+                        confidence_score=0.98
+                    )
+
         # 17. Expanded Healthcare & International Standards
         if ("ce" in c_lower and "mdr" in c_lower) or "iso 13485" in c_lower or "2017/745" in c_lower:
             for chunk in retrieved_chunks:
@@ -730,6 +847,8 @@ class MockRuleAuditor:
                 return "VitaPulse V8"
             if "aeroflow" in doc_lower or "aeroflow" in text_lower:
                 return "AeroFlow Pro"
+            if "lexshield" in doc_lower or "lexshield" in text_lower:
+                return "LexShield Kurumsal SLA & Hukuk Paketi"
             # Fallback to searching first line for product header
             for line in c.text.split("\n")[:3]:
                 line_clean = line.strip("= -*#").strip()
@@ -1425,21 +1544,25 @@ class RAGComplianceEngine:
 
     def audit_clause(self, clause: SpecClause, force_mock: bool = False) -> ComplianceResult:
         """Retrieve relevant context and audit a single specification clause with verification guardrails."""
+        from app.services.intelligence_service import ProposalDossierGenerator
         self._ensure_provider_connected()
         retrieved_chunks = self.hybrid_search.search(clause.clause_text, top_k=self.settings.TOP_K_CHUNKS)
 
         if not force_mock and self.llm_auditor:
             try:
                 raw_res = self.llm_auditor.audit(clause, retrieved_chunks)
-                return apply_post_audit_guardrails(clause, retrieved_chunks, raw_res, self.mock_auditor)
+                guarded = apply_post_audit_guardrails(clause, retrieved_chunks, raw_res, self.mock_auditor)
+                return ProposalDossierGenerator.enrich_compliance_result(guarded)
             except Exception as e:
                 # Fallback to mock auditor if LLM invocation fails
                 res = self.mock_auditor.audit(clause, retrieved_chunks)
                 res.explanation += f" (LLM çağrısı başarısız olduğu için yerel denetçi devrede: {e})"
-                return apply_post_audit_guardrails(clause, retrieved_chunks, res, self.mock_auditor)
+                guarded = apply_post_audit_guardrails(clause, retrieved_chunks, res, self.mock_auditor)
+                return ProposalDossierGenerator.enrich_compliance_result(guarded)
 
         res = self.mock_auditor.audit(clause, retrieved_chunks)
-        return apply_post_audit_guardrails(clause, retrieved_chunks, res, self.mock_auditor)
+        guarded = apply_post_audit_guardrails(clause, retrieved_chunks, res, self.mock_auditor)
+        return ProposalDossierGenerator.enrich_compliance_result(guarded)
 
     def analyze_specification(
         self,
@@ -1448,6 +1571,7 @@ class RAGComplianceEngine:
         force_mock: bool = False
     ) -> AnalysisResponse:
         """Analyze a list of clauses and compile summary statistics."""
+        from app.services.intelligence_service import ProposalDossierGenerator
         self._ensure_provider_connected()
         results: List[ComplianceResult] = []
 
@@ -1455,6 +1579,7 @@ class RAGComplianceEngine:
         kismen_uyumlu = 0
         uyumsuz = 0
         belirtilmemis = 0
+        vendor_lock_count = 0
 
         if force_mock or len(clauses) <= 1:
             for clause in clauses:
@@ -1475,6 +1600,9 @@ class RAGComplianceEngine:
             else:
                 belirtilmemis += 1
 
+            if res.vendor_lock_risk in ("ORTA", "YÜKSEK"):
+                vendor_lock_count += 1
+
         total = len(clauses)
         summary = AnalysisSummary(
             total_clauses=total,
@@ -1486,13 +1614,16 @@ class RAGComplianceEngine:
             uyumsuz_pct=round((uyumsuz / total) * 100, 1) if total > 0 else 0.0,
             belirtilmemis_count=belirtilmemis,
             belirtilmemis_pct=round((belirtilmemis / total) * 100, 1) if total > 0 else 0.0,
+            vendor_lock_count=vendor_lock_count,
         )
 
-        return AnalysisResponse(
+        response = AnalysisResponse(
             spec_name=spec_name,
             summary=summary,
             results=results
         )
+        response.summary.recommended_bom_packages = ProposalDossierGenerator.build_recommended_bom(response)
+        return response
 
     def calculate_risk_score(self, analysis: AnalysisResponse) -> RiskScoreResponse:
         """Calculate weighted tender risk score and executive advisory."""

@@ -1,6 +1,6 @@
 /**
- * SpecMatrix AI — Enterprise Compliance & Tender Verification Platform (v3.2)
- * Architectural UI Controller · Responsive Viewport Fit · Realistic RAG Thinking · What-If Simulator
+ * SpecMatrix AI — Enterprise Compliance, Spec-Lock & Proposal Engineering Platform (v4.0)
+ * Architectural UI Controller · Spec-Lock Radar · Auto-Proposal Dossier · Spec Diff · Multi-Tender Portfolio
  */
 
 // Global State
@@ -11,7 +11,9 @@ let activeClause = null;
 let currentSector = 'UNIVERSAL';
 let chatHistory = [];
 let allChunks = [];
-let simulatedResolvedClauses = new Set(); // Stores clause_ids simulated as resolved via What-If simulator
+let simulatedResolvedClauses = new Set();
+let tenderPortfolio = []; // Stores analyzed specifications for instant switching
+let currentDossier = null;
 
 // DOM Elements Registry
 const elements = {
@@ -23,18 +25,24 @@ const elements = {
     btnThemeToggle: document.getElementById('btn-theme-toggle'),
     themeToggleIcon: document.getElementById('theme-toggle-icon'),
 
-    // Navigation Tabs
+    // Navigation Tabs (5 Modules)
     navBtnMatrix: document.getElementById('nav-btn-matrix'),
+    navBtnDossier: document.getElementById('nav-btn-dossier'),
     navBtnChat: document.getElementById('nav-btn-chat'),
     navBtnRebuttal: document.getElementById('nav-btn-rebuttal'),
     navBtnKb: document.getElementById('nav-btn-kb'),
-    mobileNavTabs: document.querySelectorAll('.mobile-nav-tab'),
 
     // Tab Panes
     tabPaneMatrix: document.getElementById('tab-pane-matrix'),
+    tabPaneDossier: document.getElementById('tab-pane-dossier'),
     tabPaneChat: document.getElementById('tab-pane-chat'),
     tabPaneRebuttal: document.getElementById('tab-pane-rebuttal'),
     tabPaneKb: document.getElementById('tab-pane-kb'),
+
+    // Multi-Tender Portfolio Bar
+    portfolioHistoryBar: document.getElementById('portfolio-history-bar'),
+    portfolioItemsList: document.getElementById('portfolio-items-list'),
+    btnClearPortfolio: document.getElementById('btn-clear-portfolio'),
 
     // Tab 1: Specification Input & Engine
     sampleSpecSelect: document.getElementById('sample-spec-select'),
@@ -66,9 +74,11 @@ const elements = {
     riskDialBorder: document.getElementById('risk-dial-border'),
     riskGaugeCircle: document.getElementById('risk-gauge-circle'),
     execDecisionBadge: document.getElementById('exec-decision-badge'),
+    specLockSummaryBadge: document.getElementById('spec-lock-summary-badge'),
     simActiveBadge: document.getElementById('sim-active-badge'),
     execRedflagsList: document.getElementById('exec-redflags-list'),
     btnResetSimulation: document.getElementById('btn-reset-simulation'),
+    btnJumpDossier: document.getElementById('btn-jump-dossier'),
     btnCopyExecBrief: document.getElementById('btn-copy-exec-brief'),
 
     // Progress Bar
@@ -96,7 +106,7 @@ const elements = {
     filterButtons: document.querySelectorAll('.filter-btn'),
     btnExportExcel: document.getElementById('btn-export-excel'),
 
-    // Slide-Over Evidence Drawer
+    // Slide-Over Evidence Drawer (With v4.0 Spec-Lock, Gap Recipe & Formal Proposal Response)
     evidenceDrawer: document.getElementById('evidence-drawer'),
     drawerBackdrop: document.getElementById('drawer-backdrop'),
     drawerCloseBtn: document.getElementById('drawer-close-btn'),
@@ -107,14 +117,48 @@ const elements = {
     drawerStatusText: document.getElementById('drawer-status-text'),
     drawerStatusIcon: document.getElementById('drawer-status-icon'),
     btnDrawerToggleSim: document.getElementById('btn-drawer-toggle-sim'),
+    drawerSpeclockBox: document.getElementById('drawer-speclock-box'),
+    drawerSpeclockScore: document.getElementById('drawer-speclock-score'),
+    drawerSpeclockReason: document.getElementById('drawer-speclock-reason'),
     drawerClauseText: document.getElementById('drawer-clause-text'),
     drawerMatchedProduct: document.getElementById('drawer-matched-product'),
     drawerDocPage: document.getElementById('drawer-doc-page'),
     drawerExactQuote: document.getElementById('drawer-exact-quote'),
     drawerExplanation: document.getElementById('drawer-explanation'),
+    drawerCostImpact: document.getElementById('drawer-cost-impact'),
+    drawerRemediationAction: document.getElementById('drawer-remediation-action'),
+    drawerProposalResponse: document.getElementById('drawer-proposal-response'),
+    btnDrawerCopyProposal: document.getElementById('btn-drawer-copy-proposal'),
     btnDrawerCreateRebuttal: document.getElementById('btn-drawer-create-rebuttal'),
 
-    // Tab 2: Chat Copilot
+    // Tab 2 (NEW v4.0): Proposal Dossier & Spec Version Diff
+    subtabBtnProposal: document.getElementById('subtab-btn-proposal'),
+    subtabBtnSpecdiff: document.getElementById('subtab-btn-specdiff'),
+    subviewProposalDossier: document.getElementById('subview-proposal-dossier'),
+    subviewSpecDiff: document.getElementById('subview-spec-diff'),
+    btnRefreshDossier: document.getElementById('btn-refresh-dossier'),
+    btnPrintDossier: document.getElementById('btn-print-dossier'),
+    btnCopyFullDossier: document.getElementById('btn-copy-full-dossier'),
+    dossierBomList: document.getElementById('dossier-bom-list'),
+    dossierCoverLetter: document.getElementById('dossier-cover-letter'),
+    dossierClausesCount: document.getElementById('dossier-clauses-count'),
+    dossierClausesContainer: document.getElementById('dossier-clauses-container'),
+    diffSectorSelect: document.getElementById('diff-sector-select'),
+    btnToggleCustomDiff: document.getElementById('btn-toggle-custom-diff'),
+    customDiffEditorBox: document.getElementById('custom-diff-editor-box'),
+    diffOldTextarea: document.getElementById('diff-old-textarea'),
+    diffNewTextarea: document.getElementById('diff-new-textarea'),
+    btnRunCustomDiff: document.getElementById('btn-run-custom-diff'),
+    btnRunSpecDiff: document.getElementById('btn-run-spec-diff'),
+    diffSpecTitle: document.getElementById('diff-spec-title'),
+    diffExecSummary: document.getElementById('diff-exec-summary'),
+    diffOldPct: document.getElementById('diff-old-pct'),
+    diffNewPct: document.getElementById('diff-new-pct'),
+    diffDeltaPct: document.getElementById('diff-delta-pct'),
+    diffGapsDelta: document.getElementById('diff-gaps-delta'),
+    diffItemsContainer: document.getElementById('diff-items-container'),
+
+    // Tab 3: Chat Copilot
     chatMessagesContainer: document.getElementById('chat-messages-container'),
     chatForm: document.getElementById('chat-form'),
     chatInputText: document.getElementById('chat-input-text'),
@@ -124,18 +168,19 @@ const elements = {
     chatPromptChips: document.getElementById('chat-prompt-chips'),
     chatSidebarPrompts: document.getElementById('chat-sidebar-prompts'),
 
-    // Tab 3: Rebuttal Generator
+    // Tab 4: Rebuttal Generator (Single & Batch)
     rebuttalClauseSelect: document.getElementById('rebuttal-clause-select'),
     rebuttalClauseText: document.getElementById('rebuttal-clause-text'),
     rebuttalStrategySelect: document.getElementById('rebuttal-strategy-select'),
     rebuttalCompanyName: document.getElementById('rebuttal-company-name'),
     rebuttalAuthorityName: document.getElementById('rebuttal-authority-name'),
     btnGenerateRebuttal: document.getElementById('btn-generate-rebuttal'),
+    btnGenerateBatchRebuttal: document.getElementById('btn-generate-batch-rebuttal'),
     rebuttalLetterPreview: document.getElementById('rebuttal-letter-preview'),
     btnCopyRebuttal: document.getElementById('btn-copy-rebuttal'),
     btnDownloadRebuttal: document.getElementById('btn-download-rebuttal'),
 
-    // Tab 4: Knowledge Base
+    // Tab 5: Knowledge Base
     kbDropzone: document.getElementById('kb-dropzone'),
     kbFileInput: document.getElementById('kb-file-input'),
     btnLoadDemoKb: document.getElementById('btn-load-demo-kb'),
@@ -155,12 +200,62 @@ document.addEventListener('DOMContentLoaded', () => {
     setupNavigation();
     setupSectorPresets();
     setupMatrixAudit();
+    setupProposalAndDiffTab();
     setupChatCopilot();
     setupRebuttalGenerator();
     setupKnowledgeBase();
+    setupGlobalKeyboardShortcuts();
+    loadPortfolioFromStorage();
     fetchSystemStatus();
     loadKnowledgeBaseChunks();
 });
+
+function setupGlobalKeyboardShortcuts() {
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && elements.evidenceDrawer && elements.evidenceDrawer.classList.contains('active')) {
+            closeEvidenceDrawer();
+        }
+        const tag = (document.activeElement && document.activeElement.tagName) || '';
+        const isTyping = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+        if (!isTyping && (e.key === '/' || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k'))) {
+            if (elements.matrixSearch && !elements.tabPaneMatrix.classList.contains('hidden')) {
+                e.preventDefault();
+                elements.matrixSearch.focus();
+            }
+        }
+    });
+}
+
+function attachDragAndDrop(dropzoneEl, fileInputEl, onFileDropped) {
+    if (!dropzoneEl || !fileInputEl) return;
+    ['dragenter', 'dragover'].forEach(evtName => {
+        dropzoneEl.addEventListener(evtName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzoneEl.classList.add('drag-active');
+        });
+    });
+    ['dragleave', 'drop'].forEach(evtName => {
+        dropzoneEl.addEventListener(evtName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzoneEl.classList.remove('drag-active');
+        });
+    });
+    dropzoneEl.addEventListener('drop', (e) => {
+        const files = e.dataTransfer ? e.dataTransfer.files : null;
+        if (files && files.length > 0) {
+            try {
+                const dt = new DataTransfer();
+                dt.items.add(files[0]);
+                fileInputEl.files = dt.files;
+            } catch (_) {
+                // Fallback if DataTransfer constructor is restricted
+            }
+            if (onFileDropped) onFileDropped(files[0]);
+        }
+    });
+}
 
 function initLucide() {
     if (window.lucide) {
@@ -201,10 +296,11 @@ function applyTheme(theme) {
     initLucide();
 }
 
-// --- 1. TAB NAVIGATION CONTROLLER (Desktop & Mobile Synced) ---
+// --- 1. TAB NAVIGATION CONTROLLER (5 Modules) ---
 function setupNavigation() {
     const tabs = [
         { key: 'matrix', btn: elements.navBtnMatrix, pane: elements.tabPaneMatrix },
+        { key: 'dossier', btn: elements.navBtnDossier, pane: elements.tabPaneDossier },
         { key: 'chat', btn: elements.navBtnChat, pane: elements.tabPaneChat },
         { key: 'rebuttal', btn: elements.navBtnRebuttal, pane: elements.tabPaneRebuttal },
         { key: 'kb', btn: elements.navBtnKb, pane: elements.tabPaneKb }
@@ -221,14 +317,10 @@ function setupNavigation() {
                 t.pane.classList.add('hidden');
             }
         });
-
-        elements.mobileNavTabs.forEach(mBtn => {
-            if (mBtn.getAttribute('data-mobile-nav') === key) {
-                mBtn.classList.add('active');
-            } else {
-                mBtn.classList.remove('active');
-            }
-        });
+        if (key === 'dossier') {
+            loadProposalDossier();
+            runSpecVersionDiff();
+        }
         initLucide();
     }
 
@@ -236,17 +328,11 @@ function setupNavigation() {
         if (!btn) return;
         btn.addEventListener('click', () => activateTab(key));
     });
-
-    elements.mobileNavTabs.forEach(mBtn => {
-        mBtn.addEventListener('click', () => {
-            const key = mBtn.getAttribute('data-mobile-nav');
-            if (key) activateTab(key);
-        });
-    });
 }
 
 function switchTab(tabName) {
     if (tabName === 'matrix' && elements.navBtnMatrix) elements.navBtnMatrix.click();
+    else if (tabName === 'dossier' && elements.navBtnDossier) elements.navBtnDossier.click();
     else if (tabName === 'chat' && elements.navBtnChat) elements.navBtnChat.click();
     else if (tabName === 'rebuttal' && elements.navBtnRebuttal) elements.navBtnRebuttal.click();
     else if (tabName === 'kb' && elements.navBtnKb) elements.navBtnKb.click();
@@ -258,11 +344,11 @@ function setupSectorPresets() {
 
     elements.headerSectorSelect.addEventListener('change', (e) => {
         currentSector = e.target.value;
-        if (elements.sampleSpecSelect) {
-            if (currentSector === 'HEALTHCARE_MEDTECH') elements.sampleSpecSelect.value = 'HEALTHCARE_MEDTECH';
-            else if (currentSector === 'CONSTRUCTION_HVAC') elements.sampleSpecSelect.value = 'CONSTRUCTION_HVAC';
-            else elements.sampleSpecSelect.value = 'DEFENSE_IT';
-        }
+        const mappedSector = ['HEALTHCARE_MEDTECH', 'CONSTRUCTION_HVAC', 'CONTRACTS_LEGAL'].includes(currentSector)
+            ? currentSector
+            : 'DEFENSE_IT';
+        if (elements.sampleSpecSelect) elements.sampleSpecSelect.value = mappedSector;
+        if (elements.diffSectorSelect) elements.diffSectorSelect.value = mappedSector;
         updateChatPromptChips();
         showToast(`Sektör profili: ${getSectorLabel(currentSector)}`, 'info');
     });
@@ -270,9 +356,8 @@ function setupSectorPresets() {
     if (elements.sampleSpecSelect) {
         elements.sampleSpecSelect.addEventListener('change', (e) => {
             currentSector = e.target.value;
-            if (elements.headerSectorSelect) {
-                elements.headerSectorSelect.value = currentSector;
-            }
+            if (elements.headerSectorSelect) elements.headerSectorSelect.value = currentSector;
+            if (elements.diffSectorSelect) elements.diffSectorSelect.value = currentSector;
             updateChatPromptChips();
         });
     }
@@ -325,16 +410,33 @@ async function fetchKbStats() {
         if (!resp.ok) return;
         const stats = await resp.json();
 
-        const renderDocPill = (d) => `
+        const renderDocPill = (d, allowDelete = false) => `
             <span class="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)] text-[11px] font-mono">
                 <i data-lucide="file-text" class="w-3 h-3 text-blue-500 shrink-0"></i>
-                <span class="truncate max-w-[165px]">${escapeHtml(d)}</span>
+                <span class="truncate max-w-[155px]">${escapeHtml(d)}</span>
+                ${allowDelete ? `<button type="button" data-del-doc="${escapeHtml(d)}" class="btn-del-single-doc ml-1 text-[var(--text-muted)] hover:text-rose-500 transition-colors" title="Bu dokümanı sil">&times;</button>` : ''}
             </span>
         `;
 
         if (elements.kbDocsTags) {
             if (stats.documents && stats.documents.length > 0) {
-                elements.kbDocsTags.innerHTML = stats.documents.map(renderDocPill).join('');
+                elements.kbDocsTags.innerHTML = stats.documents.map(d => renderDocPill(d, true)).join('');
+                elements.kbDocsTags.querySelectorAll('.btn-del-single-doc').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        const docName = btn.getAttribute('data-del-doc');
+                        if (!docName) return;
+                        try {
+                            const delResp = await fetch(`/api/knowledge-base/documents/${encodeURIComponent(docName)}`, { method: 'DELETE' });
+                            if (!delResp.ok) throw new Error('Doküman silinemedi.');
+                            showToast(`'${docName}' bilgi bankasından kaldırıldı.`, 'info');
+                            fetchSystemStatus();
+                            loadKnowledgeBaseChunks();
+                        } catch (err) {
+                            showToast(err.message, 'error');
+                        }
+                    });
+                });
             } else {
                 elements.kbDocsTags.innerHTML = '<span class="text-[var(--text-muted)] text-xs">Henüz doküman yüklenmedi.</span>';
             }
@@ -342,7 +444,7 @@ async function fetchKbStats() {
 
         if (elements.matrixActiveDocsList) {
             if (stats.documents && stats.documents.length > 0) {
-                elements.matrixActiveDocsList.innerHTML = stats.documents.map(renderDocPill).join('');
+                elements.matrixActiveDocsList.innerHTML = stats.documents.map(d => renderDocPill(d, false)).join('');
             } else {
                 elements.matrixActiveDocsList.innerHTML = '<span class="text-amber-500 text-xs font-medium">Henüz referans ürün dokümanı yüklenmedi.</span>';
             }
@@ -353,7 +455,83 @@ async function fetchKbStats() {
     }
 }
 
-// --- 4. MATRIX, WHAT-IF SIMULATOR & GAP AUDIT CONTROLLER ---
+// --- 4. MULTI-TENDER PORTFOLIO MEMORY ---
+function loadPortfolioFromStorage() {
+    try {
+        const raw = localStorage.getItem('specmatrix-portfolio-v4');
+        if (raw) {
+            tenderPortfolio = JSON.parse(raw);
+            renderPortfolioBar();
+        }
+    } catch (e) {
+        tenderPortfolio = [];
+    }
+
+    if (elements.btnClearPortfolio) {
+        elements.btnClearPortfolio.addEventListener('click', () => {
+            tenderPortfolio = [];
+            localStorage.removeItem('specmatrix-portfolio-v4');
+            renderPortfolioBar();
+            showToast('İhale portföy geçmişi temizlendi.', 'info');
+        });
+    }
+}
+
+function saveToPortfolio(analysis) {
+    if (!analysis || !analysis.spec_name) return;
+    tenderPortfolio = tenderPortfolio.filter(item => item.spec_name !== analysis.spec_name);
+    tenderPortfolio.unshift(analysis);
+    if (tenderPortfolio.length > 6) tenderPortfolio = tenderPortfolio.slice(0, 6);
+    try {
+        localStorage.setItem('specmatrix-portfolio-v4', JSON.stringify(tenderPortfolio));
+    } catch (e) {
+        // Ignore quota limits
+    }
+    renderPortfolioBar();
+}
+
+function renderPortfolioBar() {
+    if (!elements.portfolioHistoryBar || !elements.portfolioItemsList) return;
+    if (tenderPortfolio.length === 0) {
+        elements.portfolioHistoryBar.classList.add('hidden');
+        return;
+    }
+
+    elements.portfolioHistoryBar.classList.remove('hidden');
+    elements.portfolioItemsList.innerHTML = tenderPortfolio.map((item, idx) => {
+        const isCurrent = currentAnalysis && currentAnalysis.spec_name === item.spec_name;
+        const pct = item.summary ? item.summary.tam_uyumlu_pct : 0;
+        const shortName = item.spec_name.replace(/\.[^/.]+$/, '').replace(/_/g, ' ').slice(0, 28);
+        return `
+            <button type="button" data-port-idx="${idx}" class="port-switch-btn px-2.5 py-1 rounded-md text-xs font-mono shrink-0 inline-flex items-center space-x-1.5 transition-all ${
+                isCurrent
+                    ? 'bg-blue-600 text-white font-semibold shadow-xs'
+                    : 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border border-[var(--border-subtle)] hover:text-[var(--text-primary)]'
+            }">
+                <span>${escapeHtml(shortName)}</span>
+                <span class="px-1.5 py-0.2 rounded text-[10px] ${isCurrent ? 'bg-blue-700 text-white' : 'bg-[var(--bg-surface)] text-emerald-400'}">%${pct}</span>
+            </button>
+        `;
+    }).join('');
+
+    elements.portfolioItemsList.querySelectorAll('.port-switch-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const idx = Number(btn.getAttribute('data-port-idx'));
+            const target = tenderPortfolio[idx];
+            if (target) {
+                simulatedResolvedClauses.clear();
+                currentAnalysis = target;
+                recalculateAndRenderMetrics();
+                populateRebuttalClauseDropdown();
+                renderPortfolioBar();
+                showToast(`Portföyden yüklendi: ${target.spec_name}`, 'info');
+            }
+        });
+    });
+    initLucide();
+}
+
+// --- 5. MATRIX, SPEC-LOCK RADAR & WHAT-IF SIMULATOR ---
 function setupMatrixAudit() {
     if (elements.tabBtnFile && elements.tabBtnText) {
         elements.tabBtnFile.addEventListener('click', () => {
@@ -373,15 +551,18 @@ function setupMatrixAudit() {
 
     if (elements.matrixKbDropzone && elements.matrixKbFileInput) {
         elements.matrixKbDropzone.addEventListener('click', () => elements.matrixKbFileInput.click());
+        const updateKbLabel = (file) => {
+            if (elements.matrixKbFileLabel) {
+                elements.matrixKbFileLabel.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+            }
+            elements.matrixKbDropzone.classList.add('file-selected');
+        };
         elements.matrixKbFileInput.addEventListener('change', () => {
             if (elements.matrixKbFileInput.files.length > 0) {
-                const file = elements.matrixKbFileInput.files[0];
-                if (elements.matrixKbFileLabel) {
-                    elements.matrixKbFileLabel.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
-                }
-                elements.matrixKbDropzone.classList.add('file-selected');
+                updateKbLabel(elements.matrixKbFileInput.files[0]);
             }
         });
+        attachDragAndDrop(elements.matrixKbDropzone, elements.matrixKbFileInput, updateKbLabel);
     }
 
     if (elements.btnMatrixUploadKb) {
@@ -432,13 +613,16 @@ function setupMatrixAudit() {
 
     if (elements.specDropzone && elements.specFileInput) {
         elements.specDropzone.addEventListener('click', () => elements.specFileInput.click());
+        const updateSpecLabel = (file) => {
+            elements.specFileLabel.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+            elements.specDropzone.classList.add('file-selected');
+        };
         elements.specFileInput.addEventListener('change', () => {
             if (elements.specFileInput.files.length > 0) {
-                const file = elements.specFileInput.files[0];
-                elements.specFileLabel.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
-                elements.specDropzone.classList.add('file-selected');
+                updateSpecLabel(elements.specFileInput.files[0]);
             }
         });
+        attachDragAndDrop(elements.specDropzone, elements.specFileInput, updateSpecLabel);
     }
 
     if (elements.btnLoadSampleSpec) {
@@ -449,7 +633,6 @@ function setupMatrixAudit() {
         elements.btnStartAnalysis.addEventListener('click', handleAnalyzeUploadedSpec);
     }
 
-    // Filter Buttons
     elements.filterButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             elements.filterButtons.forEach(b => b.classList.remove('active'));
@@ -470,7 +653,6 @@ function setupMatrixAudit() {
         elements.btnExportExcel.addEventListener('click', handleExportExcel);
     }
 
-    // What-If Simulation Reset & Executive Brief Copy
     if (elements.btnResetSimulation) {
         elements.btnResetSimulation.addEventListener('click', () => {
             simulatedResolvedClauses.clear();
@@ -479,11 +661,14 @@ function setupMatrixAudit() {
         });
     }
 
+    if (elements.btnJumpDossier) {
+        elements.btnJumpDossier.addEventListener('click', () => switchTab('dossier'));
+    }
+
     if (elements.btnCopyExecBrief) {
         elements.btnCopyExecBrief.addEventListener('click', copyExecutiveBriefToClipboard);
     }
 
-    // Evidence Drawer Controls
     if (elements.drawerCloseBtn) elements.drawerCloseBtn.addEventListener('click', closeEvidenceDrawer);
     if (elements.drawerBottomClose) elements.drawerBottomClose.addEventListener('click', closeEvidenceDrawer);
     if (elements.drawerBackdrop) elements.drawerBackdrop.addEventListener('click', closeEvidenceDrawer);
@@ -493,6 +678,15 @@ function setupMatrixAudit() {
             if (!activeClause) return;
             toggleClauseSimulation(activeClause.clause_id);
             openEvidenceDrawer(activeClause);
+        });
+    }
+
+    if (elements.btnDrawerCopyProposal) {
+        elements.btnDrawerCopyProposal.addEventListener('click', () => {
+            if (!activeClause || !activeClause.proposal_response_text) return;
+            navigator.clipboard.writeText(activeClause.proposal_response_text).then(() => {
+                showToast(`${activeClause.clause_id} resmi teklif cevabı kopyalandı.`, 'success');
+            });
         });
     }
 
@@ -542,10 +736,11 @@ async function handleAnalyzeSampleSpec() {
         const data = await resp.json();
         finishProgressSimulation(() => {
             currentAnalysis = data;
+            saveToPortfolio(data);
             recalculateAndRenderMetrics();
             populateRebuttalClauseDropdown();
             fetchSystemStatus();
-            showToast('Uyumluluk matrisi ve kanıt doğrulaması tamamlandı.', 'success');
+            showToast('Uyumluluk matrisi, Spec-Lock radarı ve teklif paketi hazırlandı.', 'success');
         });
     } catch (e) {
         hideProgress();
@@ -594,6 +789,7 @@ async function handleAnalyzeUploadedSpec() {
         const data = await resp.json();
         finishProgressSimulation(() => {
             currentAnalysis = data;
+            saveToPortfolio(data);
             recalculateAndRenderMetrics();
             populateRebuttalClauseDropdown();
             fetchSystemStatus();
@@ -616,9 +812,13 @@ function recalculateAndRenderMetrics() {
     let kismenCount = 0;
     let uyumsuzCount = 0;
     let belirtilmemisCount = 0;
+    let specLockCount = 0;
     const redFlags = [];
 
     results.forEach(r => {
+        if (r.vendor_lock_risk === 'YÜKSEK' || r.vendor_lock_risk === 'ORTA') {
+            specLockCount++;
+        }
         const effectiveStatus = simulatedResolvedClauses.has(r.clause_id) ? 'TAM_UYUMLU' : r.status;
         if (effectiveStatus === 'TAM_UYUMLU') tamCount++;
         else if (effectiveStatus === 'KISMEN_UYUMLU') kismenCount++;
@@ -645,13 +845,15 @@ function recalculateAndRenderMetrics() {
     elements.kpiBelirtilmemis.textContent = belirtilmemisCount;
     elements.kpiBelirtilmemisPct.textContent = `%${belPct}`;
 
-    // Calculate Weighted Compliance & Risk Level (including What-If simulation delta)
+    if (elements.specLockSummaryBadge) {
+        elements.specLockSummaryBadge.textContent = `Rekabet Kısıtı (Spec-Lock): ${specLockCount} Madde`;
+    }
+
     const weightedCompliance = Number((((tamCount * 1.0 + kismenCount * 0.5) / total) * 100).toFixed(1));
     let riskLevel = 'DÜŞÜK';
     if (uyumsuzCount >= 2 || weightedCompliance < 65) riskLevel = 'YÜKSEK';
     else if (uyumsuzCount === 1 || weightedCompliance < 85) riskLevel = 'ORTA';
 
-    // Update SVG Circular Gauge
     if (elements.riskPctValue) elements.riskPctValue.textContent = `%${weightedCompliance}`;
     if (elements.riskGapsCount) elements.riskGapsCount.textContent = `${uyumsuzCount} Madde`;
 
@@ -682,28 +884,26 @@ function recalculateAndRenderMetrics() {
         if (uyumsuzCount === 0) {
             elements.riskExecSummary.textContent = 'Kritik teknik sapma bulunmamaktadır. İhaleye doğrudan katılım için teknik yeterlilik tamdır.';
         } else {
-            elements.riskExecSummary.textContent = `${uyumsuzCount} maddede kritik kapasite/kriter sapması mevcuttur. Zeyilname veya ek donanım revizyonu önerilir.`;
+            elements.riskExecSummary.textContent = `${uyumsuzCount} maddede kritik sapma ve ${specLockCount} maddede rekabet kısıtı (Spec-Lock) mevcuttur.`;
         }
     }
 
-    // Update Executive Go / No-Go Decision Strip
     if (elements.execDecisionBadge) {
         if (uyumsuzCount === 0) {
-            elements.execDecisionBadge.textContent = 'DOĞRUDAN KATILIM UYGUN (Teknik Yeterlilik Tam)';
+            elements.execDecisionBadge.textContent = 'DOĞRUDAN KATILIM UYGUN';
             elements.execDecisionBadge.className = 'text-xs font-semibold font-mono px-2.5 py-0.5 rounded badge-tam-uyumlu';
         } else if (uyumsuzCount === 1) {
-            elements.execDecisionBadge.textContent = 'ŞARTLI KATILIM (1 Madde İçin Zeyilname Önerilir)';
+            elements.execDecisionBadge.textContent = 'ŞARTLI KATILIM (1 Zeyilname / Ek Modül)';
             elements.execDecisionBadge.className = 'text-xs font-semibold font-mono px-2.5 py-0.5 rounded badge-kismen-uyumlu';
         } else {
-            elements.execDecisionBadge.textContent = `ŞARTLI KATILIM (${uyumsuzCount} Kritik Sapma · Zeyilname Şart)`;
+            elements.execDecisionBadge.textContent = `ŞARTLI KATILIM (${uyumsuzCount} Gap · Zeyilname Şart)`;
             elements.execDecisionBadge.className = 'text-xs font-semibold font-mono px-2.5 py-0.5 rounded badge-uyumsuz';
         }
     }
 
-    // Show/Hide Simulation Badges
     if (elements.simActiveBadge && elements.btnResetSimulation) {
         if (simulatedResolvedClauses.size > 0) {
-            elements.simActiveBadge.textContent = `What-If Simülasyonu: ${simulatedResolvedClauses.size} Madde Çözüldü Varsayıldı`;
+            elements.simActiveBadge.textContent = `What-If: ${simulatedResolvedClauses.size} Madde Çözüldü Varsayıldı`;
             elements.simActiveBadge.classList.remove('hidden');
             elements.btnResetSimulation.classList.remove('hidden');
         } else {
@@ -712,10 +912,9 @@ function recalculateAndRenderMetrics() {
         }
     }
 
-    // Render Clickable Red Flag Pills
     if (elements.execRedflagsList) {
         if (redFlags.length > 0) {
-            elements.execRedflagsList.innerHTML = `<span class="text-[11px] text-[var(--text-muted)] ml-1">Kritik Engeller:</span>` +
+            elements.execRedflagsList.innerHTML = `<span class="text-[11px] text-[var(--text-muted)] ml-1">Engeller:</span>` +
                 redFlags.map(rf => `
                     <button type="button" data-rf-id="${escapeHtml(rf.clause_id)}" class="rf-jump-pill text-[11px] font-mono px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/30 hover:bg-rose-500/20 transition-colors">
                         ${escapeHtml(rf.clause_id)}
@@ -740,13 +939,14 @@ function copyExecutiveBriefToClipboard() {
     if (!currentAnalysis) return;
     const r = currentAnalysis.results || [];
     const gaps = r.filter(x => x.status === 'UYUMSUZ' && !simulatedResolvedClauses.has(x.clause_id));
+    const locks = r.filter(x => x.vendor_lock_risk === 'YÜKSEK' || x.vendor_lock_risk === 'ORTA');
     const brief = [
-        `SPECMATRIX AI — YÖNETİCİ İHALE UYUMLULUK ÖZETİ`,
+        `SPECMATRIX AI v4.0 — YÖNETİCİ İHALE VE REKABET KISITI ÖZETİ`,
         `Şartname: ${currentAnalysis.spec_name}`,
-        `Toplam Madde: ${r.length} | Tam Uyumlu: ${elements.kpiTam.textContent} (${elements.kpiTamPct.textContent}) | Kritik Gap: ${gaps.length}`,
+        `Toplam Madde: ${r.length} | Tam Uyumlu: ${elements.kpiTam.textContent} (${elements.kpiTamPct.textContent}) | Kritik Gap: ${gaps.length} | Rekabet Kısıtı (Spec-Lock): ${locks.length}`,
         `İhale Kararı: ${elements.execDecisionBadge ? elements.execDecisionBadge.textContent : ''}`,
-        gaps.length > 0 ? `\nKRİTİK UYUMSUZ MADDELER (RED FLAGS):` : `\nTüm kritik teknik şartlar karşılanmaktadır.`,
-        ...gaps.map(g => `- ${g.clause_id} (${g.category}): ${g.explanation}`)
+        gaps.length > 0 ? `\nKRİTİK UYUMSUZ MADDELER VE ÇÖZÜM REÇETELERİ:` : `\nTüm kritik teknik şartlar karşılanmaktadır.`,
+        ...gaps.map(g => `- ${g.clause_id} (${g.category}): ${g.explanation}\n  Çözüm: ${g.remediation_action || ''} (${g.estimated_cost_impact || ''})`)
     ].join('\n');
 
     navigator.clipboard.writeText(brief).then(() => {
@@ -759,7 +959,9 @@ function renderMatrixTable() {
 
     let items = currentAnalysis.results;
 
-    if (currentFilter !== 'ALL') {
+    if (currentFilter === 'SPEC_LOCK') {
+        items = items.filter(i => i.vendor_lock_risk === 'YÜKSEK' || i.vendor_lock_risk === 'ORTA');
+    } else if (currentFilter !== 'ALL') {
         items = items.filter(i => i.status === currentFilter);
     }
 
@@ -790,6 +992,14 @@ function renderMatrixTable() {
             ? `<div class="font-medium text-[var(--text-primary)]">${escapeHtml(item.matched_product)}</div><div class="text-[11px] font-mono text-[var(--text-muted)] truncate max-w-[180px]">${escapeHtml(item.matched_doc || '')}</div>`
             : '<span class="text-[var(--text-muted)]">—</span>';
 
+        const specLockPill = (item.vendor_lock_risk === 'YÜKSEK' || item.vendor_lock_risk === 'ORTA')
+            ? `<div class="mt-1"><span class="inline-flex items-center space-x-1 text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30" title="${escapeHtml(item.vendor_lock_reason || '')}"><span>⚠ SPEC-LOCK (${item.vendor_lock_score})</span></span></div>`
+            : '';
+
+        const recipeHint = (item.status !== 'TAM_UYUMLU' && item.estimated_cost_impact)
+            ? `<div class="mt-1 text-[11px] font-mono text-[var(--text-muted)]">Çözüm Etkisi: <span class="text-blue-400">${escapeHtml(item.estimated_cost_impact)}</span></div>`
+            : '';
+
         const canSimulate = item.status === 'UYUMSUZ' || item.status === 'KISMEN_UYUMLU' || item.status === 'BELIRTILMEMIS';
         const simBtnHtml = canSimulate ? `
             <button type="button" class="btn-sim-clause sm-btn-secondary px-2 py-1 text-[11px] font-mono ${isSimulated ? 'border-blue-500 text-blue-400' : 'text-[var(--text-muted)]'}" data-sim-id="${escapeHtml(item.clause_id)}" title="What-If Simülasyonu: Bu maddeyi zeyilname veya ek teklifle çözüldü varsay">
@@ -799,22 +1009,28 @@ function renderMatrixTable() {
 
         return `
             <tr class="matrix-row" data-idx="${idx}">
-                <td class="py-3 px-3.5 font-mono font-semibold text-[var(--text-primary)] whitespace-nowrap">${escapeHtml(item.clause_id)}</td>
-                <td class="py-3 px-3.5 hidden sm:table-cell">
+                <td class="py-3 px-3.5 font-mono font-semibold text-[var(--text-primary)] whitespace-nowrap align-top">
+                    <div>${escapeHtml(item.clause_id)}</div>
+                    ${specLockPill}
+                </td>
+                <td class="py-3 px-3.5 hidden sm:table-cell align-top">
                     <span class="inline-block text-[11px] px-2 py-0.5 rounded bg-[var(--bg-subtle)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">${escapeHtml(item.category || 'Genel')}</span>
                 </td>
-                <td class="py-3 px-3.5 text-[var(--text-primary)] leading-relaxed">${highlightTechnicalTerms(item.clause_text)}</td>
-                <td class="py-3 px-3.5 text-center whitespace-nowrap">
+                <td class="py-3 px-3.5 text-[var(--text-primary)] leading-relaxed align-top">
+                    <div>${highlightTechnicalTerms(item.clause_text)}</div>
+                    ${recipeHint}
+                </td>
+                <td class="py-3 px-3.5 text-center whitespace-nowrap align-top">
                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-mono font-medium ${badge.cssClass}">
                         <span class="status-dot"></span>
                         <span>${badge.label}</span>
                     </span>
                 </td>
-                <td class="py-3 px-3.5 text-xs hidden md:table-cell">${productInfo}</td>
-                <td class="py-3 px-3.5 text-right whitespace-nowrap space-x-1">
+                <td class="py-3 px-3.5 text-xs hidden md:table-cell align-top">${productInfo}</td>
+                <td class="py-3 px-3.5 text-right whitespace-nowrap space-x-1 align-top">
                     ${simBtnHtml}
                     <button type="button" class="btn-inspect-clause sm-btn-secondary px-2.5 py-1 text-xs inline-flex items-center space-x-1" data-id="${escapeHtml(item.clause_id)}">
-                        <span>Kanıt</span>
+                        <span>Dosya</span>
                         <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-[var(--text-muted)]"></i>
                     </button>
                 </td>
@@ -841,11 +1057,10 @@ function renderMatrixTable() {
     });
 }
 
-// Highlight technical metrics, units, and standards inside requirement & evidence text
 function highlightTechnicalTerms(text) {
     if (!text) return '';
     const escaped = escapeHtml(text);
-    const techRegex = /(\b\d+(?:[.,]\d+)?\s*(?:Gbps|Mbps|GB|TB|inç|saat|m³\/h|°C|dB|Hz|W|V)\b|\+\d+\s*°C|\b(?:AES-256|TLS\s*1\.3|IP\d{2}|MIL-STD-\d+[A-Z]?|FIPS\s*140-\d|ISO\s*\d+|EN\s*\d+|CE\s*MDR|HL7|BACnet|Modbus|D1|L1)\b)/gi;
+    const techRegex = /(\b\d+(?:[.,]\d+)?\s*(?:Gbps|Mbps|GB|TB|inç|saat|m³\/h|°C|dB|Hz|W|V)\b|\+\d+\s*°C|\b(?:AES-256|TLS\s*1\.3|IP\d{2}|MIL-STD-\d+[A-Z]?|FIPS\s*140-\d|ISO\s*\d+|EN\s*\d+|CE\s*MDR|US\s*FDA\s*510k|HL7|BACnet|Modbus|D1|L1)\b)/gi;
     return escaped.replace(techRegex, '<span class="tech-param-pill">$1</span>');
 }
 
@@ -890,6 +1105,21 @@ function openEvidenceDrawer(item) {
         }
     }
 
+    // Spec-Lock Radar Box
+    if (elements.drawerSpeclockBox) {
+        if (item.vendor_lock_risk === 'YÜKSEK' || item.vendor_lock_risk === 'ORTA') {
+            elements.drawerSpeclockBox.classList.remove('hidden');
+            if (elements.drawerSpeclockScore) {
+                elements.drawerSpeclockScore.textContent = `${item.vendor_lock_risk} RİSK · Skor: ${item.vendor_lock_score || 75}/100`;
+            }
+            if (elements.drawerSpeclockReason) {
+                elements.drawerSpeclockReason.textContent = item.vendor_lock_reason || '';
+            }
+        } else {
+            elements.drawerSpeclockBox.classList.add('hidden');
+        }
+    }
+
     elements.drawerClauseText.innerHTML = highlightTechnicalTerms(item.clause_text);
     elements.drawerMatchedProduct.textContent = item.matched_product || 'Eşleşen Ürün Yok';
     elements.drawerDocPage.textContent = item.page_or_section ? `${item.matched_doc || ''} · ${item.page_or_section}` : (item.matched_doc || '—');
@@ -902,9 +1132,19 @@ function openEvidenceDrawer(item) {
 
     elements.drawerExplanation.textContent = item.explanation || '—';
 
+    if (elements.drawerCostImpact) {
+        elements.drawerCostImpact.textContent = item.estimated_cost_impact || 'Ek Maliyet Yok';
+    }
+    if (elements.drawerRemediationAction) {
+        elements.drawerRemediationAction.textContent = item.remediation_action || 'Standart ürün paketi ile karşılanmaktadır.';
+    }
+    if (elements.drawerProposalResponse) {
+        elements.drawerProposalResponse.textContent = item.proposal_response_text || '—';
+    }
+
     const rebuttalJump = document.getElementById('drawer-rebuttal-jump-box');
     if (rebuttalJump) {
-        if (item.status === 'UYUMSUZ' || item.status === 'KISMEN_UYUMLU') {
+        if (item.status === 'UYUMSUZ' || item.status === 'KISMEN_UYUMLU' || item.vendor_lock_risk === 'YÜKSEK') {
             rebuttalJump.classList.remove('hidden');
         } else {
             rebuttalJump.classList.add('hidden');
@@ -933,7 +1173,7 @@ async function handleExportExcel() {
     }
 
     try {
-        showToast('Kurumsal Excel raporu oluşturuluyor...', 'info');
+        showToast('4 Sayfalı Kurumsal İhale Excel Paketi oluşturuluyor...', 'info');
         const resp = await fetch('/api/export/excel', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -946,18 +1186,264 @@ async function handleExportExcel() {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `SpecMatrix_Uyumluluk_${currentAnalysis.spec_name.replace(/\.[^/.]+$/, '')}.xlsx`;
+        a.download = `SpecMatrix_Ihale_Paketi_${currentAnalysis.spec_name.replace(/\.[^/.]+$/, '')}.xlsx`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
-        showToast('Excel Uyumluluk Matrisi indirildi.', 'success');
+        showToast('4 Sayfalı Excel İhale Paketi indirildi.', 'success');
     } catch (e) {
         showToast(e.message, 'error');
     }
 }
 
-// --- 5. PROGRESS BAR CONTROLLER ---
+// --- 6. NEW v4.0 TAB: AUTO-PROPOSAL DOSSIER & SPEC VERSION DIFF ---
+function setupProposalAndDiffTab() {
+    if (elements.subtabBtnProposal && elements.subtabBtnSpecdiff) {
+        elements.subtabBtnProposal.addEventListener('click', () => {
+            elements.subtabBtnProposal.className = 'px-3.5 py-1.5 rounded-md bg-[var(--bg-surface)] text-[var(--text-primary)] font-semibold shadow-xs transition-all inline-flex items-center space-x-2';
+            elements.subtabBtnSpecdiff.className = 'px-3.5 py-1.5 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium transition-all inline-flex items-center space-x-2';
+            elements.subviewProposalDossier.classList.remove('hidden');
+            elements.subviewSpecDiff.classList.add('hidden');
+        });
+
+        elements.subtabBtnSpecdiff.addEventListener('click', () => {
+            elements.subtabBtnSpecdiff.className = 'px-3.5 py-1.5 rounded-md bg-[var(--bg-surface)] text-[var(--text-primary)] font-semibold shadow-xs transition-all inline-flex items-center space-x-2';
+            elements.subtabBtnProposal.className = 'px-3.5 py-1.5 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium transition-all inline-flex items-center space-x-2';
+            elements.subviewSpecDiff.classList.remove('hidden');
+            elements.subviewProposalDossier.classList.add('hidden');
+            runSpecVersionDiff();
+        });
+    }
+
+    if (elements.btnRefreshDossier) {
+        elements.btnRefreshDossier.addEventListener('click', () => {
+            loadProposalDossier();
+            showToast('Teklif dosyası ve BOM paketi güncellendi.', 'success');
+        });
+    }
+
+    if (elements.btnPrintDossier) {
+        elements.btnPrintDossier.addEventListener('click', printProposalDossier);
+    }
+
+    if (elements.btnToggleCustomDiff && elements.customDiffEditorBox) {
+        elements.btnToggleCustomDiff.addEventListener('click', () => {
+            elements.customDiffEditorBox.classList.toggle('hidden');
+        });
+    }
+
+    if (elements.btnRunCustomDiff) {
+        elements.btnRunCustomDiff.addEventListener('click', () => runSpecVersionDiff(true));
+    }
+
+    if (elements.btnCopyFullDossier) {
+        elements.btnCopyFullDossier.addEventListener('click', () => {
+            if (!currentDossier) return;
+            const fullText = [
+                currentDossier.executive_cover_letter,
+                '\n========================================================================',
+                'TEKNİK ŞARTNAMEYE MADDE MADDE RESMİ CEVAP CETVELİ',
+                '========================================================================\n',
+                ...currentDossier.clause_responses.map(c =>
+                    `[${c.clause_id} - ${c.category}]\nŞartname: "${c.clause_text}"\nResmi Cevabımız: ${c.formal_response}\nGap/BOM Notu: ${c.remediation_action} (${c.estimated_cost_impact})\n`
+                )
+            ].join('\n');
+            navigator.clipboard.writeText(fullText).then(() => {
+                showToast('Tam Teknik Teklif ve Cevap Dosyası panoya kopyalandı.', 'success');
+            });
+        });
+    }
+
+    if (elements.btnRunSpecDiff) {
+        elements.btnRunSpecDiff.addEventListener('click', () => runSpecVersionDiff(false));
+    }
+    if (elements.diffSectorSelect) {
+        elements.diffSectorSelect.addEventListener('change', () => runSpecVersionDiff(false));
+    }
+}
+
+function printProposalDossier() {
+    if (!currentDossier) {
+        showToast('Önce teklif dosyasının yüklenmesini bekleyin.', 'error');
+        return;
+    }
+    const win = window.open('', '_blank', 'width=960,height=800');
+    if (!win) {
+        showToast('Açılır pencere engellendi; tarayıcı iznini kontrol edin.', 'error');
+        return;
+    }
+    const rowsHtml = currentDossier.clause_responses.map(c => `
+        <tr>
+            <td style="font-family:monospace;font-weight:700;white-space:nowrap;">${escapeHtml(c.clause_id)}<br><small style="color:#666;">${escapeHtml(c.status)}</small></td>
+            <td><strong>${escapeHtml(c.category)}</strong><br>${escapeHtml(c.clause_text)}</td>
+            <td>${escapeHtml(c.formal_response)}<br><small style="color:#2563eb;"><strong>Çözüm/Maliyet:</strong> ${escapeHtml(c.estimated_cost_impact)}</small></td>
+        </tr>
+    `).join('');
+
+    win.document.write(`<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"><title>SpecMatrix Resmi Teknik Teklif Dosyası — ${escapeHtml(currentDossier.spec_name)}</title>
+        <style>
+            body { font-family: 'Segoe UI', Arial, sans-serif; color: #111; margin: 32px; line-height: 1.5; font-size: 12px; }
+            h1 { font-size: 18px; margin-bottom: 4px; border-bottom: 2px solid #111; padding-bottom: 8px; }
+            .meta { color: #555; margin-bottom: 18px; font-size: 11px; }
+            pre { background: #f7f7f8; border: 1px solid #ddd; padding: 14px; white-space: pre-wrap; font-family: 'Consolas', monospace; font-size: 11px; border-radius: 6px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+            th, td { border: 1px solid #ccc; padding: 8px 10px; vertical-align: top; text-align: left; }
+            th { background: #1e293b; color: #fff; font-size: 11px; text-transform: uppercase; }
+        </style></head><body>
+        <h1>SPECMATRIX AI — RESMİ TEKNİK TEKLİF VE ŞARTNAMEYE CEVAP DOSYASI</h1>
+        <div class="meta">Şartname: <strong>${escapeHtml(currentDossier.spec_name)}</strong> | Toplam Madde: ${currentDossier.total_clauses} | Tam Uyumlu: ${currentDossier.compliant_clauses} | Kritik Gap: ${currentDossier.gap_clauses}</div>
+        <h3>1. Resmi Teklif Sunum Üst Yazısı ve Optimum BOM Paketi</h3>
+        <pre>${escapeHtml(currentDossier.executive_cover_letter)}</pre>
+        <h3>2. Teknik Şartnameye Madde Madde İstekli Cevap Cetveli</h3>
+        <table><thead><tr><th style="width:14%">Madde / Durum</th><th style="width:38%">Şartname Gereksinimi</th><th style="width:48%">İstekli Firma Resmi Cevap & Taahhüt Metni</th></tr></thead>
+        <tbody>${rowsHtml}</tbody></table>
+        <script>window.onload = function(){ window.print(); };<\/script>
+    </body></html>`);
+    win.document.close();
+}
+
+async function loadProposalDossier() {
+    try {
+        const company = elements.rebuttalCompanyName ? elements.rebuttalCompanyName.value : 'ABC Teknoloji ve Savunma Sanayii A.Ş.';
+        const authority = elements.rebuttalAuthorityName ? elements.rebuttalAuthorityName.value : 'İhale Komisyonu Başkanlığı';
+        const resp = await fetch('/api/proposal/dossier', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                company_name: company,
+                authority_name: authority,
+                analysis: currentAnalysis || null
+            })
+        });
+        if (!resp.ok) return;
+        const data = await resp.json();
+        currentDossier = data;
+
+        if (elements.dossierBomList) {
+            elements.dossierBomList.innerHTML = data.recommended_bom.map((b, i) => `
+                <div class="p-2.5 sm-card-subtle flex items-start space-x-2.5">
+                    <span class="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-400 border border-blue-500/30 shrink-0">BOM-0${i + 1}</span>
+                    <span class="text-xs text-[var(--text-primary)] leading-snug">${escapeHtml(b)}</span>
+                </div>
+            `).join('');
+        }
+
+        if (elements.dossierCoverLetter) {
+            elements.dossierCoverLetter.textContent = data.executive_cover_letter;
+        }
+
+        if (elements.dossierClausesCount) {
+            elements.dossierClausesCount.textContent = `${data.total_clauses} Madde · ${data.compliant_clauses} Tam Uyumlu`;
+        }
+
+        if (elements.dossierClausesContainer) {
+            elements.dossierClausesContainer.innerHTML = data.clause_responses.map(c => {
+                const badge = getStatusBadge(c.status);
+                return `
+                    <div class="p-3.5 sm-card-subtle space-y-2">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <span class="font-mono text-xs font-bold text-[var(--text-primary)]">${escapeHtml(c.clause_id)}</span>
+                                <span class="text-[11px] text-[var(--text-muted)]">${escapeHtml(c.category)}</span>
+                            </div>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono ${badge.cssClass}">
+                                <span class="status-dot"></span>
+                                <span>${badge.label}</span>
+                            </span>
+                        </div>
+                        <p class="text-[11px] text-[var(--text-secondary)]">${highlightTechnicalTerms(c.clause_text)}</p>
+                        <div class="p-2.5 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs font-mono text-[var(--text-primary)] leading-relaxed">
+                            ${escapeHtml(c.formal_response)}
+                        </div>
+                        <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] pt-1">
+                            <span class="text-[var(--text-secondary)]"><strong>Aksiyon:</strong> ${escapeHtml(c.remediation_action)}</span>
+                            <span class="font-mono text-blue-400 shrink-0">${escapeHtml(c.estimated_cost_impact)}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        initLucide();
+    } catch (e) {
+        console.error('Failed to load proposal dossier:', e);
+    }
+}
+
+async function runSpecVersionDiff(isCustom = false) {
+    try {
+        const sectorVal = elements.diffSectorSelect ? elements.diffSectorSelect.value : 'DEFENSE_IT';
+        let reqBody = { sector: sectorVal, use_sample_addendum: true };
+
+        if (isCustom === true) {
+            const oldTxt = elements.diffOldTextarea ? elements.diffOldTextarea.value.trim() : '';
+            const newTxt = elements.diffNewTextarea ? elements.diffNewTextarea.value.trim() : '';
+            if (!oldTxt || !newTxt) {
+                showToast('Lütfen hem v1 hem de v2 şartname metinlerini girin.', 'error');
+                return;
+            }
+            reqBody = {
+                sector: sectorVal,
+                use_sample_addendum: false,
+                old_spec_text: oldTxt,
+                new_spec_text: newTxt
+            };
+        }
+
+        const resp = await fetch('/api/spec-diff', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(reqBody)
+        });
+        if (!resp.ok) return;
+        const diff = await resp.json();
+
+        if (elements.diffSpecTitle) elements.diffSpecTitle.textContent = diff.spec_title;
+        if (elements.diffExecSummary) elements.diffExecSummary.textContent = diff.executive_diff_summary;
+        if (elements.diffOldPct) elements.diffOldPct.textContent = `%${diff.old_compliance_pct}`;
+        if (elements.diffNewPct) elements.diffNewPct.textContent = `%${diff.new_compliance_pct}`;
+        if (elements.diffDeltaPct) elements.diffDeltaPct.textContent = `+${diff.compliance_delta_pct}%`;
+        if (elements.diffGapsDelta) elements.diffGapsDelta.textContent = `${diff.old_gaps_count} Gap → ${diff.new_gaps_count} Gap`;
+
+        if (elements.diffItemsContainer) {
+            elements.diffItemsContainer.innerHTML = diff.items.map(item => {
+                const isRelaxed = item.change_type.includes('ESNETİLDİ');
+                const isUnchanged = item.change_type === 'DEĞİŞMEDİ';
+                const cardBorder = isRelaxed ? 'border-l-4 border-l-emerald-500' : (isUnchanged ? 'opacity-75' : 'border-l-4 border-l-blue-500');
+
+                return `
+                    <div class="sm-card p-3.5 space-y-2 ${cardBorder}">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div class="flex items-center space-x-2">
+                                <span class="font-mono text-xs font-bold text-[var(--text-primary)]">${escapeHtml(item.clause_id)}</span>
+                                <span class="text-[11px] text-[var(--text-muted)]">${escapeHtml(item.category)}</span>
+                                <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded ${isRelaxed ? 'badge-tam-uyumlu' : 'badge-belirtilmemis'}">${escapeHtml(item.change_type)}</span>
+                            </div>
+                            <span class="font-mono text-xs font-semibold text-blue-400">${escapeHtml(item.highlighted_delta)}</span>
+                        </div>
+                        ${!isUnchanged ? `
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs">
+                                <div class="p-2.5 rounded-lg bg-rose-500/5 border border-rose-500/20">
+                                    <span class="text-[10px] font-mono uppercase text-rose-400 block mb-1">v1 İlk İlan (${escapeHtml(item.old_status || '')})</span>
+                                    <p class="text-[var(--text-secondary)] line-through">${escapeHtml(item.old_text || '')}</p>
+                                </div>
+                                <div class="p-2.5 rounded-lg bg-emerald-500/5 border border-emerald-500/20">
+                                    <span class="text-[10px] font-mono uppercase text-emerald-400 block mb-1">v2 Zeyilname Sonrası (${escapeHtml(item.new_status || '')})</span>
+                                    <p class="text-[var(--text-primary)] font-medium">${highlightTechnicalTerms(item.new_text || '')}</p>
+                                </div>
+                            </div>
+                        ` : `<p class="text-xs text-[var(--text-secondary)]">${escapeHtml(item.new_text || '')}</p>`}
+                        <div class="text-[11px] font-mono text-emerald-400">${escapeHtml(item.impact_summary)}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+    } catch (e) {
+        console.error('Spec diff error:', e);
+    }
+}
+
+// --- 7. PROGRESS BAR CONTROLLER ---
 let progressTimer = null;
 function startProgressSimulation(isFastMode = true) {
     if (!elements.analysisProgressPanel) return;
@@ -977,7 +1463,7 @@ function startProgressSimulation(isFastMode = true) {
                 if (pct > 85) pct = 85;
                 elements.progressPct.textContent = `${pct}%`;
                 elements.progressBarFill.style.width = `${pct}%`;
-                elements.progressStepText.textContent = '2/3 Sayısal eşikler ve kanıt alıntıları doğrulanıyor...';
+                elements.progressStepText.textContent = '2/3 Spec-Lock rekabet kısıtı radarı ve resmi teklif cevap cetveli derleniyor...';
             }
         }, 70);
     } else {
@@ -995,7 +1481,7 @@ function startProgressSimulation(isFastMode = true) {
                 if (pct >= 30 && pct < 60) {
                     elements.progressStepText.textContent = '2/4 Yerel model doküman alıntılarını ve teknik eşikleri kontrol ediyor...';
                 } else if (pct >= 60) {
-                    elements.progressStepText.textContent = '3/4 Kanıt doğrulama kuralları ve uyumluluk matrisi derleniyor...';
+                    elements.progressStepText.textContent = '3/4 Spec-Lock radarı ve uyumluluk matrisi derleniyor...';
                 }
             }
         }, 800);
@@ -1023,7 +1509,7 @@ function hideProgress() {
     }
 }
 
-// --- 6. CONVERSATIONAL RAG CHAT COPILOT (With Realistic Cognitive Thinking Delay) ---
+// --- 8. CONVERSATIONAL RAG CHAT COPILOT (With Realistic Cognitive Thinking Delay) ---
 async function executeChatQuery(queryText = null) {
     const rawVal = queryText !== null ? queryText : (elements.chatInputText ? elements.chatInputText.value : '');
     const query = String(rawVal).trim();
@@ -1060,7 +1546,6 @@ async function executeChatQuery(queryText = null) {
         }
         const data = await resp.json();
 
-        // Ensure a realistic cognitive thinking period (minimum ~1850ms) when in fast/mock mode
         const elapsed = performance.now() - startTime;
         const minThinkingMs = 1850;
         if (elapsed < minThinkingMs) {
@@ -1136,17 +1621,22 @@ function updateChatPromptChips() {
         chips = [
             'AeroFlow Pro santralin nominal hava debisi ve sızdırmazlık sınıfı nedir?',
             'Santral EN 1886 D1 ve L1 standartlarını karşılıyor mu?',
-            'Havalimanı şartnamesindeki 20.000 m³/h farkı için itiraz stratejisi nedir?'
+            'Şartnamedeki adrese teslim / rekabet kısıtı (Spec-Lock) maddeleri hangileri?'
+        ];
+    } else if (currentSector === 'CONTRACTS_LEGAL') {
+        chips = [
+            'Kurumsal SLA erişilebilirlik oranımız ve cezai şart üst sınırımız nedir?',
+            'Sözleşmedeki adrese teslim veya ağırlaştırıcı maddeler (Spec-Lock) hangileri?',
+            'Kaynak kod devri talebine karşı Yazılım Escrow politikamız nedir?'
         ];
     } else {
         chips = [
-            'Bu şartnamede elenmemize yol açabilecek uyumsuz maddeler hangileri?',
+            'Şartnamedeki adrese teslim / rekabet kısıtı (Spec-Lock) maddeleri hangileri?',
             'AegisGuard X-500 cihazının çalışma sıcaklığı ve iklim dayanımı nedir?',
-            '40 Gbps verim farkını zeyilname ile nasıl savunabiliriz?'
+            'Gap kapatma reçetesi ve teklif paketi (BOM) maliyet etkisi nedir?'
         ];
     }
 
-    // 1. Mobile/Tablet Horizontal Chips
     if (elements.chatPromptChips) {
         elements.chatPromptChips.innerHTML = chips.map(q => `
             <button type="button" class="chat-chip px-2.5 py-1 rounded-md shrink-0 text-[11px]">
@@ -1163,7 +1653,6 @@ function updateChatPromptChips() {
         });
     }
 
-    // 2. Desktop Sidebar Vertically Wrapped Cards (Full legibility, zero truncation)
     if (elements.chatSidebarPrompts) {
         elements.chatSidebarPrompts.innerHTML = chips.map(q => `
             <button type="button" class="chat-chip w-full text-left p-2.5 rounded-lg text-xs leading-snug flex items-start space-x-2">
@@ -1311,7 +1800,7 @@ function formatMarkdown(text) {
         .replace(/^\- (.*?)$/gm, '<li class="ml-4 list-disc">$1</li>');
 }
 
-// --- 7. TENDER REBUTTAL & EXCEPTION GENERATOR ---
+// --- 9. TENDER REBUTTAL & BATCH ZEYİLNAME GENERATOR ---
 function setupRebuttalGenerator() {
     if (!elements.btnGenerateRebuttal) return;
 
@@ -1325,6 +1814,10 @@ function setupRebuttalGenerator() {
     });
 
     elements.btnGenerateRebuttal.addEventListener('click', handleGenerateRebuttal);
+
+    if (elements.btnGenerateBatchRebuttal) {
+        elements.btnGenerateBatchRebuttal.addEventListener('click', handleGenerateBatchRebuttal);
+    }
 
     if (elements.btnCopyRebuttal) {
         elements.btnCopyRebuttal.addEventListener('click', () => {
@@ -1342,7 +1835,7 @@ function setupRebuttalGenerator() {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `Zeyilname_Talebi_${elements.rebuttalClauseSelect.value || 'Madde'}.txt`;
+            a.download = `Zeyilname_Talebi_${elements.rebuttalClauseSelect.value || 'Toplu_Paket'}.txt`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -1358,10 +1851,11 @@ function populateRebuttalClauseDropdown() {
     const clauses = currentAnalysis.results;
     elements.rebuttalClauseSelect.innerHTML = '<option value="">İtiraz edilecek şartname maddesini seçin...</option>' +
         clauses.map(c => {
+            const lockFlag = (c.vendor_lock_risk === 'YÜKSEK' || c.vendor_lock_risk === 'ORTA') ? '[SPEC-LOCK] ' : '';
             const tag = c.status === 'UYUMSUZ' ? '[GAP]' : (c.status === 'KISMEN_UYUMLU' ? '[KISMEN]' : '[UYUMLU]');
             return `
                 <option value="${escapeHtml(c.clause_id)}">
-                    ${tag} ${escapeHtml(c.clause_id)} — ${escapeHtml(c.clause_text.slice(0, 62))}...
+                    ${lockFlag}${tag} ${escapeHtml(c.clause_id)} — ${escapeHtml(c.clause_text.slice(0, 58))}...
                 </option>
             `;
         }).join('');
@@ -1416,11 +1910,39 @@ async function handleGenerateRebuttal() {
     }
 }
 
-// --- 8. KNOWLEDGE BASE & CHUNKS EXPLORER ---
+async function handleGenerateBatchRebuttal() {
+    try {
+        showToast('Tüm Gap ve Spec-Lock maddeleri için toplu zeyilname paketi derleniyor...', 'info');
+        const payload = {
+            sector: currentSector,
+            company_name: elements.rebuttalCompanyName.value.trim() || 'İstekli Firma',
+            authority_name: elements.rebuttalAuthorityName.value.trim() || 'İhale Komisyonu Başkanlığı',
+            rebuttal_strategy: elements.rebuttalStrategySelect.value,
+            analysis: currentAnalysis || null
+        };
+
+        const resp = await fetch('/api/rebuttal/batch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!resp.ok) throw new Error('Toplu zeyilname üretimi başarısız.');
+        const data = await resp.json();
+
+        elements.rebuttalLetterPreview.textContent = data.combined_official_letter;
+        showToast(`${data.total_objected_clauses} maddeyi kapsayan Toplu Zeyilname Paketi üretildi.`, 'success');
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+// --- 10. KNOWLEDGE BASE & CHUNKS EXPLORER ---
 function setupKnowledgeBase() {
     if (elements.kbDropzone && elements.kbFileInput) {
         elements.kbDropzone.addEventListener('click', () => elements.kbFileInput.click());
         elements.kbFileInput.addEventListener('change', handleUploadKbDocument);
+        attachDragAndDrop(elements.kbDropzone, elements.kbFileInput, () => handleUploadKbDocument());
     }
 
     if (elements.btnLoadDemoKb) {
@@ -1532,7 +2054,7 @@ function renderChunksList(filterQuery = '') {
     initLucide();
 }
 
-// --- 9. ARCHITECTURAL TOAST NOTIFICATIONS ---
+// --- 11. ARCHITECTURAL TOAST NOTIFICATIONS ---
 function showToast(message, type = 'info') {
     if (!elements.toastContainer) return;
 

@@ -1,0 +1,17 @@
+KURUMSAL BİLİŞİM VE YÖNETİLEN HİZMET ALIMI
+İDARİ VE HUKUKİ SÖZLEŞME TASLAĞI / ŞARTNAMESİ
+
+İHALE / SÖZLEŞME NO: 2026/HUKUK-BT-8840
+BÖLÜM 5: HİZMET SEVİYESİ, VERİ GÜVENLİĞİ VE HUKUKİ YÜKÜMLÜLÜKLER
+
+Madde 5.1.1: Yüklenici, sözleşme konusu tüm veri işleme faaliyetlerinde 6698 Sayılı KVKK hükümlerine tam uyum sağlamalı ve geçerli ISO 27001 Bilgi Güvenliği Yönetim Sistemi sertifikasına sahip olmalıdır.
+
+Madde 5.1.2: Yüklenici tarafından işletilecek platformda yıllık kesintisiz erişilebilirlik (SLA Uptime) oranı en az %99.999 olmalı ve sıfır planlı kesinti taahhüt edilmelidir.
+
+Madde 5.2.1: Kritik arıza bildirimlerinde Yüklenici 7/24 esasına göre en geç 30 dakika içerisinde ilk müdahaleyi gerçekleştirmeli ve sistemi en geç 4 saat içinde çalışır hale getirmelidir.
+
+Madde 5.2.2: Hizmet seviyesi ihlallerinde uygulanacak cezai şart üst sınırı toplam sözleşme bedelinin %50 oranına kadar uygulanabilir olmalı ve Yüklenici her türlü dolaylı kâr kaybını sınırsız tazmin etmelidir.
+
+Madde 5.3.1: Sözleşme kapsamında sunulan tüm ticari yazılım platformlarının açık kaynak kodları (source code) ve tüm fikri mülkiyet hakları bedelsiz ve koşulsuz olarak İdareye devredilmelidir.
+
+Madde 5.3.2: Sistem ve entegrasyon hizmetleri kesin kabul tarihinden itibaren en az 24 ay süreyle tam kapsamlı garanti ve yama desteği altında olmalıdır.

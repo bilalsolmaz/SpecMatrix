@@ -358,9 +358,15 @@ h1, h2, h3, h4, .font-display {
 }
 
 .sm-dropzone:hover,
-.sm-dropzone.file-selected {
+.sm-dropzone.file-selected,
+.sm-dropzone.drag-active {
     border-color: var(--accent-primary);
     background-color: var(--accent-subtle);
+}
+
+.sm-dropzone.drag-active {
+    box-shadow: 0 0 0 3px var(--accent-subtle);
+    transform: scale(1.005);
 }
 
 /* Matrix Table Rows */

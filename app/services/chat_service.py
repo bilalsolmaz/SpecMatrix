@@ -213,8 +213,35 @@ Lütfen yukarıdaki doküman kanıtlarına dayanarak geçerli bir JSON yanıtı 
         citations: List[ChatCitation] = []
         answer_parts: List[str] = []
 
-        # Case A: Questions about Gaps / Uyumsuzluklar
-        if any(w in q_lower for w in ["risk", "uyumsuz", "gap", "açık", "eksik", "karşılanma"]):
+        # Case A1: Spec-Lock / Vendor Bias / Adrese Teslim Questions
+        if any(w in q_lower for w in ["adrese teslim", "rekabet", "spec-lock", "speclock", "kısıt", "kik"]):
+            if active_clauses:
+                locked = [c for c in active_clauses if c.get("vendor_lock_risk") in ("YÜKSEK", "ORTA")]
+                if locked:
+                    answer_parts.append(f"İncelenen şartnamede **4734 Sayılı KİK Madde 12** kapsamında rekabeti daraltıcı nitelikte **{len(locked)} adet şüpheli madde (Spec-Lock)** tespit edilmiştir:")
+                    for item in locked:
+                        answer_parts.append(f"- **{item.get('clause_id')} (Skor: {item.get('vendor_lock_score', 75)}/100):** {item.get('vendor_lock_reason', '')}")
+                    answer_parts.append("\n**Önerilen Aksiyon:** 'Zeyilname & İtiraz Robotu' sekmesindeki **Toplu Zeyilname Paketi Üret** butonuyla bu maddelerin tamamı için birleşik resmi itiraz dilekçesi oluşturabilirsiniz.")
+                else:
+                    answer_parts.append("İncelenen şartnamede adrese teslim veya doğrudan rekabeti kısıtlayıcı bir eşik (Spec-Lock) tespit edilmemiştir.")
+            else:
+                answer_parts.append("Rekabet kısıtı (Spec-Lock) analizi için lütfen önce bir şartnameyi denetleyin.")
+
+        # Case A2: BOM / Teklif Paketi / Maliyet Etkisi Questions
+        elif any(w in q_lower for w in ["bom", "teklif paketi", "maliyet", "bütçe", "çözüm reçete"]):
+            if active_clauses:
+                gaps = [c for c in active_clauses if c.get("status") != "TAM_UYUMLU"]
+                answer_parts.append("Aktif şartname için **Gap Kapatma ve Maliyet Etkisi Özeti**:")
+                if gaps:
+                    for item in gaps:
+                        answer_parts.append(f"- **{item.get('clause_id')} ({item.get('status')}):** {item.get('remediation_action', '')} — *Tahmini Etki: {item.get('estimated_cost_impact', '')}*")
+                else:
+                    answer_parts.append("- Tüm maddeler standart ürün paketiyle **%0 ek maliyet** ile karşılanmaktadır.")
+            else:
+                answer_parts.append("Teklif paketi (BOM) ve maliyet etkisi analizi için lütfen önce bir şartnameyi denetleyin.")
+
+        # Case A3: Questions about Gaps / Uyumsuzluklar
+        elif any(w in q_lower for w in ["risk", "uyumsuz", "gap", "açık", "eksik", "karşılanma"]):
             if active_clauses:
                 uyumsuz_list = [c for c in active_clauses if c.get("status") in ("UYUMSUZ", "KISMEN_UYUMLU")]
                 if uyumsuz_list:
@@ -229,9 +256,9 @@ Lütfen yukarıdaki doküman kanıtlarına dayanarak geçerli bir JSON yanıtı 
                                 exact_quote=item.get("exact_quote"),
                                 relevance_score=0.98
                             ))
-                    answer_parts.append("\n💡 **Tavsiye:** Bu maddeler için 'Zeyilname & İtiraz Robotu' üzerinden resmi itiraz dilekçesi taslağı oluşturabilirsiniz.")
+                    answer_parts.append("\n**Stratejik Tavsiye:** Bu maddeler için 'Zeyilname & İtiraz Robotu' üzerinden tekil veya toplu itiraz dilekçesi oluşturabilirsiniz.")
                 else:
-                    answer_parts.append("Harika haber! İncelenen şartnamede herhangi bir doğrudan uygunsuzluk (Gap) tespit edilmemiştir.")
+                    answer_parts.append("İncelenen şartnamede herhangi bir doğrudan uygunsuzluk (Gap) tespit edilmemiştir.")
             else:
                 answer_parts.append("Aktif incelenen şartnamede risk analizi yapmak için lütfen önce bir şartname analiz edin.")
 

@@ -2,37 +2,55 @@
 
 from functools import lru_cache
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Tuple
+import time
 import urllib.request
 import json
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+_OLLAMA_STATUS_CACHE: Dict[str, Tuple[float, Dict[str, Any]]] = {}
+_OLLAMA_CACHE_TTL_SEC = 2.5
 
-def check_ollama_status(base_url: str = "http://localhost:11434", timeout: float = 1.5) -> Dict[str, Any]:
-    """Check whether the local Ollama instance is reachable and retrieve available models."""
-    url = f"{base_url.rstrip('/')}/api/tags"
+
+def check_ollama_status(base_url: str = "http://localhost:11434", timeout: float = 1.5, use_cache: bool = True) -> Dict[str, Any]:
+    """Check whether the local Ollama instance is reachable and retrieve available models with short TTL cache."""
+    clean_base = base_url.rstrip("/")
+    now = time.monotonic()
+    if use_cache and clean_base in _OLLAMA_STATUS_CACHE:
+        ts, cached_val = _OLLAMA_STATUS_CACHE[clean_base]
+        if now - ts < _OLLAMA_CACHE_TTL_SEC:
+            return cached_val
+
+    url = f"{clean_base}/api/tags"
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "SpecMatrix-AI/1.0"})
+        req = urllib.request.Request(url, headers={"User-Agent": "SpecMatrix-AI/4.1"})
         with urllib.request.urlopen(req, timeout=timeout) as response:
             if response.status == 200:
                 data = json.loads(response.read().decode("utf-8"))
                 models = [m.get("name", "") for m in data.get("models", []) if m.get("name")]
-                return {
+                res = {
                     "available": True,
                     "models": models,
                     "error": None
                 }
+                _OLLAMA_STATUS_CACHE[clean_base] = (now, res)
+                return res
     except Exception as exc:
-        return {
+        res = {
             "available": False,
             "models": [],
             "error": str(exc)
         }
-    return {
+        _OLLAMA_STATUS_CACHE[clean_base] = (now, res)
+        return res
+
+    res = {
         "available": False,
         "models": [],
         "error": "Bilinmeyen Ollama bağlantı durumu"
     }
+    _OLLAMA_STATUS_CACHE[clean_base] = (now, res)
+    return res
 
 
 def resolve_ollama_model(base_url: str = "http://localhost:11434", preferred_model: str = "llama3.2:3b") -> Optional[str]:
@@ -102,6 +120,7 @@ class Settings(BaseSettings):
     HOST: str = "127.0.0.1"
     PORT: int = 8000
     DEBUG: bool = True
+    MAX_UPLOAD_SIZE_MB: int = 25
 
     # RAG & Chunking Settings
     CHUNK_SIZE: int = 650

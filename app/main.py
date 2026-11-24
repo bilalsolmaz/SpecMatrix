@@ -29,6 +29,12 @@ from app.models.schemas import (
     ChatResponse,
     RebuttalRequest,
     RebuttalResponse,
+    BatchRebuttalRequest,
+    BatchRebuttalResponse,
+    ProposalDossierRequest,
+    ProposalDossierResponse,
+    SpecDiffRequest,
+    SpecDiffResponse,
     RiskScoreResponse,
     SectorType,
 )
@@ -38,6 +44,7 @@ from app.services.rag_engine import RAGComplianceEngine
 from app.services.export_service import ComplianceExcelExporter
 from app.services.chat_service import ConversationalRAGChatService
 from app.services.rebuttal_service import TenderRebuttalService
+from app.services.intelligence_service import ProposalDossierGenerator, SpecDiffEngine
 
 # Global Service Instances
 settings = get_settings()
@@ -68,8 +75,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="SpecMatrix AI",
-    description="RAG-Based Technical Specification Compliance and Proposal Verification Engine",
-    version="1.0.0",
+    description="Enterprise RAG Specification Compliance, Spec-Lock Radar & Proposal Engineering Platform",
+    version="4.1.0",
     lifespan=lifespan
 )
 
@@ -179,6 +186,12 @@ async def upload_document(file: UploadFile = File(...)):
 
     try:
         content = await file.read()
+        max_bytes = settings.MAX_UPLOAD_SIZE_MB * 1024 * 1024
+        if len(content) > max_bytes:
+            raise HTTPException(
+                status_code=413,
+                detail=f"Dosya boyutu çok büyük. Azami yükleme sınırı {settings.MAX_UPLOAD_SIZE_MB} MB'dir."
+            )
         temp_path.write_bytes(content)
 
         chunks = doc_parser.parse_file(temp_path)
@@ -196,11 +209,25 @@ async def upload_document(file: UploadFile = File(...)):
             "message": f"'{safe_original_name}' başarıyla yüklendi ve indekslendi ({len(chunks)} parça).",
             "stats": stats
         }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Doküman işleme hatası: {str(e)}")
     finally:
         if temp_path.exists():
             temp_path.unlink()
+
+
+@app.delete("/api/knowledge-base/documents/{doc_name}")
+def delete_single_document(doc_name: str):
+    """Remove a single document and its chunks from the knowledge base."""
+    removed_count = hybrid_search.delete_document(doc_name)
+    if removed_count == 0:
+        raise HTTPException(status_code=404, detail=f"'{doc_name}' bilgi bankasında bulunamadı.")
+    return {
+        "message": f"'{doc_name}' silindi ({removed_count} parça kaldırıldı).",
+        "stats": hybrid_search.get_stats()
+    }
 
 
 @app.delete("/api/knowledge-base/clear")
@@ -227,6 +254,8 @@ def analyze_sample_specification(
         sample_spec = settings.SAMPLE_SPECS_DIR / "Sehir_Hastanesi_Yogun_Bakim_Monitoru_Teknik_Sartnamesi.txt"
     elif sector == SectorType.CONSTRUCTION_HVAC:
         sample_spec = settings.SAMPLE_SPECS_DIR / "Havalimani_Mekanik_Havalandirma_Teknik_Sartnamesi.txt"
+    elif sector == SectorType.CONTRACTS_LEGAL:
+        sample_spec = settings.SAMPLE_SPECS_DIR / "Kurumsal_BT_Hizmet_Alimi_Idari_ve_Hukuki_Sozlesme_Sartnamesi.txt"
     else:
         sample_spec = settings.SAMPLE_SPECS_DIR / "Kamu_Siber_Guvenlik_Teknik_Sartnamesi.txt"
 
@@ -264,6 +293,55 @@ def chat_with_documents(request: ChatRequest):
 def generate_tender_rebuttal(request: RebuttalRequest):
     """Draft an official objection petition (Zeyilname / Şerh) for a specific non-compliant clause."""
     return rebuttal_service.generate_rebuttal(request)
+
+
+@app.post("/api/rebuttal/batch", response_model=BatchRebuttalResponse)
+def generate_batch_tender_rebuttal(request: BatchRebuttalRequest):
+    """Generate a combined official Zeyilname dossier for all non-compliant and vendor-locked clauses."""
+    global latest_analysis
+    target_analysis = request.analysis or latest_analysis
+    if not target_analysis:
+        target_analysis = analyze_sample_specification(sector=request.sector or SectorType.DEFENSE_IT, force_mock=True)
+    return rebuttal_service.generate_batch_rebuttal(target_analysis, request)
+
+
+@app.get("/api/proposal/dossier", response_model=ProposalDossierResponse)
+def get_proposal_response_dossier(
+    company_name: str = "ABC Teknoloji ve Savunma Sanayii A.Ş.",
+    authority_name: str = "İhale ve Satın Alma Komisyonu Başkanlığı"
+):
+    """Generate a complete clause-by-clause technical proposal response dossier and multi-product BOM."""
+    global latest_analysis
+    if not latest_analysis:
+        analyze_sample_specification(sector=SectorType.DEFENSE_IT, force_mock=True)
+    return ProposalDossierGenerator.generate_full_dossier(
+        analysis=latest_analysis,
+        company_name=company_name,
+        authority_name=authority_name
+    )
+
+
+@app.post("/api/proposal/dossier", response_model=ProposalDossierResponse)
+def build_custom_proposal_dossier(request: ProposalDossierRequest):
+    """Generate a Proposal Response Dossier from an explicit client portfolio analysis or latest server analysis."""
+    global latest_analysis
+    target_analysis = request.analysis or latest_analysis
+    if not target_analysis:
+        target_analysis = analyze_sample_specification(sector=SectorType.DEFENSE_IT, force_mock=True)
+    return ProposalDossierGenerator.generate_full_dossier(
+        analysis=target_analysis,
+        company_name=request.company_name,
+        authority_name=request.authority_name
+    )
+
+
+@app.post("/api/spec-diff", response_model=SpecDiffResponse)
+def compare_specification_versions(request: SpecDiffRequest):
+    """Compare Initial Specification (v1) vs Revised Addendum (v2 / Zeyilname) and calculate compliance delta."""
+    stats = hybrid_search.get_stats()
+    if stats.total_chunks == 0:
+        load_sample_documents()
+    return SpecDiffEngine.compare_specifications(request, spec_parser=spec_parser, rag_engine=rag_engine)
 
 
 @app.get("/api/risk-score", response_model=RiskScoreResponse)
@@ -323,6 +401,12 @@ async def analyze_uploaded_specification(
 
         try:
             content = await file.read()
+            max_bytes = settings.MAX_UPLOAD_SIZE_MB * 1024 * 1024
+            if len(content) > max_bytes:
+                raise HTTPException(
+                    status_code=413,
+                    detail=f"Şartname dosyası çok büyük. Azami sınır {settings.MAX_UPLOAD_SIZE_MB} MB'dir."
+                )
             temp_path.write_bytes(content)
             clauses = spec_parser.parse_spec_file(temp_path)
         finally:

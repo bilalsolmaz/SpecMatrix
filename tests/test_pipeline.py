@@ -1323,6 +1323,129 @@ def test_api_endpoints_multisector_chat_rebuttal_and_chunks():
         assert "doc_name" in chunks[0]
 
 
+def test_v4_intelligence_modules_and_endpoints():
+    """Verify v4.0 Enterprise features: Spec-Lock Radar, Proposal Dossier, Spec Diff, Batch Rebuttal, and 4-Sheet Excel."""
+    with TestClient(app) as client:
+        # 1. Sample analysis includes Spec-Lock, Proposal Response, and BOM enrichment
+        a_resp = client.post("/api/analyze/sample?sector=DEFENSE_IT&force_mock=true")
+        assert a_resp.status_code == 200
+        a_data = a_resp.json()
+        assert a_data["summary"]["vendor_lock_count"] >= 2
+        assert len(a_data["summary"]["recommended_bom_packages"]) >= 2
+
+        first_res = a_data["results"][0]
+        assert first_res["proposal_response_text"] is not None
+        assert first_res["remediation_action"] is not None
+        assert first_res["estimated_cost_impact"] is not None
+
+        # 2. Proposal Dossier endpoint (/api/proposal/dossier)
+        d_resp = client.get("/api/proposal/dossier")
+        assert d_resp.status_code == 200
+        d_data = d_resp.json()
+        assert d_data["total_clauses"] == 8
+        assert len(d_data["recommended_bom"]) >= 2
+        assert len(d_data["clause_responses"]) == 8
+
+        # 3. Spec Version Diff endpoint (/api/spec-diff)
+        diff_resp = client.post("/api/spec-diff", json={"sector": "DEFENSE_IT", "use_sample_addendum": True})
+        assert diff_resp.status_code == 200
+        diff_data = diff_resp.json()
+        assert diff_data["new_compliance_pct"] > diff_data["old_compliance_pct"]
+        assert diff_data["modified_clauses_count"] >= 2
+
+        # 4. Batch Rebuttal endpoint (/api/rebuttal/batch)
+        batch_resp = client.post("/api/rebuttal/batch", json={
+            "sector": "DEFENSE_IT",
+            "company_name": "Test Savunma A.Ş.",
+            "authority_name": "DMO Genel Müdürlüğü"
+        })
+        assert batch_resp.status_code == 200
+        batch_data = batch_resp.json()
+        assert batch_data["total_objected_clauses"] >= 2
+        assert "İTİRAZ KALEMİ #1" in batch_data["combined_official_letter"]
+
+        # 5. 4-Sheet Excel Export Verification
+        ex_resp = client.post("/api/export/excel", json=a_data)
+        assert ex_resp.status_code == 200
+        wb = load_workbook(io.BytesIO(ex_resp.content))
+        assert len(wb.sheetnames) == 4
+        assert "Uyumluluk Matrisi" in wb.sheetnames
+        assert "Resmi Teklif Cevap Cetveli" in wb.sheetnames
+        assert "Gap Kapatma & BOM Reçetesi" in wb.sheetnames
+        assert "Rekabet Kısıtı (Spec-Lock)" in wb.sheetnames
+
+
+def test_v41_legal_sector_doc_delete_custom_diff_and_chat():
+    """Verify v4.1 full audit improvements: Legal/Contracts sector, custom Spec Diff, POST dossier, single doc deletion, and Spec-Lock/BOM chat."""
+    with TestClient(app) as client:
+        # Ensure all sample documents (including LexShield Legal policy) are loaded
+        load_resp = client.post("/api/knowledge-base/load-sample")
+        assert load_resp.status_code == 200
+
+        # 1. Analyze Legal / Contracts sample specification
+        leg_resp = client.post("/api/analyze/sample?sector=CONTRACTS_LEGAL&force_mock=true")
+        assert leg_resp.status_code == 200
+        leg_data = leg_resp.json()
+        assert leg_data["summary"]["total_clauses"] == 6
+        assert leg_data["summary"]["tam_uyumlu_count"] >= 3
+        assert leg_data["summary"]["uyumsuz_count"] >= 2
+        assert leg_data["summary"]["vendor_lock_count"] >= 2
+
+        # 2. POST /api/proposal/dossier with explicit client portfolio analysis
+        dos_post = client.post("/api/proposal/dossier", json={
+            "company_name": "Hukuk Test Teknoloji A.Ş.",
+            "authority_name": "Kurumsal Satın Alma Direktörlüğü",
+            "analysis": leg_data
+        })
+        assert dos_post.status_code == 200
+        dos_json = dos_post.json()
+        assert dos_json["total_clauses"] == 6
+        assert any("LexShield" in b for b in dos_json["recommended_bom"])
+
+        # 3. Spec Diff for HVAC & Custom v1/v2 text
+        hvac_diff = client.post("/api/spec-diff", json={"sector": "CONSTRUCTION_HVAC", "use_sample_addendum": True})
+        assert hvac_diff.status_code == 200
+        assert hvac_diff.json()["new_compliance_pct"] > hvac_diff.json()["old_compliance_pct"]
+
+        custom_diff = client.post("/api/spec-diff", json={
+            "sector": "DEFENSE_IT",
+            "use_sample_addendum": False,
+            "old_spec_text": "Madde 1.1: Cihaz en az 40 Gbps verim sağlamalıdır.",
+            "new_spec_text": "Madde 1.1: Cihaz en az 10 Gbps verim sağlamalıdır."
+        })
+        assert custom_diff.status_code == 200
+        cd_data = custom_diff.json()
+        assert cd_data["old_compliance_pct"] == 0.0
+        assert cd_data["new_compliance_pct"] == 100.0
+
+        # 4. Chat Copilot Spec-Lock & BOM queries
+        chat_lock = client.post("/api/chat", json={
+            "query": "Şartnamedeki adrese teslim ve rekabet kısıtı (Spec-Lock) maddeleri nelerdir?",
+            "force_mock": True
+        })
+        assert chat_lock.status_code == 200
+        assert "Spec-Lock" in chat_lock.json()["answer"] or "KİK" in chat_lock.json()["answer"]
+
+        chat_bom = client.post("/api/chat", json={
+            "query": "Bu ihalenin teklif paketi BOM ve maliyet etkisi nedir?",
+            "force_mock": True
+        })
+        assert chat_bom.status_code == 200
+        assert "Maliyet" in chat_bom.json()["answer"]
+
+        # 5. Single document upload & targeted deletion
+        temp_content = b"[Sayfa: 1]\n1. TEST DOKUMANI\nBu gecici bir test katalogudur."
+        up_r = client.post("/api/knowledge-base/upload", files={"file": ("Gecici_Test_Doc.txt", temp_content, "text/plain")})
+        assert up_r.status_code == 200
+        assert "Gecici_Test_Doc.txt" in up_r.json()["stats"]["documents"]
+
+        del_r = client.delete("/api/knowledge-base/documents/Gecici_Test_Doc.txt")
+        assert del_r.status_code == 200
+        assert "Gecici_Test_Doc.txt" not in del_r.json()["stats"]["documents"]
+
+
+
+
 
 
 
