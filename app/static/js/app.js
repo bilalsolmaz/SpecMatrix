@@ -1,6 +1,6 @@
 /**
- * SpecMatrix AI — Enterprise Compliance, Spec-Lock & Proposal Engineering Platform (v4.0)
- * Architectural UI Controller · Spec-Lock Radar · Auto-Proposal Dossier · Spec Diff · Multi-Tender Portfolio
+ * SpecMatrix AI — Enterprise Compliance, Spec-Lock & Proposal Engineering Platform (v5.0)
+ * Executive Pearl & Midnight Sapphire UI · Spec-Lock Radar · Auto-Proposal Dossier · Spec Diff · Multi-Tender Portfolio
  */
 
 // Global State
@@ -87,17 +87,27 @@ const elements = {
     progressPct: document.getElementById('progress-pct'),
     progressBarFill: document.getElementById('progress-bar-fill'),
 
-    // KPI Cards
+    // KPI Cards & Distribution Analytics (v5.0)
+    onboardingShowcase: document.getElementById('onboarding-showcase'),
+    quickSectorCards: document.querySelectorAll('.quick-sector-card'),
     resultsSection: document.getElementById('results-section'),
     kpiTotal: document.getElementById('kpi-total'),
     kpiTam: document.getElementById('kpi-tam'),
     kpiTamPct: document.getElementById('kpi-tam-pct'),
+    kpiBarTam: document.getElementById('kpi-bar-tam'),
     kpiKismen: document.getElementById('kpi-kismen'),
     kpiKismenPct: document.getElementById('kpi-kismen-pct'),
+    kpiBarKismen: document.getElementById('kpi-bar-kismen'),
     kpiUyumsuz: document.getElementById('kpi-uyumsuz'),
     kpiUyumsuzPct: document.getElementById('kpi-uyumsuz-pct'),
+    kpiBarUyumsuz: document.getElementById('kpi-bar-uyumsuz'),
     kpiBelirtilmemis: document.getElementById('kpi-belirtilmemis'),
     kpiBelirtilmemisPct: document.getElementById('kpi-belirtilmemis-pct'),
+    kpiBarBel: document.getElementById('kpi-bar-bel'),
+    distSegTam: document.getElementById('dist-seg-tam'),
+    distSegKismen: document.getElementById('dist-seg-kismen'),
+    distSegUyumsuz: document.getElementById('dist-seg-uyumsuz'),
+    distSegBel: document.getElementById('dist-seg-bel'),
 
     // Matrix Table & Filters
     matrixTbody: document.getElementById('matrix-tbody'),
@@ -263,9 +273,9 @@ function initLucide() {
     }
 }
 
-// --- 0. THEME CONTROLLER (DARK / LIGHT) ---
+// --- 0. THEME CONTROLLER (EXECUTIVE PEARL LIGHT DEFAULT / MIDNIGHT SAPPHIRE DARK) ---
 function setupThemeToggle() {
-    const savedTheme = localStorage.getItem('specmatrix-theme') || 'dark';
+    const savedTheme = localStorage.getItem('specmatrix-theme-v5') || 'light';
     applyTheme(savedTheme);
 
     if (elements.btnThemeToggle) {
@@ -273,7 +283,7 @@ function setupThemeToggle() {
             const isLight = document.documentElement.classList.contains('light');
             const nextTheme = isLight ? 'dark' : 'light';
             applyTheme(nextTheme);
-            localStorage.setItem('specmatrix-theme', nextTheme);
+            localStorage.setItem('specmatrix-theme-v5', nextTheme);
         });
     }
 }
@@ -384,13 +394,13 @@ async function fetchSystemStatus() {
         if (elements.engineModeText) {
             if (data.llm_provider === 'ollama' && data.ollama && data.ollama.available) {
                 elements.engineModeText.textContent = `Ollama · ${data.ollama.selected_model || 'llama3.2:3b'}`;
-                if (elements.engineStatusDot) elements.engineStatusDot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+                if (elements.engineStatusDot) elements.engineStatusDot.className = 'relative inline-flex rounded-full h-2 w-2 bg-emerald-500';
             } else if (data.llm_provider === 'openai') {
                 elements.engineModeText.textContent = `OpenAI · ${data.model}`;
-                if (elements.engineStatusDot) elements.engineStatusDot.className = 'w-2 h-2 rounded-full bg-blue-500';
+                if (elements.engineStatusDot) elements.engineStatusDot.className = 'relative inline-flex rounded-full h-2 w-2 bg-blue-500';
             } else {
                 elements.engineModeText.textContent = 'Kural Motoru · Aktif';
-                if (elements.engineStatusDot) elements.engineStatusDot.className = 'w-2 h-2 rounded-full bg-amber-500';
+                if (elements.engineStatusDot) elements.engineStatusDot.className = 'relative inline-flex rounded-full h-2 w-2 bg-amber-500';
             }
         }
 
@@ -503,13 +513,13 @@ function renderPortfolioBar() {
         const pct = item.summary ? item.summary.tam_uyumlu_pct : 0;
         const shortName = item.spec_name.replace(/\.[^/.]+$/, '').replace(/_/g, ' ').slice(0, 28);
         return `
-            <button type="button" data-port-idx="${idx}" class="port-switch-btn px-2.5 py-1 rounded-md text-xs font-mono shrink-0 inline-flex items-center space-x-1.5 transition-all ${
+            <button type="button" data-port-idx="${idx}" class="port-switch-btn px-3 py-1.5 rounded-lg text-xs font-mono shrink-0 inline-flex items-center space-x-1.5 transition-all ${
                 isCurrent
                     ? 'bg-blue-600 text-white font-semibold shadow-xs'
                     : 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border border-[var(--border-subtle)] hover:text-[var(--text-primary)]'
             }">
                 <span>${escapeHtml(shortName)}</span>
-                <span class="px-1.5 py-0.2 rounded text-[10px] ${isCurrent ? 'bg-blue-700 text-white' : 'bg-[var(--bg-surface)] text-emerald-400'}">%${pct}</span>
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold ${isCurrent ? 'bg-blue-700 text-white' : 'bg-[var(--bg-surface)] text-emerald-600 dark:text-emerald-400'}">%${pct}</span>
             </button>
         `;
     }).join('');
@@ -533,17 +543,31 @@ function renderPortfolioBar() {
 
 // --- 5. MATRIX, SPEC-LOCK RADAR & WHAT-IF SIMULATOR ---
 function setupMatrixAudit() {
+    if (elements.quickSectorCards && elements.quickSectorCards.length > 0) {
+        elements.quickSectorCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const sectorKey = card.getAttribute('data-quick-sector') || 'DEFENSE_IT';
+                currentSector = sectorKey;
+                if (elements.sampleSpecSelect) elements.sampleSpecSelect.value = sectorKey;
+                if (elements.headerSectorSelect) elements.headerSectorSelect.value = sectorKey;
+                if (elements.diffSectorSelect) elements.diffSectorSelect.value = sectorKey;
+                updateChatPromptChips();
+                handleAnalyzeSampleSpec();
+            });
+        });
+    }
+
     if (elements.tabBtnFile && elements.tabBtnText) {
         elements.tabBtnFile.addEventListener('click', () => {
-            elements.tabBtnFile.className = 'px-2 py-0.5 rounded-md bg-[var(--bg-surface)] text-[var(--text-primary)] font-medium shadow-xs transition-all';
-            elements.tabBtnText.className = 'px-2 py-0.5 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all';
+            elements.tabBtnFile.className = 'px-2.5 py-1 rounded-md bg-[var(--bg-surface)] text-[var(--text-primary)] font-semibold shadow-2xs transition-all';
+            elements.tabBtnText.className = 'px-2.5 py-1 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all';
             elements.tabPaneFile.classList.remove('hidden');
             elements.tabPaneText.classList.add('hidden');
         });
 
         elements.tabBtnText.addEventListener('click', () => {
-            elements.tabBtnText.className = 'px-2 py-0.5 rounded-md bg-[var(--bg-surface)] text-[var(--text-primary)] font-medium shadow-xs transition-all';
-            elements.tabBtnFile.className = 'px-2 py-0.5 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all';
+            elements.tabBtnText.className = 'px-2.5 py-1 rounded-md bg-[var(--bg-surface)] text-[var(--text-primary)] font-semibold shadow-2xs transition-all';
+            elements.tabBtnFile.className = 'px-2.5 py-1 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all';
             elements.tabPaneText.classList.remove('hidden');
             elements.tabPaneFile.classList.add('hidden');
         });
@@ -803,6 +827,9 @@ async function handleAnalyzeUploadedSpec() {
 
 function recalculateAndRenderMetrics() {
     if (!currentAnalysis || !currentAnalysis.results) return;
+    if (elements.onboardingShowcase) {
+        elements.onboardingShowcase.classList.add('hidden');
+    }
     elements.resultsSection.classList.remove('hidden');
 
     const results = currentAnalysis.results;
@@ -845,6 +872,17 @@ function recalculateAndRenderMetrics() {
     elements.kpiBelirtilmemis.textContent = belirtilmemisCount;
     elements.kpiBelirtilmemisPct.textContent = `%${belPct}`;
 
+    // Update v5.0 KPI Mini Progress Bars & Multi-Segment Distribution Bar
+    if (elements.kpiBarTam) elements.kpiBarTam.style.width = `${tamPct}%`;
+    if (elements.kpiBarKismen) elements.kpiBarKismen.style.width = `${kismenPct}%`;
+    if (elements.kpiBarUyumsuz) elements.kpiBarUyumsuz.style.width = `${uyumsuzPct}%`;
+    if (elements.kpiBarBel) elements.kpiBarBel.style.width = `${belPct}%`;
+
+    if (elements.distSegTam) elements.distSegTam.style.width = `${tamPct}%`;
+    if (elements.distSegKismen) elements.distSegKismen.style.width = `${kismenPct}%`;
+    if (elements.distSegUyumsuz) elements.distSegUyumsuz.style.width = `${uyumsuzPct}%`;
+    if (elements.distSegBel) elements.distSegBel.style.width = `${belPct}%`;
+
     if (elements.specLockSummaryBadge) {
         elements.specLockSummaryBadge.textContent = `Rekabet Kısıtı (Spec-Lock): ${specLockCount} Madde`;
     }
@@ -877,7 +915,7 @@ function recalculateAndRenderMetrics() {
 
     if (elements.riskLevelBadge) {
         elements.riskLevelBadge.textContent = `${riskLevel} RİSK`;
-        elements.riskLevelBadge.className = `text-[10px] font-mono font-semibold uppercase px-2 py-0.5 rounded ${badgeClass}`;
+        elements.riskLevelBadge.className = `text-[10px] font-mono font-semibold uppercase px-2.5 py-1 rounded-full ${badgeClass}`;
     }
 
     if (elements.riskExecSummary) {
@@ -891,13 +929,13 @@ function recalculateAndRenderMetrics() {
     if (elements.execDecisionBadge) {
         if (uyumsuzCount === 0) {
             elements.execDecisionBadge.textContent = 'DOĞRUDAN KATILIM UYGUN';
-            elements.execDecisionBadge.className = 'text-xs font-semibold font-mono px-2.5 py-0.5 rounded badge-tam-uyumlu';
+            elements.execDecisionBadge.className = 'text-xs font-bold font-mono px-3 py-1 rounded-full badge-tam-uyumlu';
         } else if (uyumsuzCount === 1) {
             elements.execDecisionBadge.textContent = 'ŞARTLI KATILIM (1 Zeyilname / Ek Modül)';
-            elements.execDecisionBadge.className = 'text-xs font-semibold font-mono px-2.5 py-0.5 rounded badge-kismen-uyumlu';
+            elements.execDecisionBadge.className = 'text-xs font-bold font-mono px-3 py-1 rounded-full badge-kismen-uyumlu';
         } else {
             elements.execDecisionBadge.textContent = `ŞARTLI KATILIM (${uyumsuzCount} Gap · Zeyilname Şart)`;
-            elements.execDecisionBadge.className = 'text-xs font-semibold font-mono px-2.5 py-0.5 rounded badge-uyumsuz';
+            elements.execDecisionBadge.className = 'text-xs font-bold font-mono px-3 py-1 rounded-full badge-uyumsuz';
         }
     }
 
@@ -914,9 +952,9 @@ function recalculateAndRenderMetrics() {
 
     if (elements.execRedflagsList) {
         if (redFlags.length > 0) {
-            elements.execRedflagsList.innerHTML = `<span class="text-[11px] text-[var(--text-muted)] ml-1">Engeller:</span>` +
+            elements.execRedflagsList.innerHTML = `<span class="text-[11px] font-medium text-[var(--text-muted)] ml-1">Engeller:</span>` +
                 redFlags.map(rf => `
-                    <button type="button" data-rf-id="${escapeHtml(rf.clause_id)}" class="rf-jump-pill text-[11px] font-mono px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/30 hover:bg-rose-500/20 transition-colors">
+                    <button type="button" data-rf-id="${escapeHtml(rf.clause_id)}" class="rf-jump-pill text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/30 hover:bg-rose-500/20 transition-colors">
                         ${escapeHtml(rf.clause_id)}
                     </button>
                 `).join('');
@@ -928,7 +966,7 @@ function recalculateAndRenderMetrics() {
                 });
             });
         } else {
-            elements.execRedflagsList.innerHTML = '<span class="text-[11px] text-emerald-500 font-mono">● Kritik elenme engeli bulunmuyor</span>';
+            elements.execRedflagsList.innerHTML = '<span class="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono font-semibold">● Kritik elenme engeli bulunmuyor</span>';
         }
     }
 
@@ -941,7 +979,7 @@ function copyExecutiveBriefToClipboard() {
     const gaps = r.filter(x => x.status === 'UYUMSUZ' && !simulatedResolvedClauses.has(x.clause_id));
     const locks = r.filter(x => x.vendor_lock_risk === 'YÜKSEK' || x.vendor_lock_risk === 'ORTA');
     const brief = [
-        `SPECMATRIX AI v4.0 — YÖNETİCİ İHALE VE REKABET KISITI ÖZETİ`,
+        `SPECMATRIX AI v5.0 — YÖNETİCİ İHALE VE REKABET KISITI ÖZETİ`,
         `Şartname: ${currentAnalysis.spec_name}`,
         `Toplam Madde: ${r.length} | Tam Uyumlu: ${elements.kpiTam.textContent} (${elements.kpiTamPct.textContent}) | Kritik Gap: ${gaps.length} | Rekabet Kısıtı (Spec-Lock): ${locks.length}`,
         `İhale Kararı: ${elements.execDecisionBadge ? elements.execDecisionBadge.textContent : ''}`,
@@ -989,47 +1027,47 @@ function renderMatrixTable() {
             : getStatusBadge(item.status);
 
         const productInfo = item.matched_product
-            ? `<div class="font-medium text-[var(--text-primary)]">${escapeHtml(item.matched_product)}</div><div class="text-[11px] font-mono text-[var(--text-muted)] truncate max-w-[180px]">${escapeHtml(item.matched_doc || '')}</div>`
+            ? `<div class="font-semibold text-[var(--text-primary)]">${escapeHtml(item.matched_product)}</div><div class="text-[11px] font-mono text-[var(--text-muted)] truncate max-w-[190px] mt-0.5">${escapeHtml(item.matched_doc || '')}</div>`
             : '<span class="text-[var(--text-muted)]">—</span>';
 
         const specLockPill = (item.vendor_lock_risk === 'YÜKSEK' || item.vendor_lock_risk === 'ORTA')
-            ? `<div class="mt-1"><span class="inline-flex items-center space-x-1 text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30" title="${escapeHtml(item.vendor_lock_reason || '')}"><span>⚠ SPEC-LOCK (${item.vendor_lock_score})</span></span></div>`
+            ? `<div class="mt-1.5"><span class="inline-flex items-center space-x-1 text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full badge-kismen-uyumlu" title="${escapeHtml(item.vendor_lock_reason || '')}"><span>⚠ SPEC-LOCK (${item.vendor_lock_score})</span></span></div>`
             : '';
 
         const recipeHint = (item.status !== 'TAM_UYUMLU' && item.estimated_cost_impact)
-            ? `<div class="mt-1 text-[11px] font-mono text-[var(--text-muted)]">Çözüm Etkisi: <span class="text-blue-400">${escapeHtml(item.estimated_cost_impact)}</span></div>`
+            ? `<div class="mt-1.5 text-[11.5px] font-mono text-[var(--text-muted)]">Çözüm Etkisi: <span class="text-[var(--accent-text)] font-semibold">${escapeHtml(item.estimated_cost_impact)}</span></div>`
             : '';
 
         const canSimulate = item.status === 'UYUMSUZ' || item.status === 'KISMEN_UYUMLU' || item.status === 'BELIRTILMEMIS';
         const simBtnHtml = canSimulate ? `
-            <button type="button" class="btn-sim-clause sm-btn-secondary px-2 py-1 text-[11px] font-mono ${isSimulated ? 'border-blue-500 text-blue-400' : 'text-[var(--text-muted)]'}" data-sim-id="${escapeHtml(item.clause_id)}" title="What-If Simülasyonu: Bu maddeyi zeyilname veya ek teklifle çözüldü varsay">
+            <button type="button" class="btn-sim-clause sm-btn-secondary px-2.5 py-1.5 text-[11px] font-mono ${isSimulated ? 'border-blue-500 text-[var(--accent-text)] bg-[var(--accent-subtle)]' : 'text-[var(--text-secondary)]'}" data-sim-id="${escapeHtml(item.clause_id)}" title="What-If Simülasyonu: Bu maddeyi zeyilname veya ek teklifle çözüldü varsay">
                 ${isSimulated ? '✓ Simüle' : '+ Simüle'}
             </button>
         ` : '';
 
         return `
             <tr class="matrix-row" data-idx="${idx}">
-                <td class="py-3 px-3.5 font-mono font-semibold text-[var(--text-primary)] whitespace-nowrap align-top">
+                <td class="py-4 px-5 font-mono font-bold text-[var(--text-primary)] whitespace-nowrap align-top">
                     <div>${escapeHtml(item.clause_id)}</div>
                     ${specLockPill}
                 </td>
-                <td class="py-3 px-3.5 hidden sm:table-cell align-top">
-                    <span class="inline-block text-[11px] px-2 py-0.5 rounded bg-[var(--bg-subtle)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">${escapeHtml(item.category || 'Genel')}</span>
+                <td class="py-4 px-4 hidden sm:table-cell align-top">
+                    <span class="inline-block text-[11.5px] font-medium px-2.5 py-0.5 rounded-md bg-[var(--bg-subtle)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">${escapeHtml(item.category || 'Genel')}</span>
                 </td>
-                <td class="py-3 px-3.5 text-[var(--text-primary)] leading-relaxed align-top">
+                <td class="py-4 px-4 text-[var(--text-primary)] leading-relaxed align-top">
                     <div>${highlightTechnicalTerms(item.clause_text)}</div>
                     ${recipeHint}
                 </td>
-                <td class="py-3 px-3.5 text-center whitespace-nowrap align-top">
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-mono font-medium ${badge.cssClass}">
+                <td class="py-4 px-4 text-center whitespace-nowrap align-top">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-mono font-semibold ${badge.cssClass}">
                         <span class="status-dot"></span>
                         <span>${badge.label}</span>
                     </span>
                 </td>
-                <td class="py-3 px-3.5 text-xs hidden md:table-cell align-top">${productInfo}</td>
-                <td class="py-3 px-3.5 text-right whitespace-nowrap space-x-1 align-top">
+                <td class="py-4 px-4 text-xs hidden md:table-cell align-top">${productInfo}</td>
+                <td class="py-4 px-5 text-right whitespace-nowrap space-x-1.5 align-top">
                     ${simBtnHtml}
-                    <button type="button" class="btn-inspect-clause sm-btn-secondary px-2.5 py-1 text-xs inline-flex items-center space-x-1" data-id="${escapeHtml(item.clause_id)}">
+                    <button type="button" class="btn-inspect-clause sm-btn-secondary px-3 py-1.5 text-xs inline-flex items-center space-x-1" data-id="${escapeHtml(item.clause_id)}">
                         <span>Dosya</span>
                         <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-[var(--text-muted)]"></i>
                     </button>
@@ -1201,15 +1239,15 @@ async function handleExportExcel() {
 function setupProposalAndDiffTab() {
     if (elements.subtabBtnProposal && elements.subtabBtnSpecdiff) {
         elements.subtabBtnProposal.addEventListener('click', () => {
-            elements.subtabBtnProposal.className = 'px-3.5 py-1.5 rounded-md bg-[var(--bg-surface)] text-[var(--text-primary)] font-semibold shadow-xs transition-all inline-flex items-center space-x-2';
-            elements.subtabBtnSpecdiff.className = 'px-3.5 py-1.5 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium transition-all inline-flex items-center space-x-2';
+            elements.subtabBtnProposal.className = 'px-4 py-2 rounded-lg bg-[var(--bg-surface)] text-[var(--text-primary)] font-semibold shadow-xs transition-all inline-flex items-center space-x-2';
+            elements.subtabBtnSpecdiff.className = 'px-4 py-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium transition-all inline-flex items-center space-x-2';
             elements.subviewProposalDossier.classList.remove('hidden');
             elements.subviewSpecDiff.classList.add('hidden');
         });
 
         elements.subtabBtnSpecdiff.addEventListener('click', () => {
-            elements.subtabBtnSpecdiff.className = 'px-3.5 py-1.5 rounded-md bg-[var(--bg-surface)] text-[var(--text-primary)] font-semibold shadow-xs transition-all inline-flex items-center space-x-2';
-            elements.subtabBtnProposal.className = 'px-3.5 py-1.5 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium transition-all inline-flex items-center space-x-2';
+            elements.subtabBtnSpecdiff.className = 'px-4 py-2 rounded-lg bg-[var(--bg-surface)] text-[var(--text-primary)] font-semibold shadow-xs transition-all inline-flex items-center space-x-2';
+            elements.subtabBtnProposal.className = 'px-4 py-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium transition-all inline-flex items-center space-x-2';
             elements.subviewSpecDiff.classList.remove('hidden');
             elements.subviewProposalDossier.classList.add('hidden');
             runSpecVersionDiff();
@@ -1322,9 +1360,9 @@ async function loadProposalDossier() {
 
         if (elements.dossierBomList) {
             elements.dossierBomList.innerHTML = data.recommended_bom.map((b, i) => `
-                <div class="p-2.5 sm-card-subtle flex items-start space-x-2.5">
-                    <span class="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-400 border border-blue-500/30 shrink-0">BOM-0${i + 1}</span>
-                    <span class="text-xs text-[var(--text-primary)] leading-snug">${escapeHtml(b)}</span>
+                <div class="p-3 sm-card-subtle flex items-start space-x-3">
+                    <span class="font-mono text-[10.5px] font-bold px-2 py-0.5 rounded-md bg-[var(--accent-subtle)] text-[var(--accent-text)] border border-[var(--accent-border)] shrink-0">BOM-0${i + 1}</span>
+                    <span class="text-xs sm:text-[13px] text-[var(--text-primary)] leading-snug font-medium">${escapeHtml(b)}</span>
                 </div>
             `).join('');
         }
@@ -1356,9 +1394,9 @@ async function loadProposalDossier() {
                         <div class="p-2.5 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs font-mono text-[var(--text-primary)] leading-relaxed">
                             ${escapeHtml(c.formal_response)}
                         </div>
-                        <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] pt-1">
+                        <div class="flex flex-wrap items-center justify-between gap-2 text-[11.5px] pt-1">
                             <span class="text-[var(--text-secondary)]"><strong>Aksiyon:</strong> ${escapeHtml(c.remediation_action)}</span>
-                            <span class="font-mono text-blue-400 shrink-0">${escapeHtml(c.estimated_cost_impact)}</span>
+                            <span class="font-mono font-semibold text-[var(--accent-text)] shrink-0">${escapeHtml(c.estimated_cost_impact)}</span>
                         </div>
                     </div>
                 `;
@@ -1412,28 +1450,28 @@ async function runSpecVersionDiff(isCustom = false) {
                 const cardBorder = isRelaxed ? 'border-l-4 border-l-emerald-500' : (isUnchanged ? 'opacity-75' : 'border-l-4 border-l-blue-500');
 
                 return `
-                    <div class="sm-card p-3.5 space-y-2 ${cardBorder}">
+                    <div class="sm-card p-5 space-y-3 ${cardBorder}">
                         <div class="flex flex-wrap items-center justify-between gap-2">
-                            <div class="flex items-center space-x-2">
+                            <div class="flex items-center space-x-2.5">
                                 <span class="font-mono text-xs font-bold text-[var(--text-primary)]">${escapeHtml(item.clause_id)}</span>
-                                <span class="text-[11px] text-[var(--text-muted)]">${escapeHtml(item.category)}</span>
-                                <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded ${isRelaxed ? 'badge-tam-uyumlu' : 'badge-belirtilmemis'}">${escapeHtml(item.change_type)}</span>
+                                <span class="text-xs text-[var(--text-muted)]">${escapeHtml(item.category)}</span>
+                                <span class="text-[10.5px] font-mono font-semibold px-2.5 py-0.5 rounded-full ${isRelaxed ? 'badge-tam-uyumlu' : 'badge-belirtilmemis'}">${escapeHtml(item.change_type)}</span>
                             </div>
-                            <span class="font-mono text-xs font-semibold text-blue-400">${escapeHtml(item.highlighted_delta)}</span>
+                            <span class="font-mono text-xs font-semibold text-[var(--accent-text)]">${escapeHtml(item.highlighted_delta)}</span>
                         </div>
                         ${!isUnchanged ? `
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs">
-                                <div class="p-2.5 rounded-lg bg-rose-500/5 border border-rose-500/20">
-                                    <span class="text-[10px] font-mono uppercase text-rose-400 block mb-1">v1 İlk İlan (${escapeHtml(item.old_status || '')})</span>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs sm:text-[13px]">
+                                <div class="p-3.5 rounded-xl bg-rose-500/5 border border-rose-500/20">
+                                    <span class="text-[10.5px] font-mono font-semibold uppercase text-rose-600 dark:text-rose-400 block mb-1">v1 İlk İlan (${escapeHtml(item.old_status || '')})</span>
                                     <p class="text-[var(--text-secondary)] line-through">${escapeHtml(item.old_text || '')}</p>
                                 </div>
-                                <div class="p-2.5 rounded-lg bg-emerald-500/5 border border-emerald-500/20">
-                                    <span class="text-[10px] font-mono uppercase text-emerald-400 block mb-1">v2 Zeyilname Sonrası (${escapeHtml(item.new_status || '')})</span>
+                                <div class="p-3.5 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+                                    <span class="text-[10.5px] font-mono font-semibold uppercase text-emerald-600 dark:text-emerald-400 block mb-1">v2 Zeyilname Sonrası (${escapeHtml(item.new_status || '')})</span>
                                     <p class="text-[var(--text-primary)] font-medium">${highlightTechnicalTerms(item.new_text || '')}</p>
                                 </div>
                             </div>
-                        ` : `<p class="text-xs text-[var(--text-secondary)]">${escapeHtml(item.new_text || '')}</p>`}
-                        <div class="text-[11px] font-mono text-emerald-400">${escapeHtml(item.impact_summary)}</div>
+                        ` : `<p class="text-xs sm:text-[13px] text-[var(--text-secondary)]">${escapeHtml(item.new_text || '')}</p>`}
+                        <div class="text-xs font-mono font-semibold text-emerald-600 dark:text-emerald-400">${escapeHtml(item.impact_summary)}</div>
                     </div>
                 `;
             }).join('');
